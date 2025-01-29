@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Input Test</title>
+</head>
+<body>
+    <button id="attachImage">Attach Image</button>
+    <input type="file" id="imageInput" style="display: none;" />
+    
+    <script>
+        const attachImageButton = document.getElementById('attachImage');
+        const imageInput = document.getElementById('imageInput');
+        
+        attachImageButton.addEventListener('click', () => {
+            imageInput.click(); // Trigger file input dialog
+        });
+        
+        imageInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                alert('Selected file: ' + file.name);
+            }
+        });
+    </script>
+</body>
+</html>

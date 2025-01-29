@@ -28,6 +28,24 @@ body {
   --vh: 1vh;
 }
 
+.button3 {
+    cursor: pointer;
+	color: #0078D7;
+	font-weight: bold;
+	font-size: 1rem;
+	display: inline-block;
+	padding: 5px;
+	border: 2px solid #0078D7;
+	border-radius: 10px;
+	transition: all 0.3s;  
+	margin: 5px;
+}
+
+button:hover {
+  background-color: #0078D7;
+   color: #fff;
+}
+
 .avatar {
   width: 50px;
   height: 50px;
@@ -242,6 +260,10 @@ body {
     
 }
 
+p{
+margin:5px 0px;
+}
+
 .message.self {
     background-color: #daf8cb;
     align-self: flex-end;
@@ -304,6 +326,7 @@ body {
     display: flex;
     padding: 10px;
     border-top: 1px solid #ddd;
+    gap:5px;
 }
 
 .message-input-area input {
@@ -324,7 +347,7 @@ body {
 	border: 2px solid #0078D7;
 	border-radius: 10px;
 	transition: all 0.3s;  
-	margin-left: 10px;
+	margin-left: 0px;
 }
 
 .message-input-area button:hover {
@@ -347,13 +370,8 @@ body {
         
     }
      
-    .left-panel input {margin:20px 10px; width: 89%; height:30px;
+    .left-panel input {width: 50%; height:30px;
 } 
-.user-item {
-    padding: 10px;
-    margin: 5px 20px;
-    width:80%; }
-
     .left-panel, .right-panel {
         width: 100%;
         height: calc(var(--vh) * 100);

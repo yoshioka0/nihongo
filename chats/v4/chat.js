@@ -244,7 +244,7 @@ function displayNotification(message) {
 
     setTimeout(() => {
         notification.style.display = 'none';
-    }, 3000); // Hide after 3 seconds
+    }, 5000); // Hide after 5 seconds
 }
 
 // 6. Handle Typing Indicator

@@ -263,28 +263,89 @@ document.addEventListener('DOMContentLoaded', () => {
 const loginHere = document.getElementById("login-here");
 const signupHere = document.getElementById("signup-here");
 
-// Add click event listeners
-if (window.location.pathname === '/nihongo/') {
-	
-	// General password toggle functionality
-function togglePasswordVisibility(event) {
-    const passwordField = event.target.previousElementSibling; // Target the input field
-    if (passwordField.type === 'password') {
-        passwordField.type = 'text'; // Show password
-        event.target.classList.remove('fa-eye'); // Change icon to 'eye slash'
-        event.target.classList.add('fa-eye-slash');
-    } else {
-        passwordField.type = 'password'; // Hide password
-        event.target.classList.remove('fa-eye-slash'); // Change icon back to 'eye'
-        event.target.classList.add('fa-eye');
+// Function to show a popup message with a progress bar
+function showPopupMessage(message, duration = 3000) {
+    const popup = document.createElement('div');
+    popup.classList.add('popup-notification');
+
+    // Create progress bar wrapper
+    const progressBarWrapper = document.createElement('div');
+    progressBarWrapper.classList.add('progress-bar-wrapper');
+    popup.appendChild(progressBarWrapper);
+
+    // Create the progress bar inside the wrapper
+    const progressBar = document.createElement('div');
+    progressBar.classList.add('progress-bar');
+    progressBarWrapper.appendChild(progressBar);
+
+    // Add the message to the popup
+    const messageText = document.createElement('div');
+    messageText.textContent = message;
+    popup.appendChild(messageText);
+
+    document.body.appendChild(popup);
+    
+    // Show the popup
+    setTimeout(() => {
+        popup.classList.add('show');
+    }, 10);
+
+    // Start filling the progress bar
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += 100 / (duration / 100);
+        progressBar.style.width = `${progress}%`;
+        if (progress >= 100) {
+            clearInterval(progressInterval);
+        }
+    }, 100);
+
+    // Hide the popup after the specified duration
+    setTimeout(() => {
+        popup.classList.remove('show');
+        // Remove the popup from the DOM after animation
+        setTimeout(() => popup.remove(), 300);
+    }, duration);
+}
+
+// Function to show a loading spinner during async actions
+function showLoadingSpinner(element, message) {
+    const loadingMessage = document.createElement('div');
+    loadingMessage.classList.add('loading-message');
+    loadingMessage.innerHTML = `${message} <div class="spinner"></div>`;
+    element.appendChild(loadingMessage);
+}
+
+// Function to hide the loading spinner
+function hideLoadingSpinner(element) {
+    const loadingMessage = element.querySelector('.loading-message');
+    if (loadingMessage) {
+        element.removeChild(loadingMessage);
     }
 }
 
-// Attach the event listener to both login and signup eye icons
-document.querySelectorAll('.password-wrapper i').forEach(icon => {
-    icon.addEventListener('click', togglePasswordVisibility);
-});
-	
+// Add click event listeners for login and sign-up
+if (window.location.pathname === '/nihongo/') {
+    
+    // General password toggle functionality
+    function togglePasswordVisibility(event) {
+        const passwordField = event.target.previousElementSibling; // Target the input field
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text'; // Show password
+            event.target.classList.remove('fa-eye'); // Change icon to 'eye slash'
+            event.target.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password'; // Hide password
+            event.target.classList.remove('fa-eye-slash'); // Change icon back to 'eye'
+            event.target.classList.add('fa-eye');
+        }
+    }
+
+    // Attach the event listener to both login and signup eye icons
+    document.querySelectorAll('.password-wrapper i').forEach(icon => {
+        icon.addEventListener('click', togglePasswordVisibility);
+    });
+
     loginHere.addEventListener("click", () => {
         document.getElementById("login-modal").style.display = "flex";
         document.getElementById("signup-modal").style.display = "none";
@@ -299,32 +360,36 @@ document.querySelectorAll('.password-wrapper i').forEach(icon => {
     // Helper functions
     const isValidUsername = (username) => /^[a-zA-Z0-9_-]{3,15}$/.test(username);
     const isStrongPassword = (password) =>
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#^%*?&])[A-Za-z\d@$!%#^*?&]{8,}$/.test(password);
 
     // New User Creation
     document.getElementById('signup-form').addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        const signupForm = document.getElementById('signup-form');
         const username = document.getElementById('signup-username').value.trim();
         const password = document.getElementById('signup-password').value;
-        const errorMessage = document.getElementById('signupErrorMessage');
-        errorMessage.textContent = 'Creating Account, Please Wait...';
+        const errorMessage = document.getElementById('ErrorMessage');
+        errorMessage.textContent = '';
 
         if (!isValidUsername(username)) {
+            showPopupMessage('Username must be 3-15 characters and contain only letters, numbers, underscores, or hyphens.');
             errorMessage.textContent = 'Username must be 3-15 characters and contain only letters, numbers, underscores, or hyphens.';
             return;
         }
 
         if (!isStrongPassword(password)) {
-            errorMessage.textContent =
-                'Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character.';
+            showPopupMessage('Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character. (Aa1@)');
             return;
         }
+
+        showLoadingSpinner(signupForm, 'Creating Account...');
 
         try {
             const turnstileResponse = turnstile.getResponse(turnstile1);
             if (!turnstileResponse) {
-                errorMessage.textContent = 'Please complete the captcha.';
+                showPopupMessage('Please complete the captcha.');
+                hideLoadingSpinner(signupForm);
                 return;
             }
 
@@ -335,17 +400,23 @@ document.querySelectorAll('.password-wrapper i').forEach(icon => {
             });
 
             const data = await response.json();
+            hideLoadingSpinner(signupForm);
+
             if (response.ok) {
+            	showPopupMessage(`User created successfully! (${username})`);
                 localStorage.setItem('jwt', data.token);
+                await delay(500);
                 alert(`User created successfully! (${username})`);
                 document.getElementById('signup-modal').style.display = 'none';
                 location.reload();
             } else {
-                errorMessage.textContent = data.error || 'Something went wrong!';
+                showPopupMessage(data.error || 'Something went wrong!');
+                turnstile.reset(turnstile1);
             }
         } catch (error) {
             console.error('Error:', error);
-            errorMessage.textContent = 'Error connecting to the server. Please try again.';
+            hideLoadingSpinner(signupForm);
+            showPopupMessage('Error connecting to the server. Please try again.');
         }
     });
 
@@ -353,20 +424,22 @@ document.querySelectorAll('.password-wrapper i').forEach(icon => {
     document.getElementById('login-form').addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        const loginForm = document.getElementById('login-form');
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value;
-        const errorMessage = document.getElementById('loginErrorMessage');
-        errorMessage.textContent = 'Logging In, Please Wait...';
 
         if (!username || !password) {
-            errorMessage.textContent = 'Please enter both username and password.';
+            showPopupMessage('Please enter both username and password.');
             return;
         }
+
+        showLoadingSpinner(loginForm, 'Logging In...');
 
         try {
             const turnstileResponse = turnstile.getResponse(turnstile2);
             if (!turnstileResponse) {
-                errorMessage.textContent = 'Please complete the captcha.';
+                showPopupMessage('Please complete the captcha.');
+                hideLoadingSpinner(loginForm);
                 return;
             }
 
@@ -377,17 +450,28 @@ document.querySelectorAll('.password-wrapper i').forEach(icon => {
             });
 
             const data = await response.json();
+            hideLoadingSpinner(loginForm);
+
             if (response.ok) {
+            	showPopupMessage(`Welcome back, ${username}!`);
                 localStorage.setItem('jwt', data.token);
+                await delay(500);
                 alert(`Welcome back, ${username}!`);
                 document.getElementById('login-modal').style.display = 'none';
                 location.reload();
             } else {
-                errorMessage.textContent = data.error || 'Invalid username or password.';
+                showPopupMessage(data.error || 'Invalid username or password.');
+                turnstile.reset(turnstile2); // Reset captcha on failure
             }
         } catch (error) {
             console.error('Error:', error);
-            errorMessage.textContent = 'Error connecting to the server. Please try again.';
+            hideLoadingSpinner(loginForm);
+            showPopupMessage('Error connecting to the server. Please try again.');
         }
     });
+}
+
+// Define the delay function
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

@@ -77,6 +77,7 @@ async function checkAuthentication() {
 // Logout user and redirect
 function logout() { 
     localStorage.removeItem('jwt');
+    localStorage.removeItem('chattedUsers');
     // Handle UI change for logged-out users
     if (window.location.pathname === '/nihongo/') {
         document.getElementById('signup-modal').style.display = 'flex';

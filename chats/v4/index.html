@@ -36,8 +36,18 @@
         <div class="right-panel">
 	      <div class="chat-header">
                 <h3 id="chat-user" class="chat-user" >Select a user to chat</h3>
-                <div class="block-box"> <button id="block-button" class="block-button" style="display: none;">Block</button> </div>
+                <div class="block-box"> 
+                	<button id="startConnectionButton" class="button3">🛜</button>
+					<button id="block-button" class="block-button" style="display: none;">Block</button> 
+				</div>
              </div>
+             
+ <div id="connectionStatus">Connection Status: Waiting...</div>
+<div id="fileStatus">File Status: Waiting for Connection!</div>
+<div id="fileProgressContainer" style="width: 100%; background: #ccc; height: 20px;">
+ 	<div id="fileProgress" style="width: 0%; height: 100%; background: #4caf50;"></div>
+</div>
+
 
             <div id="chat-window" class="chat-window">
 
@@ -48,10 +58,12 @@
             </div>
 						
 				<div id="typing-indicator" class="typing-indicator" style="display: none;">
-    <span id="typing-text">User is typing...</span>
-</div>
-
+    				<span id="typing-text">User is typing...</span>
+     			</div>
+			
             <div class="message-input-area">
+            	<input type="file" id="imageInput" accept="image/*" style="display: none;" />
+				<button id="attachImage">🗃️</button>
                 <input id="message-input" type="text" placeholder="Type a message..." />
                 <button id="send-button">Send</button>
             </div>
@@ -71,5 +83,7 @@
     
     <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
     <script src="chat.js"></script>
+    <script src="webrtc.js"></script>
+    
 </body>
 </html>

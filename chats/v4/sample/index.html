@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebRTC Text Chat</title>
+</head>
+<body>
+  <h1>WaveRTC - Text Chat</h1>
+  
+  <textarea id="messageInput" placeholder="Type your message..." rows="4" cols="50"></textarea><br><br>
+  <button id="sendMessageBtn">Send Message</button><br><br>
+  
+  <h3>Received Messages:</h3>
+  <div id="receivedMessages"></div>
+
+  <script>
+    let localConnection;
+    let dataChannel;
+    let ws;
+
+    // WebSocket connection to the signaling server
+    function setupWebSocket() {
+      ws = new WebSocket('ws://localhost:3000');
+      
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        setupWebRTCConnection();
+      };
+
+      ws.onmessage = (message) => {
+        const signal = JSON.parse(message.data);
+        
+        if (signal.offer) {
+          handleOffer(signal.offer);
+        } else if (signal.answer) {
+          handleAnswer(signal.answer);
+        } else if (signal.iceCandidate) {
+          handleIceCandidate(signal.iceCandidate);
+        } else if (signal.textMessage) {
+          displayMessage(signal.textMessage);
+        }
+      };
+      
+      ws.onerror = (err) => {
+        console.error('WebSocket error:', err);
+      };
+      
+      ws.onclose = () => {
+        console.log('WebSocket disconnected');
+      };
+    }
+
+    // Set up WebRTC connection
+    function setupWebRTCConnection() {
+      localConnection = new RTCPeerConnection();
+      
+      dataChannel = localConnection.createDataChannel("chat");
+      dataChannel.onopen = () => {
+        console.log("Data channel opened");
+      };
+      
+      dataChannel.onmessage = (event) => {
+        displayMessage(event.data);
+      };
+      
+      dataChannel.onclose = () => {
+        console.log("Data channel closed");
+      };
+      
+      localConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          sendSignal({ iceCandidate: event.candidate });
+        }
+      };
+    }
+
+    // Send a text message via WebRTC DataChannel
+    function sendTextMessage() {
+      const message = document.getElementById("messageInput").value;
+      if (message && dataChannel.readyState === "open") {
+        dataChannel.send(message);
+        document.getElementById("messageInput").value = "";
+        displayMessage(`You: ${message}`);
+      }
+    }
+
+    // Display received message in the UI
+    function displayMessage(message) {
+      const messagesDiv = document.getElementById("receivedMessages");
+      messagesDiv.innerHTML += `<p>${message}</p>`;
+    }
+
+    // Handle the offer received from the other peer
+    function handleOffer(offer) {
+      localConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      localConnection.createAnswer()
+        .then(answer => {
+          localConnection.setLocalDescription(answer);
+          sendSignal({ answer: answer });
+        });
+    }
+
+    // Handle the answer received from the other peer
+    function handleAnswer(answer) {
+      localConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    }
+
+    // Handle the ICE candidate received from the other peer
+    function handleIceCandidate(candidate) {
+      localConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    }
+
+    // Send signal to the signaling server
+    function sendSignal(signal) {
+      ws.send(JSON.stringify(signal));
+    }
+
+    // Start the WebRTC connection
+    setupWebSocket();
+    
+    // Button click event to send text message
+    document.getElementById("sendMessageBtn").onclick = sendTextMessage;
+  </script>
+</body>
+</html>
