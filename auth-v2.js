@@ -132,15 +132,12 @@ async function logout() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,  // Only send access token in Authorization header
+                'Authorization': `Bearer ${accessToken}`,
             },
-            body: JSON.stringify({
-                accessToken,  // Only send access token in the body
-            }),
+            body: JSON.stringify({ accessToken }),
             credentials: 'include', 
         });
 
-        // If the request was successful, proceed with client-side logout
         if (!response.ok) {
             throw new Error('Logout request failed');
         }
@@ -148,11 +145,11 @@ async function logout() {
     } catch (error) {
         console.error('Error during logout API request:', error);
     } finally {
-        // Proceed with client-side logout
-        localStorage.removeItem("accessToken");  // Remove access token from localStorage
-        document.cookie = "refreshToken=; HttpOnly; Secure; Path=/; Max-Age=0"; // Expire the cookie immediately
-        localStorage.removeItem('chattedUsers');  // Clear other sensitive data from localStorage
-        
+        // Clear tokens and session data
+        localStorage.removeItem("accessToken");
+        document.cookie = "refreshToken=; Path=/; Max-Age=0";
+        localStorage.removeItem('chattedUsers');
+
         // Handle UI change for logged-out users
         if (window.location.pathname === '/nihongo/') {
             document.getElementById('signup-modal').style.display = 'flex';
@@ -160,12 +157,24 @@ async function logout() {
             document.getElementById('master').style.filter = 'blur(5px)';
             document.getElementById('master').style.pointerEvents = 'none';
             document.getElementById('activeUser').textContent = 'No user';  
-            document.getElementById('turnstile1').className = 'cf-turnstile';
-            document.getElementById('turnstile2').className = 'cf-turnstile';
+            loadCloudflareScript();
         } else {
-            window.location.href = '/nihongo/';  // Redirect to the main page after logout
+            window.location.href = '/nihongo/';
         }
     }
 }
+
+// Function to dynamically load the Cloudflare script
+function loadCloudflareScript() {
+    const script = document.createElement('script');
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js"; // Cloudflare Turnstile script
+    script.async = true;
+    script.defer = true;
+    script.onload = () => console.log("✅ Cloudflare script loaded.");
+    script.onerror = () => console.error("❌ Failed to load Cloudflare script.");
+    document.head.appendChild(script);
+}
+
+
 // Call this function when the page loads to ensure authentication status is checked
 document.addEventListener('DOMContentLoaded', checkAuthentication);
