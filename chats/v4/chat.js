@@ -54,7 +54,7 @@ async function fetchAPI(endpoint, method = 'GET', body = null) {
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, options); // Added full URL
+    const response = await apiRequest(`${endpoint}`, options); // Added full URL
     if (!response.ok) throw new Error(await response.text());
     return response.json();
 }
@@ -102,7 +102,9 @@ async function loadChatList(query = '') {
 //  Search Users (Trigger on input change)
 function searchUsers() {
     const query = document.getElementById('search-users').value.trim();
-    loadChatList(query);  // Pass the search query to load the user list
+    if (query.length >= 3) {
+        loadChatList(query);  // Pass the search query to load the user list
+    }
 }
 
 
@@ -282,7 +284,7 @@ async function blockUser(recipientUserId) {
         };
 
         // Sending the request to the server with the correct endpoint and data
-        const response = await fetch(`${BASE_URL}/chats/block-user`, {
+        const response = await apiRequest(`/chats/block-user`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -369,7 +371,7 @@ socket.on('userBusy', ({senderUserId}) => {
 // Function to mark messages as read
 async function markMessagesAsRead(senderId, receiverId) {
     try {
-        const response = await fetch(`${BASE_URL}/chats/mark-read`, {
+        const response = await apiRequest(`/chats/mark-read`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

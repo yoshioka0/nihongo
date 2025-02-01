@@ -1,3 +1,5 @@
+// ⚠️ 🔴 No longer in Use
+
 // constants in config.js
 /**
  * Get JWT token from local storage
@@ -57,7 +59,7 @@ async function checkAuthentication() {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/validate-token`, {
+        const response = await apiRequest(`/validate-token`, {
             method: 'GET',  // Change from POST to GET as per backend endpoint
             headers: {
                 'Authorization': `Bearer ${token}`,

@@ -197,6 +197,13 @@ table {
 
 }
 
+td {
+    word-break: break-all; /* Breaks long words */
+    white-space: normal; /* Allows text to wrap */
+    max-width: 200px; /* Set a reasonable max width */
+    overflow-wrap: break-word; /* Alternative to word-break */
+}
+
 th, td {
     border: 1px solid #ddd;
     padding: 0.75em;
@@ -251,6 +258,8 @@ form button:hover {
     table, th, td {
         font-size: 0.    
     }
+    
+    
 
     form input, form textarea {
         font-size: 0.9em;

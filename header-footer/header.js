@@ -1,3 +1,37 @@
+// Assuming the token 
+const token = getJWTToken();
+
+if (token) {
+  const decodedToken = JSON.parse(atob(token.split('.')[1]));
+  const expiryTime = decodedToken.exp * 1000; // Convert to milliseconds
+  startCountdown(expiryTime);
+} else {
+  console.log("No token found");
+}
+
+function startCountdown(expiryTime) {
+  const countdownElement = document.getElementById("countdown");
+
+  const interval = setInterval(() => {
+	    const currentTime = Date.now();
+	    const remainingTime = expiryTime - currentTime;
+	
+		if (remainingTime <= 0) {
+		  clearInterval(interval);
+		  countdownElement.textContent = "Session expired";
+		  countdownElement.classList.remove("session-active");
+		  countdownElement.classList.add("session-expired");
+		  showPopupMessage('Session Expired');
+		} else {
+		  const minutes = Math.floor(remainingTime / 60000);
+		  const seconds = Math.floor((remainingTime % 60000) / 1000);
+		  countdownElement.textContent = `⏰ ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+		  countdownElement.classList.remove("session-expired");
+		  countdownElement.classList.add("session-active");
+		}
+  }, 1000);
+}
+
 // Fetch and display user subscriptions in the dropdown
 async function fetchSubscriptions() {
     const token = getJWTToken(); // Assumes you have a function to get the JWT token
@@ -8,7 +42,7 @@ async function fetchSubscriptions() {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/user/subscriptions`, {
+        const response = await apiRequest(`/api/subscriptions`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -64,7 +98,7 @@ async function deleteSubscription(endpoint) {
     }
 
     try {
-        const response = await fetch(`${BASE_URL}/unsubscribe`, {
+        const response = await apiRequest(`/api/unsubscribe`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -96,7 +130,7 @@ window.addEventListener('load', () => {
 const logoutButton = document.getElementById('logout-btn');
 // Show the logout button if the user is logged in
 function checkLoginStatus() {
-    const token = localStorage.getItem('jwt');
+    const token = localStorage.getItem('accessToken');
     if (token) {
         logoutButton.style.display = 'block'; // Show the logout button
     } else {
@@ -106,11 +140,8 @@ function checkLoginStatus() {
 
 // Logout function
 logoutButton.addEventListener('click', async () => {
-    await clearSubscriptions();
-    localStorage.removeItem('jwt');
-    sessionStorage.removeItem('user_data');
-    location.reload();
-    window.location.href = '/nihongo'; // Redirect to the desired page
+ logout();
+ location.reload();
 });
 
 

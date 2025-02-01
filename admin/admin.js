@@ -1,24 +1,11 @@
 // Constants in config.js
-
-const TOKEN = localStorage.getItem('jwt'); // JWT Token stored in localStorage
+const TOKEN = localStorage.getItem('accessToken'); // JWT Token stored in localStorage
 
 // Check if token is available, if not redirect to login page
 if (!TOKEN) {
     window.location.href = '/nihongo/unauthorized.html'; // Redirect to login page
 }
 
-async function apiFetch(url, options = {}) {
-    try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status} ${response.statusText}`);
-        }
-        return await response.json();
-    } catch (error) {
-        logMessage('Fetch error: ' + error, 'error');
-        throw error; // Rethrow the error for further handling
-    }
-}
 
 // Tab switching logic
 const tabs = document.querySelectorAll('.tab-button');
@@ -35,9 +22,9 @@ tabs.forEach(tab => {
 // Fetch users
 async function fetchUsers() {
     const userList = document.getElementById('user-list');
-    userList.innerHTML = '<tr><td colspan="4">Loading...</td></tr>'; // Show loading state
+    userList.innerHTML = '<tr><td colspan="8">Loading...</td></tr>'; // Show loading state
     try {
-        const response = await fetch(`${API_URL}/admin/users`, {
+        const response = await apiRequest(`/admin/users`, {
             headers: { Authorization: `Bearer ${TOKEN}` }
         });
 
@@ -48,48 +35,105 @@ async function fetchUsers() {
         }
 
         const users = await response.json();
+        
+        const select = document.getElementById('username');
+        select.innerHTML = ''; // Clear previous options
+        users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.username;
+            option.textContent = user.username;
+            select.appendChild(option);
+        });
+
         userList.innerHTML = users.map(user => `
             <tr>
                 <td>${user._id}</td>
                 <td>${user.username}</td>
                 <td>${user.currentIP || 'N/A'}</td>
                 <td>${user.role || 'user'}</td>
+                <td>${user.isOnline ? 'true' : 'false'}</td>
+                <td>${new Date(user.lastActive).toLocaleString() || '♾️'}</td>
+                <td>${user.isSuspended ? 'Suspended' : 'Active'}</td>
                 <td>
+                    <button onclick="suspendUser('${user._id}')" ${user.isSuspended ? 'disabled' : ''}>Suspend</button>
+                    <button onclick="activateUser('${user._id}')" ${!user.isSuspended ? 'disabled' : ''}>Activate</button>
                     <button onclick="deleteUser('${user._id}')">Delete</button>
                 </td>
             </tr>
         `).join('');
     } catch (err) {
         logMessage('Error loading users: ' + err, 'error');
-        userList.innerHTML = '<tr><td colspan="4">Error loading users</td></tr>';
+        userList.innerHTML = '<tr><td colspan="8">Error loading users</td></tr>';
     }
 }
 
-// Delete User
-async function deleteUser(userId) {
-    if (!confirm('Are you sure?')) return;
+// Suspend User
+async function suspendUser(userId) {
+    if (!confirm('Are you sure you want to suspend this user?')) return;
     
     try {
-        const response = await fetch(`${API_URL}/admin/users/${userId}`, {
+        const response = await apiRequest(`/admin/suspend/${userId}`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${TOKEN}` },
+        });
+
+        if (response.status === 401) {
+            logMessage('Your session has expired. Please log in again.', 'error');
+            logoutUser(); // Log out the user
+            return;
+        }
+
+        const data = await response.json();
+        logMessage(data.message || data.error, response.ok ? 'success' : 'error');
+        fetchUsers(); // Refresh user list
+    } catch (err) {
+        logMessage('Error suspending user: ' + err, 'error');
+    }
+}
+
+// Activate User
+async function activateUser(userId) {
+    if (!confirm('Are you sure you want to activate this user?')) return;
+    
+    try {
+        const response = await apiRequest(`/admin/activate/${userId}`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${TOKEN}` },
+        });
+
+        if (response.status === 401) {
+            logMessage('Your session has expired. Please log in again.', 'error');
+            logoutUser(); // Log out the user
+            return;
+        }
+
+        const data = await response.json();
+        logMessage(data.message || data.error, response.ok ? 'success' : 'error');
+        fetchUsers(); // Refresh user list
+    } catch (err) {
+        logMessage('Error activating user: ' + err, 'error');
+    }
+}
+
+// Delete User (Existing function)
+async function deleteUser(userId) {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    
+    try {
+        const response = await apiRequest(`/admin/users/${userId}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${TOKEN}` },
         });
 
         if (response.status === 401) {
-            // Handle case where the token is blacklisted or invalid
             logMessage('Your session has expired. Please log in again.', 'error');
-            logoutUser();  // Add a function to log out the user (clear the token)
+            logoutUser();
             return;
         }
 
-        if (!response.ok) {
-            const error = await response.json();
-            logMessage(error.error || 'Failed to delete user', 'error');
-            return;
-        }
-
-        logMessage('User deleted successfully', 'success');
-        fetchUsers(); // Refresh the user list after deletion
+        const data = await response.json();
+        logMessage(data.message || data.error, response.ok ? 'success' : 'error');
+        fetchUsers(); // Refresh user list
     } catch (err) {
         logMessage('Error deleting user: ' + err, 'error');
     }
@@ -107,7 +151,7 @@ async function fetchSubscriptions() {
     const subscriptionList = document.getElementById('subscription-list');
     subscriptionList.innerHTML = '<tr><td colspan="3">Loading...</td></tr>'; // Show loading state
     try {
-        const response = await fetch(`${API_URL}/admin/subscriptions`, {
+        const response = await apiRequest(`/admin/subscriptions`, {
             headers: { Authorization: `Bearer ${TOKEN}` }
         });
 
@@ -137,7 +181,7 @@ async function fetchSubscriptions() {
 async function deleteSubscription(subscriptionId) {
     if (!confirm('Are you sure?')) return;
     try {
-        const response = await fetch(`${API_URL}/admin/subscriptions/${subscriptionId}`, {
+        const response = await apiRequest(`/admin/subscriptions/${subscriptionId}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${TOKEN}` }
         });
@@ -165,7 +209,7 @@ document.getElementById('notification-form').addEventListener('submit', async (e
     const username = document.getElementById('username').value || null;
 
     try {
-        const response = await fetch(`${API_URL}/admin/notify`, {
+        const response = await apiRequest(`/admin/notify`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -200,7 +244,7 @@ async function fetchNotifications() {
 	notificationList.innerHTML = '<p>Loading...</p>'; // Show loading state
 
     try {
-        const response = await fetch(`${API_URL}/admin/notifications`, {
+        const response = await apiRequest(`/admin/notifications`, {
             headers: { Authorization: `Bearer ${TOKEN}` }
         });
 
@@ -247,7 +291,7 @@ async function fetchNotifications() {
 async function deleteNotification(notificationId) {
     if (!confirm('Are you sure?')) return;
     try {
-        const response = await fetch(`${API_URL}/admin/notifications/${notificationId}`, {
+        const response = await apiRequest(`/admin/notifications/${notificationId}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${TOKEN}` }
         });
@@ -265,11 +309,44 @@ async function deleteNotification(notificationId) {
     }
 }
 
+async function fetchLogs() {
+    const logList = document.getElementById('log-list');
+    logList.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+    try {
+        const response = await apiRequest(`/admin/logs`, {
+            headers: { Authorization: `Bearer ${TOKEN}` }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            logMessage(error.error || 'Failed to fetch logs', 'error');
+            return;
+        }
+
+        const logs = await response.json();
+        logList.innerHTML = logs.map(log => `
+            <tr>
+                <td>${log.user}</td>
+                <td>${log.username}</td>
+                <td>${log.action}</td>
+                <td>${log.details}</td>
+                <td>${log.ip}</td>
+                <td>${new Date(log.timestamp).toLocaleString()}</td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        logMessage('Error loading logs: ' + err, 'error');
+        logList.innerHTML = '<tr><td colspan="6">Error loading logs</td></tr>';
+    }
+}
+
+
 // Load data on page load
 document.addEventListener('DOMContentLoaded', () => {
     fetchUsers();
     fetchSubscriptions(); // Fetch subscriptions on page load
     fetchNotifications(); // Fetch notifications on page load
+    fetchLogs(); // Fetch logs on page load
 });
 
 // Function to log messages to the console div

@@ -1,96 +1,171 @@
 // constants in config.js
 
+// Function to get the access token from localStorage
 function getJWTToken() {
-    return localStorage.getItem('jwt');
+    return localStorage.getItem('accessToken');
 }
+
+// Function to get the refresh token from cookies
+function getRefreshToken() {
+    const value = `; ${document.cookie}`;
+    const parts = value.split('; refreshToken=');
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+// Function to decode JWT token and extract payload
 function decodeJWT(token) {
+    if (!token) return null; // Return null if no token is provided
+
     try {
         const base64Url = token.split('.')[1];
+        if (!base64Url) throw new Error('Invalid token format');
+
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-            atob(base64)
-                .split('')
-                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                .join('')
-        );
-        return JSON.parse(jsonPayload);
+        const jsonPayload = atob(base64)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('');
+
+        return JSON.parse(decodeURIComponent(jsonPayload));
     } catch (error) {
         console.error('Error decoding JWT:', error);
         return null;
     }
 }
+
+// Function to check if the token is expired
 function isTokenExpired(token) {
+    const decoded = decodeJWT(token);
+    if (!decoded || !decoded.exp) return true; // Consider expired if decoding fails or no expiration
+
+    return Date.now() >= decoded.exp * 1000;
+}
+
+// Function to refresh the access token using the refresh token
+async function refreshAccessToken() {
     try {
-        const { exp } = decodeJWT(token);
-        return Date.now() >= exp * 1000;
+        const response = await apiRequest('/refresh-token', {
+            method: 'POST',
+            credentials: 'include', //Allows sending HttpOnly cookies
+        });
+
+        if (!response.ok) {
+            console.error('Failed to refresh token');
+            return null;
+        }
+
+        const data = await response.json();
+        localStorage.setItem('accessToken', data.token);
+        return data.token;
     } catch (error) {
-        return true; // Assume expired if decoding fails
+        console.error('Error refreshing token:', error);
+        return null;
     }
 }
 
-
-
-/**
- * Redirect user if not authenticated and show unauthenticated page
- */
+// Function to check if the user is authenticated
 async function checkAuthentication() {
-    const token = getJWTToken();
-   
-	    // Check if the token is missing or expired 
-	    if (!token || isTokenExpired(token)) {
-	        console.log('Authentication failed: Token expired or missing');
-	        logout();
-	        return;
-	    }
-	   try {
-				const response = await fetch(`${BASE_URL}/validate-token`, {
-			    method: 'GET',
-			    headers: {
-			        'Authorization': `Bearer ${token}`,
-			    },
-			});		
-			if (response.status === 403) {
-			    console.log('Token is blacklisted');
-			    logout();
-			}
-		
-	    const result = await response.json();
-	
-	    if (!response.ok || !result.userId) {
-	        throw new Error('Invalid token');
-	    }
-	
-	    console.log('User is authenticated', result.userId);
-	
-	    if (window.location.pathname === '/nihongo/') {
-	        document.getElementById('main').style.display = 'flex';
-	        document.getElementById('master').style.filter = 'none';
-	        document.getElementById('master').style.pointerEvents = '';
-			
-	    }
-	} catch (error) {
-	    console.error('Authentication failed:', error);
-	    logout();
-	}
-}
+    let token = getJWTToken();
+    
+    // Check if the token is missing or expired
+    if (!token || isTokenExpired(token)) {
+        console.log('Access token expired or missing. Attempting to refresh...');
+        showPopupMessage('Credentials expired or missing.');
+        // Try to get a new access token using the refresh token
+        token = await refreshAccessToken();
+        if (token){
+        showPopupMessage('Credentials refreshed successfully.');
+        await delay(1000);
+        location.reload();
+        }
 
-// Logout user and redirect
-function logout() { 
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('chattedUsers');
-    // Handle UI change for logged-out users
-    if (window.location.pathname === '/nihongo/') {
-        document.getElementById('signup-modal').style.display = 'flex';
-        document.getElementById('main').style.display = 'none';
-        document.getElementById('master').style.filter = 'blur(5px)';
-        document.getElementById('master').style.pointerEvents = 'none';
-        document.getElementById('activeUser').textContent = 'No user';  
-      document.getElementById('turnstile1').className = 'cf-turnstile';
-        document.getElementById('turnstile2').className = 'cf-turnstile';
-    } else {
-        window.location.href = '/nihongo/';
+        // If we still don't have a valid token after refresh, log out
+        if (!token) {
+            console.log('Authentication failed: No valid token found');
+            //showPopupMessage('No Luck! Logging Out...');
+            logout();
+            return;
+        }
+    }
+
+    try {
+        const response = await apiRequest(`/validate-token`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (response.status === 403) {
+            console.log('Token is blacklisted');
+            logout();
+            return;
+        }
+
+        const result = await response.json();
+
+        if (!response.ok || !result.userId) {
+            throw new Error('Invalid token');
+        }
+
+        console.log('User is authenticated', result.userId);
+
+        if (window.location.pathname === '/nihongo/') {
+            document.getElementById('main').style.display = 'flex';
+            document.getElementById('master').style.filter = 'none';
+            document.getElementById('master').style.pointerEvents = '';
+        }
+    } catch (error) {
+        console.error('Authentication failed:', error);
+        logout();
     }
 }
 
+
+// Logout user and call the logout endpoint on the server to blacklist the token
+async function logout() { 
+    const accessToken = localStorage.getItem("accessToken");
+
+    try {
+        const response = await apiRequest('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,  // Only send access token in Authorization header
+            },
+            body: JSON.stringify({
+                accessToken,  // Only send access token in the body
+            }),
+            credentials: 'include', 
+        });
+
+        // If the request was successful, proceed with client-side logout
+        if (!response.ok) {
+            throw new Error('Logout request failed');
+        }
+
+    } catch (error) {
+        console.error('Error during logout API request:', error);
+    } finally {
+        // Proceed with client-side logout
+        localStorage.removeItem("accessToken");  // Remove access token from localStorage
+        document.cookie = "refreshToken=; HttpOnly; Secure; Path=/; Max-Age=0"; // Expire the cookie immediately
+        localStorage.removeItem('chattedUsers');  // Clear other sensitive data from localStorage
+        
+        // Handle UI change for logged-out users
+        if (window.location.pathname === '/nihongo/') {
+            document.getElementById('signup-modal').style.display = 'flex';
+            document.getElementById('main').style.display = 'none';
+            document.getElementById('master').style.filter = 'blur(5px)';
+            document.getElementById('master').style.pointerEvents = 'none';
+            document.getElementById('activeUser').textContent = 'No user';  
+            document.getElementById('turnstile1').className = 'cf-turnstile';
+            document.getElementById('turnstile2').className = 'cf-turnstile';
+        } else {
+            window.location.href = '/nihongo/';  // Redirect to the main page after logout
+        }
+    }
+}
 // Call this function when the page loads to ensure authentication status is checked
 document.addEventListener('DOMContentLoaded', checkAuthentication);

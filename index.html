@@ -29,11 +29,15 @@
     <div class="modal-content">
       <h2>Create a userID</h2>
 	   <form id="signup-form">
-		  <input type="text" id="signup-username" placeholder="Enter username" required>
+		  <input type="text" id="signup-username" name="signup-username" placeholder="Enter username" required>
 		
 		<div class="password-wrapper">
-    <input id="signup-password" type="password" placeholder="Password" required />
+    <input id="signup-password" name="signup-password" type="password" placeholder="Password" required />
     <i id="show-password-icon" class="fas fa-eye"></i> <!-- Eye icon for toggling -->
+</div>
+<div style="display: flex; align-items: center; gap: 5px; justify-content: center; margin-bottom:10px;">
+    <input type="checkbox" id="keep-logged-in-signup">
+    <label for="keep-logged-in-signup"><strong>Remember Me</strong>
 </div>
 				
 					<!-- class of the turnstile will be added by auth-v2.js if user unauthicated -->
@@ -52,11 +56,15 @@
     <div class="modal-content">
       <h2>Log In</h2>
 	   	<form id="login-form">
-			  <input type="text" id="login-username" placeholder="Enter username" required>
+			  <input type="text" id="login-username" name="login-username" placeholder="Enter username" required>
 			
 <div class="password-wrapper">
-    <input id="login-password" type="password" placeholder="Password" required />
+    <input id="login-password" name="login-password" type="password" placeholder="Password" required />
     <i id="show-password-icon" class="fas fa-eye"></i> <!-- Eye icon for toggling -->
+</div>
+<div style="display: flex; align-items: center; gap: 5px; justify-content: flex-start; margin-bottom:10px;">
+    <input type="checkbox" id="keep-logged-in">
+    <label for="keep-logged-in-signup"><strong>Keep me logged in</strong>
 </div>
 			
 			<!-- class of the turnstile will be added by auth-v2.js if user unauthicated -->
@@ -72,15 +80,16 @@
 
 <header class="custom-header">
   <!-- Left Section: Site Name and Icon -->
-  <div class="header-logo">
-    <button class="hamburger" id="hamburger-btn">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
-    <img src="icon.png" alt="Nihongo" class="site-icon">
-    <span class="site-name">Nihongo</span>
-  </div>
+	<div class="header-logo">
+		<button class="hamburger" id="hamburger-btn">
+		 <span class="bar"></span>
+		 <span class="bar"></span>
+		 <span class="bar"></span>
+		 </button>
+		 <img src="icon.png" alt="Nihongo" class="site-icon">
+		 <span class="site-name">Nihongo</span>
+	 	
+	</div>
 
   <!-- Middle Section: Chat and Notification -->
 <div class="header-center">
@@ -119,7 +128,9 @@
   	       	<img id="profileImg" src="" alt="Profile Picture" onclick="changeImage()">
           </div>
 		  <div id="activeUser2" class="username">Username</div>
+	  	<div id="countdown" class="countdown">Loading...</div>
       </div>
+      <a id="admin-btn" href="admin/" style="background:purple; display:none;">Admin</a>
       <a href="#changePassword">Change Password</a>
       <a href="#addRecovery">Add Recovery</a>
       <a id="surprise-button" href="#surprise">Surprise</a>

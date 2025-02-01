@@ -1,38 +1,16 @@
 //constants in config.js
 
-// Utility functions
-function getJWTToken() {
-    return localStorage.getItem('jwt');
-}
-
-function decodeJWT(token) {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-    } catch (error) {
-            console.error('Error decoding JWT:', error);
-        return null;  // Return null or handle it as needed
-    }
-}
-
-function isTokenExpired(token) {
-    try {
-        const { exp } = decodeJWT(token);
-        return Date.now() >= exp * 1000;
-    } catch (error) {
-        return true;
-    }
-}
-
+// Utility functions (Used in web-push Subscription)
 function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawData = atob(base64);
     return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+}
+
+// Define the delay function
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 
@@ -145,7 +123,7 @@ async function ensureCorrectSubscription(registration, userId) {
         const subscription = await registration.pushManager.getSubscription();
         if (subscription) {
             // Fetch user ID tied to the subscription from the server
-            const response = await fetch(`${BASE_URL}/subscription-user`, {
+            const response = await apiRequest(`/api/subscription-user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -214,7 +192,7 @@ async function subscribeUserToPush(registration, userId) {
 //		newSubscription.deviceInfo = deviceInfo;
         newSubscription.userId = userId;
 
-        await fetch(`${BASE_URL}/subscribe`, {
+        await apiRequest(`/api/subscribe`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -225,25 +203,29 @@ async function subscribeUserToPush(registration, userId) {
 
         console.log('New subscription sent to the server:', newSubscription);
     } catch (error) {
-        console.error('Failed to subscribe user to push:', error);
+        console.log('🔴 Failed to subscribe user to push:', error);
     }
 }
 
 
-// User Authentication
+// Update Active User info
 function updateActiveUser() {
     const activeUser = document.getElementById('activeUser');
     const activeUser2 = document.getElementById('activeUser2');
+    const adminButton = document.getElementById('admin-btn');
     const token = getJWTToken();
 
     if (token && !isTokenExpired(token)) {
-        try {
-            const { username } = decodeJWT(token);
-            activeUser.textContent = username || 'No user';
-            activeUser2.textContent = username || 'No user';
-        } catch {
-            activeUser.textContent = 'No user';
-        }
+	try {
+	    const { username, role } = decodeJWT(token); // Destructure both 'username' and 'role' in one line
+	    if (role === "admin") {
+	        adminButton.style.display = 'block';
+	    }
+	    activeUser.textContent = username || 'No user';
+	    activeUser2.textContent = username + `•(${role})` || 'No user';
+	} catch (error) {
+	    activeUser.textContent = 'No user';
+	}
     } else {
         activeUser.textContent = 'No user';
     }
@@ -264,6 +246,9 @@ const loginHere = document.getElementById("login-here");
 const signupHere = document.getElementById("signup-here");
 
 // Function to show a popup message with a progress bar
+// Maximum number of pop-ups allowed at once
+const MAX_POPUPS = 3;
+
 function showPopupMessage(message, duration = 3000) {
     const popup = document.createElement('div');
     popup.classList.add('popup-notification');
@@ -283,8 +268,23 @@ function showPopupMessage(message, duration = 3000) {
     messageText.textContent = message;
     popup.appendChild(messageText);
 
+    // Append the popup to the body
     document.body.appendChild(popup);
-    
+
+    // Calculate vertical position for stacking (using the number of existing pop-ups)
+    const allPopups = document.querySelectorAll('.popup-notification');
+    const popupCount = allPopups.length;  // Total number of currently visible pop-ups
+    const verticalOffset = 100; // Vertical space between pop-ups (adjust as needed)
+
+    // Stack the new popup slightly above the previous one
+    popup.style.bottom = `${popupCount * verticalOffset}px`; 
+
+    // If the number of pop-ups exceeds the limit, remove the oldest one
+    if (popupCount >= MAX_POPUPS) {
+        const firstPopup = allPopups[0];
+        firstPopup.remove();
+    }
+
     // Show the popup
     setTimeout(() => {
         popup.classList.add('show');
@@ -369,6 +369,7 @@ if (window.location.pathname === '/nihongo/') {
         const signupForm = document.getElementById('signup-form');
         const username = document.getElementById('signup-username').value.trim();
         const password = document.getElementById('signup-password').value;
+        const keepLoggedIn = document.getElementById('keep-logged-in-signup').checked; // Check if selected
         const errorMessage = document.getElementById('ErrorMessage');
         errorMessage.textContent = '';
 
@@ -393,7 +394,7 @@ if (window.location.pathname === '/nihongo/') {
                 return;
             }
 
-            const response = await fetch(`${BASE_URL}/create-user`, {
+            const response = await apiRequest(`/create-user`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, turnstileResponse })
@@ -403,8 +404,14 @@ if (window.location.pathname === '/nihongo/') {
             hideLoadingSpinner(signupForm);
 
             if (response.ok) {
+            	const { accessToken, refreshToken } = data;
+				localStorage.setItem("accessToken", accessToken);
+			    if (keepLoggedIn) {
+					// Store refresh token in a cookie (HttpOnly and Secure flags(in https environment) for better security)
+					document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800`;  // 7 days
+				}
+
             	showPopupMessage(`User created successfully! (${username})`);
-                localStorage.setItem('jwt', data.token);
                 await delay(500);
                 alert(`User created successfully! (${username})`);
                 document.getElementById('signup-modal').style.display = 'none';
@@ -427,6 +434,7 @@ if (window.location.pathname === '/nihongo/') {
         const loginForm = document.getElementById('login-form');
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value;
+        const keepLoggedIn = document.getElementById('keep-logged-in').checked; // Check if selected
 
         if (!username || !password) {
             showPopupMessage('Please enter both username and password.');
@@ -443,7 +451,7 @@ if (window.location.pathname === '/nihongo/') {
                 return;
             }
 
-            const response = await fetch(`${BASE_URL}/login`, {
+            const response = await apiRequest(`/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, turnstileResponse })
@@ -453,9 +461,14 @@ if (window.location.pathname === '/nihongo/') {
             hideLoadingSpinner(loginForm);
 
             if (response.ok) {
-            	showPopupMessage(`Welcome back, ${username}!`);
-                localStorage.setItem('jwt', data.token);
-                await delay(500);
+				const { accessToken, refreshToken } = data;
+				localStorage.setItem("accessToken", accessToken);
+			    if (keepLoggedIn) {
+					// Store refresh token in a cookie (HttpOnly and Secure flags(in https environment) for better security)
+					document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800`;  // 7 days
+				}
+				showPopupMessage(`Welcome back, ${username}!`);            
+				await delay(500);
                 alert(`Welcome back, ${username}!`);
                 document.getElementById('login-modal').style.display = 'none';
                 location.reload();
@@ -469,9 +482,4 @@ if (window.location.pathname === '/nihongo/') {
             showPopupMessage('Error connecting to the server. Please try again.');
         }
     });
-}
-
-// Define the delay function
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }

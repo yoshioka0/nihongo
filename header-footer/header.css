@@ -7,6 +7,38 @@
   box-sizing: border-box;
 }
 
+#countdown {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  color: #fff;
+  background-color: #333;
+  padding: 5px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  min-width: 100px;
+}
+
+#countdown {
+  background-color: #2d2d2d;
+  color: #fff;
+  font-weight: bold;
+}
+
+#countdown.session-expired {
+  background-color: #e74c3c;
+}
+
+#countdown.session-active {
+  background-color: #27ae60;
+}
+
+#countdown:hover {
+  transform: scale(1.1);
+}
+
 /* Header Styling */
 .custom-header {
   display: flex;

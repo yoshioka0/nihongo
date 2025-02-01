@@ -19,6 +19,7 @@
             <button class="tab-button" data-tab="send-notifications">Send Notifications</button>
             <button class="tab-button" data-tab="view-notifications">View Notifications</button>
             <button class="tab-button" data-tab="subscriptions">Subscriptions</button>
+            <button class="tab-button" data-tab="view-logs">View Logs</button>
         </section>
 
         <!-- Manage Users Tab -->
@@ -31,7 +32,10 @@
 						<th>Username</th>
                         <th>IP Address</th>
                         <th>Role</th>
-                        <th>Actions</th>
+                        <th>IsOnline</th>
+                        <th>Last Active</th>
+                        <th>IsSuspended</th>                                     
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="user-list">
@@ -56,8 +60,10 @@
                 <label for="image">Image URL (optional)</label>
                 <input type="url" id="image" name="image">
                 
-                <label for="username">Send to (optional)</label>
-                <input type="text" id="username" name="username" placeholder="Leave blank for all users">
+				<label for="username">Send to (optional)</label>
+				<select id="username" name="username">
+				    <option value="">Leave blank for all users</option>
+				</select>
                 
                 <button type="submit">Send Notification</button>
             </form>
@@ -87,7 +93,29 @@
                 </tbody>
             </table>
         </section>
-    </main>
+     
+		
+		<!-- New section to display logs -->
+		<section id="view-logs" class="tab-content">
+		    <h2>View Activity Logs</h2>
+		    <table>
+		        <thead>
+		            <tr>
+		                <th>User ID</th>
+		                <th>Username</th>
+		                <th>Action</th>
+		                <th>Details</th>
+		                <th>IP Address</th>
+		                <th>Timestamp</th>
+		            </tr>
+		        </thead>
+		        <tbody id="log-list">
+		            <!-- Logs will load here -->
+		        </tbody>
+		    </table>
+		</section>
+
+   </main>
     
      <!-- Console area to display logs -->
     <div id="console"></div>

@@ -1,9 +1,18 @@
 // Chat Frontend Script (chat.js)
+// Tip: senderId always available in senderUserId
+//		recipient Id always available in currentChatUserId
+// *** Be careful userId sometimes corresponds to something else and recipient/receiver/sender may not be available 
+
+
+// Get user details from JWT
+const accessToken = localStorage.getItem('accessToken');
+if (!accessToken) {
+    alert('Authentication token not found. Please log in again.');
+    window.location.href = '/nihongo'; // Redirect to login if token is missing
+}
 
 // Connect to the server using Socket.io
-const socket = io(BASE_URL, {
-    query: { token: localStorage.getItem('jwt') }
-});
+// Shifted to config.js
 
 // DOM Elements
 const chatList = document.getElementById('chat-list'); // Left panel: list of users/chatrooms
@@ -13,53 +22,39 @@ const sendButton = document.getElementById('send-button'); // Send button
 const logoutButton = document.getElementById('logoutBtn'); // Logout button
 const blockButton = document.getElementById('block-button'); // Block button (to be added in the HTML)
 
+const chatUserElement = document.getElementById('chat-user');
+const lastActiveElement = document.getElementById('status');
+const userElement2 = chatUserElement
+
 // Decode JWT to get user details
-function decodeJWT(token) {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-    } catch (error) {
-        console.error('Error decoding JWT:', error);
-        return null;
-    }
-}
+// Already available in auth-v2.js
 
-// Get user details from JWT
-const jwt = localStorage.getItem('jwt');
-if (!jwt) {
-    alert('Authentication token not found. Please log in again.');
-    window.location.href = '/nihongo'; // Redirect to login if token is missing
-}
-
-const decoded = decodeJWT(jwt);
+const decoded = decodeJWT(accessToken);
 const senderUserId = decoded.userId; // Sender's userId (from JWT)
 const senderUsername = decoded.username;
 
 // Set the username in the UI
 document.getElementById('myUsername').textContent = senderUsername;
 
-// Global Variable for recipient's user ID
-let currentChatUserId = null; // Tracks the currently selected recipient user
-
 // Helper Function: Fetch API Wrapper
 async function fetchAPI(endpoint, method = 'GET', body = null) {
     const headers = {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${jwt}`,
+        Authorization: `Bearer ${accessToken}`,
     };
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, options); // Added full URL
+    const response = await apiRequest(`${endpoint}`, options); // Added full URL
     if (!response.ok) throw new Error(await response.text());
     return response.json();
 }
 
 
+let currentChatUserId = null; // Tracks the currently selected recipient user
+let query = null;
+loadChatList(query);
+  
 // 1. Load User List (Left Panel) with Search and Always Show Chatted Users
 async function loadChatList(query = '') {
     try {
@@ -70,6 +65,7 @@ async function loadChatList(query = '') {
 
         // If no search query, load all chatted users
         if (!query) {
+        	console.log('🔴🟢🟠 Loaded User List from LS');
             chattedUsers.forEach(({ username, userId }) => {
                 const userItem = document.createElement('div');
                 userItem.textContent = username;
@@ -81,7 +77,7 @@ async function loadChatList(query = '') {
             });
         } else {
             // Load users based on search query
-            const users = await fetchAPI(`/api/users?username=${query}`);
+            const users = await fetchAPI(`/api/chats/users?username=${query}`);
             users.forEach((user) => {
                 const userItem = document.createElement('div');
                 userItem.textContent = user.username;
@@ -102,7 +98,10 @@ async function loadChatList(query = '') {
 //  Search Users (Trigger on input change)
 function searchUsers() {
     const query = document.getElementById('search-users').value.trim();
-    loadChatList(query);  // Pass the search query to load the user list
+    if (!query) {loadChatList(query);}
+    if (query.length >= 3) {
+        loadChatList(query);  // Pass the search query to load the user list
+    }
 }
 
 
@@ -110,9 +109,8 @@ function searchUsers() {
 async function openChat(recipientUserId, recipientUsername) {
     currentChatUserId = recipientUserId;
     currentChatUsername = recipientUsername;
-
-			
-			document.getElementById("chat-user").textContent = `💬 Chatting with ${recipientUsername}`;
+		
+	document.getElementById("chat-user").textContent = `💬 ${recipientUsername}`;
     // Clear the chat window and add a fixed header
     chatWindow.innerHTML = `
         <div class="chat-messages"></div> 
@@ -121,10 +119,12 @@ async function openChat(recipientUserId, recipientUsername) {
     const chatMessagesContainer = chatWindow.querySelector('.chat-messages');
 
     // Join the chat room
-    socket.emit('join', { senderUserId, recipientUserId });
+    if (socket) {
+    socket.emit('join', {recipientUserId });
+    } else { console.error('Join emit failed to socket with user:', recipientUserId ); }
 
     try {
-        const messages = await fetchAPI(`/chats/${senderUserId}/${recipientUserId}`);
+        const messages = await fetchAPI(`/api/chats/history/${senderUserId}/${recipientUserId}`);
         if (messages.length === 0) {
             chatMessagesContainer.innerHTML = '<p>No messages yet.</p>';
             return;
@@ -135,22 +135,25 @@ async function openChat(recipientUserId, recipientUsername) {
             const isSelf = message.sender._id === senderUserId;
             displayMessage(message, isSelf);
         });
-
-        // Mark messages as read
-        markMessagesAsRead();
+	
+		// Fetch User availability 
+		checkUserAvailability(currentChatUserId);
+        
+		// Mark messages as read
+        senderId=senderUserId; receiverId=currentChatUserId;
+   	 socket.emit('markAsRead', { senderId, receiverId });
+        
+        updateBlockButton();
 
     } catch (error) {
         console.error('Error loading chat messages:', error.message);
         chatMessagesContainer.innerHTML = '<p>Error loading messages. Please try again later.</p>';
     }
 
-
-
-
     // Show block button if user is not the current user
     if (senderUserId !== recipientUserId) {
         blockButton.style.display = 'inline-block';
-        blockButton.onclick = () => blockUser(); // Block button action
+        blockButton.onclick = () => toggleBlockUser(); // Block button action
     } else {
         blockButton.style.display = 'none';
     }
@@ -166,75 +169,356 @@ function displayMessage(message, isSelf) {
     messageText.textContent = message.message;
 
     // Create the timestamp element
-		    const formattedDate = new Date(message.timestamp).toLocaleDateString([], {
-		    year: 'numeric',
-		    month: 'short',
-		    day: 'numeric'
-		});	
-		const formattedTime = new Date(message.timestamp).toLocaleTimeString([], {
-		    hour: '2-digit',
-		    minute: '2-digit',
-		    second: '2-digit'
-		});
-	const formattedDateTime = `${formattedDate}, ${formattedTime}`;
-//    const formattedTime = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit'  });
+    const formattedDate = new Date(message.timestamp).toLocaleDateString([], {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+    const formattedTime = new Date(message.timestamp).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    const formattedDateTime = `${formattedDate}, ${formattedTime}`;
     const timestamp = document.createElement('span');
     timestamp.classList.add('timestamp');
     timestamp.textContent = formattedDateTime;
 
-    // Append message text and timestamp to the message div
+    // Only show the read receipt on the sender's (self) message
+    const readReceipt = document.createElement('span');
+    readReceipt.classList.add('read-receipt');
+
+    if (isSelf) {
+        if (message.isRead) {
+            readReceipt.textContent = '✔✔'; // Double filled tick for read
+        } else {
+            readReceipt.textContent = '✔';  // Single tick for sent (not read yet)
+        }
+    }
+
+    // Append message text, timestamp, and read receipt (if self) to the message div
     messageDiv.appendChild(messageText);
     messageDiv.appendChild(timestamp);
+    messageDiv.appendChild(readReceipt);
 
     chatWindow.appendChild(messageDiv);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// 4. Send a Message
-// 4. Send a Message
-async function sendMessage() {
+
+// Requires socket defined beforehand 
+function intializeSocket() {
+	if (socket) {
+		// Event Listeners
+		sendButton.addEventListener('click', sendMessage);
+		messageInput.addEventListener('keydown', (e) => {
+		    if (e.key === 'Enter') sendMessage();
+		});
+		
+		
+		//4. Send Message via Websocket 
+		async function sendMessage() {
     const messageText = messageInput.value.trim();
     if (!messageText || !currentChatUserId) return;
 
     const message = {
-        sender: senderUserId,             // sender is extracted from the JWT
-        receiver: currentChatUserId,      // receiver is the selected user
-        message: messageText,             // message is the content typed by the user
+        receiver: currentChatUserId,
+        message: messageText,
     };
 
     try {
-        // Emit the message to the backend via socket
-        socket.emit('sendMessage', message);
-        
-        // Clear the input field
-        messageInput.value = '';
+        // Emit the message and handle the response
+        socket.emit('sendMessage', message, (response) => {
+            if (response?.error) {
+                alert(response.error); // Show pop-up if blocked
+            } else {
+                // Clear the input field only if the message is sent successfully
+                messageInput.value = '';
 
-        // Update localStorage with the new chatted user (both username and userId)
-        const chattedUsers = JSON.parse(localStorage.getItem('chattedUsers')) || [];
+                // Ensure `currentChatUsername` is defined before using it
+                if (currentChatUsername) {
+                    const chattedUsers = JSON.parse(localStorage.getItem('chattedUsers')) || [];
 
-        if (!chattedUsers.some(user => user.username === currentChatUsername)) {
-            chattedUsers.push({
-                username: currentChatUsername,
-                userId: currentChatUserId // Save the userId as well
-            });
-            localStorage.setItem('chattedUsers', JSON.stringify(chattedUsers));
-        }
-
+                    if (!chattedUsers.some(user => user.userId === currentChatUserId)) {
+                        chattedUsers.push({
+                            username: currentChatUsername,
+                            userId: currentChatUserId
+                        });
+                        localStorage.setItem('chattedUsers', JSON.stringify(chattedUsers));
+                    }
+                } else {
+                    console.warn("currentChatUsername is undefined. Skipping localStorage update.");
+                }
+            }
+        });
     } catch (error) {
         console.error('Error sending message:', error.message);
     }
 }
+		
+		// 5. Receive Messages via WebSocket
+		if (socket) {
+		    socket.on('receiveMessage', (message) => {
+		        //console.log('📥 Socket msg received from server');
+		
+		        // Check if the message is relevant to the current chat (either sent or received by the user)
+		        if (message.receiver === senderUserId || message.sender === senderUserId) {
+		            typingIndicator.style.display = 'none';
+		
+		            // Update the isRead property to true
+		           // message.isRead = true;
+		
+		            // Display the updated message
+		            displayMessage(message, message.sender === senderUserId);
+		        }
+		    });
+		}
+		
+		// 6. Handle Typing Indicator
+		let typingTimeout;
+		let canEmitTyping = true; // Controls when to allow sending "typing" event
+		
+		const typingIndicator = document.getElementById('typing-indicator');
+		
+		messageInput.addEventListener('input', () => {
+		    if (currentChatUserId && senderUserId !== currentChatUserId) {
+		        if (canEmitTyping && socket) {
+		            socket.emit('typing', { senderId: senderUserId, receiverId: currentChatUserId });
+		            canEmitTyping = false; // Prevent immediate re-emits
+		
+		            // Allow re-emitting after 1.5 seconds
+		            setTimeout(() => {
+		                canEmitTyping = true;
+		            }, 1500);
+		        }
+		        clearTimeout(typingTimeout); // Reset timeout on every keystroke
+		    }
+		});		
+					
+		// 7. Typing Indicator Display
+		if (socket) {
+	    socket.on('typing', ({ senderId }) => {
+	       // console.log('Typing:', senderId); // Debugging
+	        
+	        if (senderId !== senderUserId && currentChatUserId === senderId) {
+				updateStatus('Typing');
+	            if (typingIndicator.style.display !== 'flex') {
+	                typingIndicator.style.display = 'flex';
+	                typingIndicator.innerHTML = `
+	                    <div class="typing-dots">
+	                        <span></span><span></span><span></span>
+	                    </div>
+	                `; // Insert only if it's not already there
+	            }        
+	        // Reset timeout each time to avoid unnecessary resets
+	        clearTimeout(typingTimeout);
+	        typingTimeout = setTimeout(() => {
+				updateStatus('Online');
+	            typingIndicator.style.display = 'none';
+	        }, 3000);
+		}
+	    });
+	}
+		
+		
+		//8. Availability-Pre
+		// Emit 'userBusy' when the user switches tabs or becomes inactive
+		document.addEventListener('visibilitychange', () => {
+			if (socket) {
+			    if (document.hidden) {
+			        // Emit userBusy when the tab is switched
+			        socket.emit('userBusy', { senderUserId});
+					//console.log('User Busy emitted.');
+			    } else {
+			        //Optionally, emit 'userOnline' when they return
+					// Mark messages as read
+			        senderId=senderUserId; receiverId=currentChatUserId;
+			   	 socket.emit('markAsRead', { senderId, receiverId });
+			
+			        socket.emit('userOnline', { senderUserId });
+			        //console.log('User Online emitted.');
+			    }
+			}
+		});
+		// Emit 'userOffline' when the user leaves or closes the website
+		window.addEventListener('beforeunload', () => {
+			if (socket) {
+		    socket.emit('userOffline', { senderUserId});
+		    //console.log('User Offline emitted.');
+			}
+		});
+		
+		// 9. Availability 
+			socket.on('userOnline', ({senderUserId}) => {
+			    //console.log(senderUserId, 'is online');
+			  
+			    userId=senderUserId;
+			    const userElement = document.querySelector(`[data-user-id='${userId}']`);
+			    if (userElement) {
+		    		userElement.classList.remove('offline', 'busy', 'online'); userElement.classList.add('online');
+			    }else{'🤯🤯🤯'}
+			    if (userElement2 && currentChatUserId === senderUserId) {
+		    		userElement2.classList.remove('offline', 'busy', 'online'); userElement2.classList.add('online');
+					updateStatus('Online');
+			    }
+			
+			});
+			
+			socket.on('userOffline', ({senderUserId}) => {
+				//console.log(senderUserId, 'is offline');
+				updateStatus('Offline');
+				userId=senderUserId;
+			    const userElement = document.querySelector(`[data-user-id='${userId}']`);
+			    if (userElement) {
+		    		userElement.classList.remove('offline', 'busy', 'online'); userElement.classList.add('offline');
+			    }
+			    if (userElement2 && currentChatUserId === senderUserId) {
+		    		userElement2.classList.remove('offline', 'busy', 'online'); userElement2.classList.add('offline');
+		            checkUserAvailability(currentChatUserId);
+			    }
+			});
+			
+			socket.on('userBusy', ({senderUserId}) => {
+				//console.log(senderUserId, 'is busy');
+			
+				userId=senderUserId;
+			    const userElement = document.querySelector(`[data-user-id='${userId}']`);
+			    if (userElement) {
+		    		userElement.classList.remove('offline', 'busy', 'online'); userElement.classList.add('busy');
+			    }
+			    if (userElement2 && currentChatUserId === senderUserId) {
+		    		userElement2.classList.remove('offline', 'busy', 'online'); userElement2.classList.add('busy');
+					updateStatus('Busy');
+			    }			    
+			});
+			
+			socket.on('messagesRead', (data) => {		
+		   const { chatId, readerId } = data;
+	   //	console.log(`messageRead received lol 😂, chatId: ${chatId} readerId: ${readerId} `);
+			if (currentChatUserId === readerId &&  senderId ===chatId) {	
+		   	 console.log(`User ${readerId} read messages in chat ${chatId}`);	
+				lol();  // Lol 😂 function to update message status in the UI	
+			}
+		});
+			
+		} else {
+			console.log('socket:', socket);
+			console.log('🔴 Socket undefined: Likely due to socket initialisation asynchronous');
+			}
+			
+			
+			socket.on('disconnect', (reason) => {
+		    console.log('⚠️ Socket disconnected:', reason);
+		    document.getElementById('socket-status').textContent = "⚠️ Disconnected";
+		    document.getElementById('socket-status').classList.remove('con', 'dis');
+		    document.getElementById('socket-status').classList.add('dis');
+		});
+		socket.on('connect_error', (error) => {
+		    console.error('⚠️ Connection failed:', error);
+		    document.getElementById('socket-status').textContent = "⚠️ Connection Failed";
+		    document.getElementById('socket-status').classList.remove('con', 'dis');
+		    document.getElementById('socket-status').classList.add('dis');
+		});
+		socket.on('reconnect', (attemptNumber) => {
+		    console.log(`🛜 Reconnected to server, attempt #${attemptNumber}`);
+		    document.getElementById('socket-status').textContent = `🛜 Reconnected (Attempt ${attemptNumber})`;
+		    document.getElementById('socket-status').classList.remove('con', 'dis');
+		    document.getElementById('socket-status').classList.add('con');
+		});
+		socket.on('reconnect_error', (error) => {
+		    console.error('⚠️ Reconnection failed:', error);
+		    document.getElementById('socket-status').textContent = "⚠️ Reconnection Failed";
+		    document.getElementById('socket-status').classList.remove('con', 'dis');
+		    document.getElementById('socket-status').classList.add('dis');
+		});
+}
 
-// 5. Receive Messages via WebSocket
-socket.on('receiveMessage', (message) => {
-    // Check if the message is relevant to the current chat (either sent or received by the user)
-    if (message.receiver === senderUserId || message.sender === senderUserId) {
-    	typingIndicator.style.display = 'none';
-        displayMessage(message, message.sender === senderUserId); // Display as 'self' if the user is the sender
+		
+// 10. Toggle Block User
+async function toggleBlockUser() {
+	const isBlocked = blockButton.dataset.blocked === 'true'; // Read status from dataset
+    const action = isBlocked ? 'unblock-user' : 'block-user';
+    
+	try {
+        // Constructing the request body with the blockUserId
+        const requestBody = {
+            blockUserId: currentChatUserId, // The ID of the user to block
+            unblockUserId: currentChatUserId // The ID of the user to block
+        };
+
+        // Sending the request to the server with the correct endpoint and data
+        const response = await apiRequest(`/api/chats/${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}` 
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+		    blockButton.textContent = isBlocked ? 'Block' : 'Unblock';
+		    blockButton.dataset.blocked = !isBlocked;
+		
+		    // Leave the room first
+		    socket.emit('leaveRoom', { currentChatUserId });
+		
+		    alert(`${currentChatUsername} has been ${isBlocked ? 'unblocked' : 'blocked'}.`);
+		
+		    // If unblocked, rejoin the room
+		    if (isBlocked) {
+				recipientUserId = currentChatUserId;
+			    if (socket) {
+			    socket.emit('join', {recipientUserId });
+    			} else { console.error('Join emit failed to socket with user:', recipientUserId ); }
+			
+		    }
+		
+		    // Optionally remove the user from the chat list or close the chat
+		    // chatWindow.innerHTML = `<p>You have blocked this ${currentChatUsername}</p>`;
+        } else {
+            alert(data.error || 'Error blocking user.');
+        }
+    } catch (error) {
+        console.error('Error blocking user:', error.message);
     }
-});
+}
 
-// ### Notify for message
+//11. Read Status 
+// Function to mark messages as read
+async function markMessagesssssAsRead(senderId, receiverId) {
+    try {
+        const response = await apiRequest(`/api/chats/mark-read`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Add your JWT token here
+            },
+            body: JSON.stringify({
+                senderId: senderUserId,
+                receiverId: currentChatUserId,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log('Messages marked as read:', data.updatedMessages);
+     	   // Notify sender that their messages were read
+
+       	 io.to(senderId).emit('messagesRead', {  readerId, chatId });
+        } else {
+            console.error('Failed to mark messages as read:', data.error);
+        }
+    } catch (error) {
+        console.error('Error marking messages as read:', error);
+    }
+}
+
+
+// ### Function to Notify for message
 function displayNotification(message) {
     const notification = document.createElement('div');
     notification.classList.add('notification');
@@ -247,188 +531,177 @@ function displayNotification(message) {
     }, 3000); // Hide after 3 seconds
 }
 
-// 6. Handle Typing Indicator
-let typingTimeout;
-const typingIndicator = document.getElementById('typing-indicator'); // Get the existing typing indicator element
 
-messageInput.addEventListener('input', () => {
-    if (currentChatUserId && senderUserId !== currentChatUserId) {
-        socket.emit('typing', { senderId: senderUserId, receiverId: currentChatUserId });
+// Function to check block-status
+async function updateBlockButton() {
+    if (!currentChatUserId) {
+        console.error("Error: currentChatUserId is undefined");
+        return;
     }
-    
-});
 
-// 7. Typing Indicator Display
-socket.on('typing', ({ senderId }) => {
-    console.log('Typing:', senderId); // For debugging
-    if (senderId !== senderUserId && currentChatUserId === senderId) {
-        typingIndicator.style.display = 'flex';
-        typingIndicator.textContent = `${currentChatUsername} is typing...`;
-    }
-    clearTimeout(typingTimeout); // Reset typing timeout
-    typingTimeout = setTimeout(() => {
-        // Hide typing indicator if no more typing happens after 2 second
-        typingIndicator.style.display = 'none';
-    }, 2000);
-});
-
-
-// 8. Block User
-async function blockUser(recipientUserId) {
     try {
-        // Constructing the request body with the blockUserId
-        const requestBody = {
-            blockUserId: recipientUserId // The ID of the user to block
-        };
-
-        // Sending the request to the server with the correct endpoint and data
-        const response = await fetch(`${BASE_URL}/chats/block-user`, {
-            method: 'POST',
+        const response = await apiRequest(`/api/chats/block-status/${currentChatUserId}`, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}` 
-            },
-            body: JSON.stringify(requestBody)
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // Add your token here
+            }
         });
-
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }        
         const data = await response.json();
-
-        if (response.ok) {
-            alert('User has been blocked.');
-            // Optionally remove the user from the chat list or close the chat
-            chatWindow.innerHTML = '<p>You have blocked this user.</p>';
-            blockButton.style.display = 'none';
-        } else {
-            alert(data.error || 'Error blocking user.');
+        
+        if (typeof data.isBlocked === "undefined") {
+            throw new Error("Invalid response from server");
         }
+
+        blockButton.textContent = data.isBlocked ? "Unblock" : "Block";
+        blockButton.dataset.blocked = data.isBlocked.toString(); // Ensure consistency
     } catch (error) {
-        console.error('Error blocking user:', error.message);
+        console.error("Error checking block status:", error);
+        blockButton.style.display = "none"; // Hide button on error
     }
 }
 
-//9.0 Availability-Pre
-// Emit 'userBusy' when the user switches tabs or becomes inactive
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        // Emit userBusy when the tab is switched
-        socket.emit('userBusy', { senderUserId});
-        console.log('User Busy emitted.');
-    } else {
-        // Optionally, emit 'userOnline' when they return
-        socket.emit('userOnline', { senderUserId: currentChatUserId });
-        console.log('User Online emitted.');
-    }
-});
-// Emit 'userOffline' when the user leaves or closes the website
-window.addEventListener('beforeunload', () => {
-    socket.emit('userOffline', { senderUserId});
-    console.log('User Offline emitted.');
-});
 
-// 9. Availability 
-socket.on('userOnline', ({senderUserId}) => {
-    console.log(senderUserId, 'is online');
-    document.getElementById('chat-user').classList.add('online');
-    userId=senderUserId;
-    const userElement = document.querySelector(`[data-user-id="${userId}"]`);
-    if (userElement) {
-        userElement.classList.remove('offline');
-        userElement.classList.remove('busy');
-        userElement.classList.add('online');
-    }
-});
-
-socket.on('userOffline', ({senderUserId}) => {
-	console.log(senderUserId, 'is offline');
-	userId=senderUserId;
-    const userElement = document.querySelector(`[data-user-id='${userId}']`);
-    if (userElement) {
-    	userElement.classList.remove('online');
-        userElement.classList.remove('busy');
-        userElement.classList.add('offline');
-    } else {
-        console.log(`User element not found for userId: ${userId}`);
-    }
-});
-
-socket.on('userBusy', ({senderUserId}) => {
-	console.log(senderUserId, 'is busy');
-	document.getElementById('chat-user').classList.add('busy');
-	userId=senderUserId;
-    const userElement = document.querySelector(`[data-user-id='${userId}']`);
-    if (userElement) {
-    	userElement.classList.remove('online');
-        userElement.classList.remove('offline');
-        userElement.classList.add('busy');
-    } else {
-        console.log(`User element not found for userId: ${userId}`);
-    }
-});
-
-//10. Read Status 
-// Function to mark messages as read
-async function markMessagesAsRead(senderId, receiverId) {
+// Function to check user availability and update UI
+async function checkUserAvailability(userId) {
     try {
-        const response = await fetch(`${BASE_URL}/chats/mark-read`, {
-            method: 'PATCH',
+        // Send request to the backend to check user availability
+        const response = await apiRequest(`/api/chats/availability/${userId}`, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`, // Add your JWT token here
-            },
-            body: JSON.stringify({
-                senderId: senderId,
-                receiverId: receiverId,
-            }),
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // Add your token here
+            }
         });
 
+        // Check if the user exists and the response is OK
+        if (!response.ok) {
+            throw new Error('User not found or server error');
+        }
         const data = await response.json();
 
-        if (response.ok) {
-            console.log('Messages marked as read:', data.updatedMessages);
-            // Update UI: mark messages as read
-            updateMessageStatusToRead(senderId, receiverId); // Implement this function to update message status in the UI
+        // Based on the user's availability, update the class list
+        if (data.isOnline) {
+        	updateStatus('Online');
+            chatUserElement.classList.add('online');
+            chatUserElement.classList.remove('offline');
         } else {
-            console.error('Failed to mark messages as read:', data.error);
+            chatUserElement.classList.add('offline');
+            chatUserElement.classList.remove('online');
         }
+		if (lastActiveElement) {
+		    if (chatUserElement.classList.contains('offline')) {
+		        const lastActiveDate = new Date(data.lastActive);
+				const now = new Date();
+				
+				// Format time part
+				const lastActiveTime = lastActiveDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true});
+				const dateFormatter = new Intl.DateTimeFormat([], { year: 'numeric', month: '2-digit', day: '2-digit' });
+				
+				// Compare today and yesterday using Date objects for more precision
+				const isToday = lastActiveDate.toDateString() === now.toDateString();
+				const isYesterday = lastActiveDate.getDate() === now.getDate() - 1 && lastActiveDate.getMonth() === now.getMonth() && lastActiveDate.getFullYear() === now.getFullYear();
+				
+				let displayText;
+				
+				if (isToday) {
+				    displayText = `Last Seen: ${lastActiveTime}`;
+				} else if (isYesterday) {
+				    displayText = `Last Seen: Yesterday, ${lastActiveTime}`;
+				} else {
+				    displayText = `Last Seen: ${dateFormatter.format(lastActiveDate)} ${lastActiveTime}`;
+				}			
+				lastActiveElement.textContent = displayText;
+		    }		
+		}
+
     } catch (error) {
-        console.error('Error marking messages as read:', error);
+        console.error('Error checking user availability:', error);
     }
 }
 
-// Function to update the message status in the UI
-function updateMessageStatusToRead(senderId, receiverId) {
-    // Loop through the chat messages in the UI and update those sent by senderId to receiverId as read
-    const messageElements = document.querySelectorAll('.message');
-    messageElements.forEach((messageElement) => {
-        const messageSenderId = messageElement.dataset.senderId;
-        const messageReceiverId = messageElement.dataset.receiverId;
+// Assuming the token 
+const token = getJWTToken();
 
-        if (messageSenderId === senderId && messageReceiverId === receiverId) {
-            messageElement.classList.add('read'); // Mark message as read visually (e.g., add 'read' class)
+if (token) {
+  const decodedToken = JSON.parse(atob(token.split('.')[1]));
+  const expiryTime = decodedToken.exp * 1000; // Convert to milliseconds
+  startCountdown(expiryTime);
+} else {
+  console.log("No token found");
+}
+
+function startCountdown(expiryTime) {
+  const countdownElement = document.getElementById("countdown");
+
+  const interval = setInterval(() => {
+	    const currentTime = Date.now();
+	    const remainingTime = expiryTime - currentTime;
+	
+		if (remainingTime <= 0) {
+		  clearInterval(interval);
+		  countdownElement.textContent = "Session expired";
+		  countdownElement.classList.remove("session-active");
+		  countdownElement.classList.add("session-expired");
+		  showPopupMessage('Session Expired');
+		} else {
+		  const minutes = Math.floor(remainingTime / 60000);
+		  const seconds = Math.floor((remainingTime % 60000) / 1000);
+		  countdownElement.textContent = `⏰ ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+		  countdownElement.classList.remove("session-expired");
+		  countdownElement.classList.add("session-active");
+		}
+  }, 1000);
+}
+
+// Function to update status, change text color, and make it bold if online
+function updateStatus(status) {
+    lastActiveElement.style.transition = 'opacity 0.3s ease-in-out'; // Smooth transition
+    lastActiveElement.style.opacity = '0'; // Fade out
+
+    setTimeout(() => {
+        if (status === 'Online') {
+            lastActiveElement.textContent = 'Online';
+            lastActiveElement.style.color = 'green';
+            lastActiveElement.style.fontWeight = 'bold';
+        } else if (status === 'Busy') {
+            lastActiveElement.textContent = 'User is Busy';
+            lastActiveElement.style.color = 'yellow';
+            lastActiveElement.style.fontWeight = 'normal';
+        } else if (status === 'Offline') {
+            lastActiveElement.textContent = 'Offline';
+            lastActiveElement.style.color = 'red';
+            lastActiveElement.style.fontWeight = 'normal';
+        } else if (status === 'Typing') {
+            lastActiveElement.textContent = 'User is Typing . . .';
+            lastActiveElement.style.color = '#DD86FF';
+            lastActiveElement.style.fontWeight = 'normal';
+        }
+        
+        lastActiveElement.style.opacity = '1'; // Fade in
+    }, 300); // Wait for fade-out before changing text
+}
+
+function lol() {
+    // Find all sender (self) messages in the chat window
+    document.querySelectorAll('.message.self .read-receipt').forEach(readReceipt => {
+        // Update only messages that are still marked as unread
+        if (readReceipt.textContent === '✔') {
+            readReceipt.textContent = '✔✔'; // Change to double tick (read)
         }
     });
 }
 
 
-// Event Listeners
-sendButton.addEventListener('click', sendMessage);
-messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendMessage();
-});
+ // Dynamically set the viewport height for better compatibility
+function setViewportHeight() {
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+}
 
- 
-    // Dynamically set the viewport height for better compatibility
-    function setViewportHeight() {
-      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-    }
-
-    window.addEventListener('resize', setViewportHeight);
-    setViewportHeight();
- 
-
-
-
-
+window.addEventListener('resize', setViewportHeight);
+setViewportHeight();
 
 // Function to toggle between panels
 function showChatPanel() {
@@ -452,7 +725,6 @@ document.querySelector('#chat-user').addEventListener('click', (e) => {
     }
 });
 
-
-
-// Initialize Chat
-loadChatList();
+function home() {
+    window.location.href = '/nihongo';  // Redirect to the homepage (root URL)
+}

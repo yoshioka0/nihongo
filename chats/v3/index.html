@@ -19,10 +19,19 @@
         <!-- Left Panel: User List -->
         <div class="left-panel">
             <div class="header">
-                <h2><a href="/nihongo/" style="color:white; text-decoration: none;">Nihongo Chats</a></h2>
-                <div class="profile">
+            	<div class="profile">
+            			  <img class="avatar" src="/nihongo/img/icon.png" onclick="home()"> 
+                		  <h2><a href="/nihongo/" style="color:white; text-decoration: none;">Nihongo Chats</a></h2>
+                  	     <p id="socket-status">🛜 Connecting...</p> 
+                  </div>
+                  <hr>
+             <div class="profile">
                 <img class="avatar" src="/nihongo/img/user.png" alt="Profile">
-                <p id="myUsername" class="username">Your Username</p> <!-- Dynamically populate this in chat.js -->
+                <p id="myUsername" class="username">Username</p> <!-- Dynamically populate this in chat.js -->
+                <div class="countdown-box">
+
+						<div id="countdown" class="countdown">Loading...</div>
+				</div>
             </div>
                 <input id="search-users" type="text" placeholder="Search users..." oninput="searchUsers()" />
             </div>
@@ -35,7 +44,11 @@
         <!-- Right Panel: Chat Window -->
         <div class="right-panel">
 	      <div class="chat-header">
-                <h3 id="chat-user" class="chat-user" >Select a user to chat</h3>
+				
+			<div class="chat-user-container">
+			    <h3 id="chat-user" class="chat-user">Select a user to chat</h3>
+			    <p id="status"></p>
+			</div>
                 <div class="block-box"> <button id="block-button" class="block-button" style="display: none;">Block</button> </div>
              </div>
 
