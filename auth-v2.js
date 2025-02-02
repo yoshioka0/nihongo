@@ -79,7 +79,7 @@ async function checkAuthentication() {
         await delay(1000);
         location.reload();
         }
-
+		showPopupMessage('404: Credentials refresh failed..');
         // If we still don't have a valid token after refresh, log out
         if (!token) {
             console.log('Authentication failed: No valid token found');
@@ -111,11 +111,6 @@ async function checkAuthentication() {
 
         console.log('User is authenticated', result.userId);
 
-        if (window.location.pathname === '/nihongo/') {
-            document.getElementById('main').style.display = 'flex';
-            document.getElementById('master').style.filter = 'none';
-            document.getElementById('master').style.pointerEvents = '';
-        }
     } catch (error) {
         console.error('Authentication failed:', error);
         logout();
@@ -126,44 +121,42 @@ async function checkAuthentication() {
 // Logout user and call the logout endpoint on the server to blacklist the token
 async function logout() { 
     const accessToken = localStorage.getItem("accessToken");
+	if (accessToken) {
+		   try {
+		       const response = await apiRequest('/api/logout', {
+		            method: 'POST',
+		            headers: {
+		                'Content-Type': 'application/json',
+		                'Authorization': `Bearer ${accessToken}`,
+		            },
+		            body: JSON.stringify({ accessToken }),
+		            credentials: 'include', 
+		        });
+		
+		        if (!response.ok) {
+		            throw new Error('Logout request failed');
+		        }
+		
+		    } catch (error) {
+		        console.error('Error during logout API request:', error);
+		    }
+	}else{
+		console.log('Unauthorized');
+		}
+    // Clear tokens and session data
+    localStorage.removeItem("accessToken");
+    document.cookie = "refreshToken=; Path=/; Max-Age=0";
+    localStorage.removeItem('chattedUsers');
 
-    try {
-        const response = await apiRequest('/api/logout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({ accessToken }),
-            credentials: 'include', 
-        });
-
-        if (!response.ok) {
-            throw new Error('Logout request failed');
-        }
-
-    } catch (error) {
-        console.error('Error during logout API request:', error);
-    } finally {
-        // Clear tokens and session data
-        localStorage.removeItem("accessToken");
-        document.cookie = "refreshToken=; Path=/; Max-Age=0";
-        localStorage.removeItem('chattedUsers');
-
-        // Handle UI change for logged-out users
-        if (window.location.pathname === '/nihongo/') {
-            document.getElementById('signup-modal').style.display = 'flex';
-            document.getElementById('main').style.display = 'none';
-            document.getElementById('master').style.filter = 'blur(5px)';
-            document.getElementById('master').style.pointerEvents = 'none';
-            document.getElementById('activeUser').textContent = 'No user';  
-            loadCloudflareScript();
-        } else {
-            window.location.href = '/nihongo/';
-        }
+    // Handle UI change for logged-out users
+    if (window.location.pathname === '/nihongo/') {
+       	showPopupMessage('Unauthorized: Certain features are not available.');
+    } else {
+        window.location.href = '/nihongo/unauthorized.html';
     }
 }
 
+loadCloudflareScript();
 // Function to dynamically load the Cloudflare script
 function loadCloudflareScript() {
     const script = document.createElement('script');
@@ -178,3 +171,71 @@ function loadCloudflareScript() {
 
 // Call this function when the page loads to ensure authentication status is checked
 document.addEventListener('DOMContentLoaded', checkAuthentication);
+
+
+//Helper Function ⭐⭐
+
+// Function to show a popup message with a progress bar
+// Maximum number of pop-ups allowed at once
+const MAX_POPUPS = 4;
+
+function showPopupMessage(message, duration = 3000) {
+    const popup = document.createElement('div');
+    popup.classList.add('popup-notification');
+
+    // Create progress bar wrapper
+    const progressBarWrapper = document.createElement('div');
+    progressBarWrapper.classList.add('progress-bar-wrapper');
+    popup.appendChild(progressBarWrapper);
+
+    // Create the progress bar inside the wrapper
+    const progressBar = document.createElement('div');
+    progressBar.classList.add('progress-bar');
+    progressBarWrapper.appendChild(progressBar);
+
+    // Add the message to the popup
+    const messageText = document.createElement('div');
+    messageText.textContent = message;
+    popup.appendChild(messageText);
+
+    // Append the popup to the body
+    document.body.appendChild(popup);
+
+    // Calculate vertical position for stacking (using the number of existing pop-ups)
+    const allPopups = document.querySelectorAll('.popup-notification');
+    const popupCount = allPopups.length;  // Total number of currently visible pop-ups
+    const verticalOffset = 100; // Vertical space between pop-ups (adjust as needed)
+
+    // Stack the new popup slightly above the previous one
+    popup.style.bottom = `${popupCount * verticalOffset}px`; 
+
+    // If the number of pop-ups exceeds the limit, remove the oldest one
+    if (popupCount >= MAX_POPUPS) {
+        const firstPopup = allPopups[0];
+        firstPopup.remove();
+    }
+
+    // Show the popup
+    setTimeout(() => {
+        popup.classList.add('show');
+    }, 10);
+
+    // Start filling the progress bar
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += 100 / (duration / 100);
+        progressBar.style.width = `${progress}%`;
+        if (progress >= 100) {
+            clearInterval(progressInterval);
+        }
+    }, 100);
+
+    // Hide the popup after the specified duration
+    setTimeout(() => {
+        popup.classList.remove('show');
+        // Remove the popup from the DOM after animation
+        setTimeout(() => popup.remove(), 300);
+    }, duration);
+}
+
+
