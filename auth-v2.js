@@ -149,7 +149,7 @@ async function logout() {
     localStorage.removeItem('chattedUsers');
 
     // Handle UI change for logged-out users
-    if (window.location.pathname === '/nihongo/') {
+    if (window.location.pathname === '/nihongo/' || window.location.pathname === '/nihongo/auth/') {
        	showPopupMessage('Unauthorized: Certain features are not available.');
     } else {
         window.location.href = '/nihongo/unauthorized.html';
@@ -210,7 +210,7 @@ function showPopupMessage(message, duration = 3000) {
     popup.style.bottom = `${popupCount * verticalOffset}px`; 
 
     // If the number of pop-ups exceeds the limit, remove the oldest one
-    if (popupCount >= MAX_POPUPS) {
+    if (popupCount > MAX_POPUPS) {
         const firstPopup = allPopups[0];
         firstPopup.remove();
     }
