@@ -145,7 +145,8 @@ async function logout() {
 		}
     // Clear tokens and session data
     localStorage.removeItem("accessToken");
-    document.cookie = "refreshToken=; Path=/; Max-Age=0";
+    console.log("Token Deleted");
+    //document.cookie = "refreshToken=; Path=/; Max-Age=0";
     localStorage.removeItem('chattedUsers');
 
     // Handle UI change for logged-out users
