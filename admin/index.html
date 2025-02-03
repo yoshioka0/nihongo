@@ -15,15 +15,39 @@
     
     <main>
         <section id="tabs">
-            <button class="tab-button active" data-tab="users">Users</button>
+        	   <button class="tab-button active" data-tab="settings">Settings</button>
+            <button class="tab-button" data-tab="users">Users</button>
             <button class="tab-button" data-tab="send-notifications">Send Notifications</button>
             <button class="tab-button" data-tab="view-notifications">View Notifications</button>
             <button class="tab-button" data-tab="subscriptions">Subscriptions</button>
             <button class="tab-button" data-tab="view-logs">View Logs</button>
         </section>
+        
+        
+<!-- Site Settings Tab -->
+<section id="site-settings" class="tab-content active">
+    <h2>Site Settings</h2>
+    <form id="site-settings-form">
+        <label for="siteStatus">Site Status</label>
+        <select id="siteStatus" name="siteStatus">
+            <option value="active">Active</option>
+            <option value="disabled">Disabled</option>
+            <option value="blocked">Blocked</option>
+        </select>
+        
+        <label for="disableLogin">Disable Login</label>
+        <input type="checkbox" id="disableLogin" name="disableLogin">
+
+        <label for="disableSignup">Disable Signup</label>
+        <input type="checkbox" id="disableSignup" name="disableSignup">
+
+        <button type="submit">Update Settings</button>
+    </form>
+</section>
+
 
         <!-- Manage Users Tab -->
-        <section id="users" class="tab-content active">
+        <section id="users" class="tab-content">
             <h2>Manage Users</h2>
             <table>
                 <thead>

@@ -1,38 +1,84 @@
 <header class="custom-header">
   <!-- Left Section: Site Name and Icon -->
-  <div class="header-logo">
-    <button class="hamburger" id="hamburger-btn">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
-    <img src="/nihongo/icon.png" alt="Nihongo" class="site-icon">
-    <span class="site-name">Nihongo</span>
-  </div>
+	<div class="header-logo">
+		 <div class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+		
+		 <img src="/nihongo/img/icon.png" alt="Nihongo" class="site-icon">
+		<a href="/nihongo/" style="color:white; text-decoration: none;">
+		 <span class="site-name">Nihongo</span>
+	 	</a>
+	</div>
 
   <!-- Middle Section: Chat and Notification -->
-  <div class="header-center">
-    <button class="chat-btn" id="chat-btn">
-      <i class="chat-icon">💬</i>
-    </button>
-    <div class="notification-btn" id="notification-btn">
-      <i class="notification-icon">🔔</i>
-      <div class="notification-dropdown" id="notification-dropdown">
-        <ul>
-          <li>Enable Notifications</li>
-          <li>Disable Notifications</li>
-        </ul>
-      </div>
-    </div>
-  </div>
+<div class="header-center">
+	<a href="chats/v3/"> <button class="chat-btn" id="chat-btn"> <i class="chat-icon">💬</i>
+  		</button>
+	</a>
+	
+<div class="notification-btn" id="notification-active" onclick="notifDrop()">
+    <i class="notification-icon">🔔</i>
+    
+</div>
+    
+</div>
 
   <!-- Right Section: Username and User Icon -->
   <div class="header-right">
   
-    <span class="user-name" id="activeUser"><strong>Null</strong></span>
+    <span class="user-name" id="activeUser"><strong></strong></span>
     <button class="user-icon" onclick="toggleDropdown()" id="dropdownButton">
       <img src="/nihongo/user.png" alt="User">
     </button>
     
   </div>
 </header>
+
+<div class="dropdown">	
+<div class="notification-dropdown" id="notification-dropdown">
+        <!-- Subscriptions will be dynamically added here -->
+    </div>
+</div>
+
+<div class="dropdown">
+    <div class="dropdown-content" id="dropdownMenu">
+      <div class="profile">
+      	<div class="profile-img-wrapper">
+  	       	<img id="profileImg" src="" alt="Profile Picture" onclick="changeImage()">
+          </div>
+		  <div id="activeUser2" class="username">Unauthorised</div>
+	  	<div id="countdown" class="countdown"></div>
+      </div>
+      <a id="admin-btn" href="admin/" style="background:purple; display:none;">Admin</a>
+      <a href="#changePassword">Change Password</a>
+      <a href="#addRecovery">Add Recovery</a>
+      <a id="surprise-button" href="#surprise">Surprise</a>
+      <a id="logout-btn" href="#logout" style="background:red;" onclick="logout()"><b>Logout</b></a>
+</div>	    
+
+        <ul class="menu">
+            <li><a href="/nihongo/">Home</a></li>
+            <li><a href="/nihongo/chats/v3/">Chat</a></li>
+            <li><a href="/nihongo/auth/" style="background:#93FF3B">Login</a></li>
+            <li><a href="/">About Me 🤖</a></li>
+        </ul>
+
+<div id="surprise-message" class="hidden">
+  <p>🎉 Congratulations! You've unlocked a surprise! 🎉</p>
+</div>
+
+  <!-- Party Elements (balloons & confetti) -->
+  <div id="party" class="hidden">
+    <!-- Balloons -->
+    <div class="balloon"></div>
+    <div class="balloon"></div>
+    <div class="balloon"></div>
+    <div class="balloon"></div>
+    <div class="balloon"></div>
+    <!-- Confetti -->
+  <!--  <div class="confetti"></div> -->
+    <div id="confetti-container"></div>
+  </div>

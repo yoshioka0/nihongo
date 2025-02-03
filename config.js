@@ -3,13 +3,14 @@
 //const BASE_URL = 'http://192.168.1.7:3000'; 
 //const BASE_URL = 'https://nihongo-backend.onrender.com'; 
 //const BASE_URL = ""
+const GOOGLE_CLIENT_ID='1015740375628-hig26ebdp3bbt4ma13pfr0ogs687838o.apps.googleusercontent.com';
 const PUBLIC_VAPID_KEY = 'BDdr26kHzz40SAgoMRYN6rVLogOqv1p8OoPw-NqX2cCTRrmK_j4YHwHVRvM8xrjw0kAx36ZuHN976uWRB0qGIjI';
 let BASE_URL
 let socket
 
 // Dynamically Choose the Fastest Server
 const backends = [
-    { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost
+//    { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost
     { url: "https://nihongo-backend.onrender.com", latency: Infinity },
     { url: "https://nihongo-backend-env.up.railway.app", latency: Infinity }
 ];

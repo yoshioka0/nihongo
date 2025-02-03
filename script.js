@@ -26,32 +26,6 @@ document.querySelectorAll('nav a').forEach(anchor => {
   });
 });
 
-// Toggle Dropdown
-function toggleDropdown() {
-  const dropdown = document.getElementById('dropdownMenu');
-  dropdown.classList.toggle('active');
-}
-// Close dropdown if clicked outside the dropdown and button
-window.addEventListener('click', function (event) {
-  const dropdown = document.getElementById('dropdownMenu');
-  const button = document.getElementById('dropdownButton'); 
-  const username = document.getElementById('activeUser');
-  if (!dropdown.contains(event.target) && !button.contains(event.target) && !username.contains(event.target)) {
-    dropdown.classList.remove('active');
-  }
-});
-
-// Footer visibility on scroll
-const footer = document.querySelector('.footer-content');
-if (footer) {
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            footer.classList.toggle('p-visible', entry.isIntersecting);
-        });
-    });
-    observer.observe(footer);
-}
-
 // Smooth scroll buttons
 document.getElementById('scroll-up')?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -207,38 +181,5 @@ async function subscribeUserToPush(registration, userId) {
     }
 }
 
-
-// Update Active User info
-function updateActiveUser() {
-    const activeUser = document.getElementById('activeUser');
-    const activeUser2 = document.getElementById('activeUser2');
-    const adminButton = document.getElementById('admin-btn');
-    const token = getJWTToken();
-
-    if (token && !isTokenExpired(token)) {
-	try {
-	    const { username, role } = decodeJWT(token); // Destructure both 'username' and 'role' in one line
-	    if (role === "admin") {
-	        adminButton.style.display = 'block';
-	    }
-	    activeUser.textContent = username || 'No user';
-	    activeUser2.textContent = username + `•(${role})` || 'No user';
-	} catch (error) {
-	    activeUser.textContent = 'No user';
-	}
-    } else {
-        activeUser.textContent = 'No user';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const token = getJWTToken();
-
-    if (!token || isTokenExpired(token)) {
-
-    } else {
-        updateActiveUser();
-    }
-});
 
 

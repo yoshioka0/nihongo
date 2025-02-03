@@ -5,6 +5,84 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+loadCloudflareScript();
+
+// Function to dynamically load the Cloudflare script
+function loadCloudflareScript() {
+    const script = document.createElement('script');
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js"; // Cloudflare Turnstile script
+    script.async = true;
+    script.defer = true;
+    script.onload = () => console.log("✅ Cloudflare script loaded.");
+    script.onerror = () => console.error("❌ Failed to load Cloudflare script.");
+    document.head.appendChild(script);
+}
+
+// Google OAuth
+function handleCredentialResponse(response) {
+    const token = response.credential; // Google ID token
+
+    	apiRequest("/auth/google", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,  // Add the token in the Authorization header
+        },
+        body: JSON.stringify({ token: token }),  // Alternatively, pass it in the body
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Store JWT and other user details
+            localStorage.setItem("accessToken", data.accessToken);
+            document.cookie = `refreshToken=${data.refreshToken}; Path=/; Max-Age=604800;`;
+            localStorage.setItem("userEmail", data.user.email);
+            localStorage.setItem("userProfilePic", data.user.profilePicture);
+            localStorage.setItem("username", data.user.username);
+
+            // Show success feedback
+            alert('success, Login successful! Welcome, ' + data.user.username);
+
+            // Optionally, redirect to the dashboard or another page
+            window.location.href = "/nihongo/";  // or any other page
+        } else {
+            // Show error feedback if something went wrong
+            alert('error Login failed: ' + data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+
+        alert('error', 'An error occurred. Please try again.');
+    });
+}
+
+
+window.onload = function () {
+    google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID, // Make sure to use your actual client ID here
+        callback: handleCredentialResponse,
+    });
+   google.accounts.id.renderButton(
+  document.getElementById("buttonDiv"),
+  {
+    theme: "filled_blue", // Button style (blue background)
+    size: "xlarge", // Button size (larger button)
+    shape: "circle", // Rounded button
+    logo_alignment: "left", // Align Google logo to the left
+    width: "auto", // Adjust the button width based on content
+  }
+);
+    google.accounts.id.prompt(); // Show One Tap dialog if available
+};
+
+
+// Auth0
+// Plan for future
+
+
+
+
 // General password toggle functionality
 function togglePasswordVisibility(event) {
     const passwordField = event.target.previousElementSibling; // Target the input field
@@ -48,7 +126,7 @@ const isStrongPassword = (password) =>
 // New User Creation
 document.getElementById('signup-form').addEventListener('submit', async (event) => {
     event.preventDefault();
-
+    
     const signupForm = document.getElementById('signup-form');
     const username = document.getElementById('signup-username').value.trim();
     const password = document.getElementById('signup-password').value;
@@ -98,7 +176,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
 			localStorage.setItem("accessToken", accessToken);
 		    if (keepLoggedIn) {
 				// Store refresh token in a cookie (HttpOnly and Secure flags(in https environment) for better security)
-				document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800; HttpOnly; SameSite=None; Secure=true;`;
+				document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800;`;
 			}
 
         	showPopupMessage(`User created successfully! (${username})`);
@@ -154,7 +232,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 			localStorage.setItem("accessToken", accessToken);
 		    if (keepLoggedIn) {
 				// Store refresh token in a cookie (HttpOnly and Secure flags(in https environment) for better security)
-				document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800; HttpOnly; SameSite=None; Secure=true;`;	// 7 days
+				document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800;`;	// 7 days
 			}
 			showPopupMessage(`Welcome back, ${username}!`);            
 			await delay(500);

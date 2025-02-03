@@ -22,64 +22,7 @@
     <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
   </noscript>
   
-<header class="custom-header">
-  <!-- Left Section: Site Name and Icon -->
-	<div class="header-logo">
-		<button class="hamburger" id="hamburger-btn">
-		 <span class="bar"></span>
-		 <span class="bar"></span>
-		 <span class="bar"></span>
-		 </button>
-		 <img src="icon.png" alt="Nihongo" class="site-icon">
-		 <span class="site-name">Nihongo</span>
-	 	
-	</div>
-
-  <!-- Middle Section: Chat and Notification -->
-<div class="header-center">
-	<a href="chats/v3/"> <button class="chat-btn" id="chat-btn"> <i class="chat-icon">💬</i>
-  		</button>
-	</a>
-	
-<div class="notification-btn" id="notification-active">
-    <i class="notification-icon">🔔</i>
-    
-</div>
-    
-</div>
-
-  <!-- Right Section: Username and User Icon -->
-  <div class="header-right">
-  
-    <span class="user-name" id="activeUser"><strong></strong></span>
-    <button class="user-icon" onclick="toggleDropdown()" id="dropdownButton">
-      <img src="user.png" alt="User">
-    </button>
-    
-  </div>
-</header>
-
-<div class="dropdown">	
-<div class="notification-dropdown" id="notification-dropdown">
-        <!-- Subscriptions will be dynamically added here -->
-    </div>
-</div>
-
-<div class="dropdown">
-    <div class="dropdown-content" id="dropdownMenu">
-      <div class="profile">
-      	<div class="profile-img-wrapper">
-  	       	<img id="profileImg" src="" alt="Profile Picture" onclick="changeImage()">
-          </div>
-		  <div id="activeUser2" class="username">Unauthorised</div>
-	  	<div id="countdown" class="countdown"></div>
-      </div>
-      <a id="admin-btn" href="admin/" style="background:purple; display:none;">Admin</a>
-      <a href="#changePassword">Change Password</a>
-      <a href="#addRecovery">Add Recovery</a>
-      <a id="surprise-button" href="#surprise">Surprise</a>
-      <a id="logout-btn" href="#logout" style="background:red;"><b>Logout</b></a>
-    </div>	    
+<div id="header" ></div>
   
   
     <div class="heading">
@@ -87,9 +30,7 @@
     </div>
   </div>
 
-<div id="surprise-message" class="hidden">
-  <p>🎉 Congratulations! You've unlocked a surprise! 🎉</p>
-</div>
+
 
    <div id="master" class="container">
       <nav>
@@ -134,27 +75,7 @@
       </div>
       </div>
      
-  <!-- Party Elements (balloons & confetti) -->
-  <div id="party" class="hidden">
-    <!-- Balloons -->
-    <div class="balloon"></div>
-    <div class="balloon"></div>
-    <div class="balloon"></div>
-    <div class="balloon"></div>
-    <div class="balloon"></div>
-    <!-- Confetti -->
-  <!--  <div class="confetti"></div> -->
-    <div id="confetti-container"></div>
-  </div>
-  
-  
-    <footer>
-      <div class="footer-content">
-        <p>© 2024 Nihongo Guidebook | All Rights Reserved</p>
-        <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a></p>
-        <p class="made-with-love">Made with<img src="img/heart.png" alt="Heart Icon" class="footer-icon"> for<img src="img/jp.png" alt="JP flag icon" class="footer-icon"> by<a href="https://yoshioka0.github.io/" class="custom-link">Yoshioka</a></p>
-      </div>
-    </footer>
+<div id="footer" ></div>
 
     <!-- Floating Notification Button -->
 <button id="enable-notifications" class="floating-button" style="display: none;">
@@ -187,7 +108,7 @@
     }
   </style>
 
-	<script  src="header-footer/header.js" defer></script> 
+	<script  src="header-footer/header.js"></script> 
 	<script  src="script.js"></script>  
 
 </body>

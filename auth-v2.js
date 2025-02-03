@@ -74,19 +74,16 @@ async function checkAuthentication() {
         showPopupMessage('Credentials expired or missing.');
         // Try to get a new access token using the refresh token
         token = await refreshAccessToken();
-        if (token){
-        showPopupMessage('Credentials refreshed successfully.');
-        await delay(1000);
-        location.reload();
-        }
-		showPopupMessage('404: Credentials refresh failed..');
-        // If we still don't have a valid token after refresh, log out
-        if (!token) {
-            console.log('Authentication failed: No valid token found');
-            //showPopupMessage('No Luck! Logging Out...');
-            logout();
-            return;
-        }
+		if (!token) {
+		    //showPopupMessage('404: Credentials refresh failed.');
+			console.log('Authentication failed: No valid token found');
+		    redirect();
+		    return; // Prevent further execution
+		} else {
+		    showPopupMessage('Credentials refreshed successfully.');
+		    await delay(1000);
+		    location.reload(); 
+		}
     }
 
     try {
@@ -110,14 +107,24 @@ async function checkAuthentication() {
         }
 
         console.log('User is authenticated', result.userId);
+        if (window.location.pathname === '/nihongo/auth/') {
+       	showPopupMessage('Already logged in!');
+       	 alert(`Already logged in!`);
+            window.location.href = '/nihongo/';         
+    } 
 
     } catch (error) {
         console.error('Authentication failed:', error);
-        logout();
+        redirect();
     }
 }
 
-
+function redirect() {
+    if (window.location.pathname !== '/nihongo/auth/'  && window.location.pathname !== '/nihongo/') {
+		window.location.href = '/nihongo/unauthorized.html';
+    }
+}
+ 
 // Logout user and call the logout endpoint on the server to blacklist the token
 async function logout() { 
     const accessToken = localStorage.getItem("accessToken");
@@ -141,33 +148,16 @@ async function logout() {
 		        console.error('Error during logout API request:', error);
 		    }
 	}else{
-		console.log('Unauthorized');
+		console.log('Logout server uncalled');
 		}
     // Clear tokens and session data
-    localStorage.removeItem("accessToken");
-    console.log("Token Deleted");
-    //document.cookie = "refreshToken=; Path=/; Max-Age=0";
-    localStorage.removeItem('chattedUsers');
-
-    // Handle UI change for logged-out users
-    if (window.location.pathname === '/nihongo/' || window.location.pathname === '/nihongo/auth/') {
-       	showPopupMessage('Unauthorized: Certain features are not available.');
-    } else {
-        window.location.href = '/nihongo/unauthorized.html';
-    }
+    localStorage.clear();
+    sessionStorage.clear();
+    document.cookie = "refreshToken=; Path=/; Max-Age=0";
+    window.location.href = '/nihongo/auth/logout.html';
 }
 
-loadCloudflareScript();
-// Function to dynamically load the Cloudflare script
-function loadCloudflareScript() {
-    const script = document.createElement('script');
-    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js"; // Cloudflare Turnstile script
-    script.async = true;
-    script.defer = true;
-    script.onload = () => console.log("✅ Cloudflare script loaded.");
-    script.onerror = () => console.error("❌ Failed to load Cloudflare script.");
-    document.head.appendChild(script);
-}
+
 
 
 // Call this function when the page loads to ensure authentication status is checked

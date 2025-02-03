@@ -358,3 +358,29 @@ function logMessage(message, type = 'log') {
     consoleDiv.appendChild(logEntry);
     consoleDiv.scrollTop = consoleDiv.scrollHeight; // Auto-scroll to the bottom
 }
+
+document.getElementById('site-settings-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const siteStatus = document.getElementById('siteStatus').value;
+    const disableLogin = document.getElementById('disableLogin').checked;
+    const disableSignup = document.getElementById('disableSignup').checked;
+
+    try {
+        const response = await apiRequest('/admin/settings', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+               Authorization: `Bearer ${TOKEN}`
+            },
+            body: JSON.stringify({ siteStatus, disableLogin, disableSignup })
+        });
+
+        const data = await response.json();
+        if (data.message) {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Error updating settings.');
+    }
+});
