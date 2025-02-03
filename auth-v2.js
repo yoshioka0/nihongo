@@ -51,7 +51,7 @@ async function refreshAccessToken() {
         });
 
         if (!response.ok) {
-            console.error('Failed to refresh token');
+            console.log('Failed to refresh token');
             return null;
         }
 

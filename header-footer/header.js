@@ -58,9 +58,10 @@ window.addEventListener('click', function (event) {
 	function updateActiveUser() {
 	    const activeUser = document.getElementById('activeUser');
 	    const activeUser2 = document.getElementById('activeUser2');
+		const userEmail = document.getElementById('userEmail');
 	    const adminButton = document.getElementById('admin-btn');
 	    const token = getJWTToken();
-	
+							
 	    if (token && !isTokenExpired(token)) {
 		try {
 		    const { username, role } = decodeJWT(token); // Destructure both 'username' and 'role' in one line
@@ -69,6 +70,7 @@ window.addEventListener('click', function (event) {
 		    }
 		    activeUser.textContent = username || 'No user';
 		    activeUser2.textContent = username + `•(${role})` || 'No user';
+			userEmail.textContext = localStorage.getItem('email');
 		} catch (error) {
 		    activeUser.textContent = 'No user';
 		}
@@ -223,12 +225,15 @@ function HTMLLoaded() {
 	
 	// log-out functionality 
 	const logoutButton = document.getElementById('logout-btn');
+	const loginButton = document.getElementById('login-btn');
 	// Show the logout button if the user is logged in
 	function checkLoginStatus() {
 	    const token = localStorage.getItem('accessToken');
 	    if (token) {
+			loginButton.style.display = 'none'; 
 	        logoutButton.style.display = 'block'; // Show the logout button
 	    } else {
+			loginButton.style.display = 'block'; 
 	        logoutButton.style.display = 'none'; // Hide the logout button
 	    }
 	}

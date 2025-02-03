@@ -68,11 +68,16 @@ async function apiRequest(endpoint, options) {
             response = await fetch(backend.url + endpoint, options);
             if (response) {
                 BASE_URL = backend.url; // Update BASE_URL dynamically
+               //  let data = await response.json();
+              //   if (data.message) {
+              //      showPopupMessage(data.message); }
+                
                 return response; // Return response from working backend
             }
         } catch (error) {
             console.warn(`🟠 Backend failed: ${backend.url}, trying next...`);
         }
     }
+    showPopupMessage("🔴 All backends failed. Please try again later.");
     throw new Error("🔴 All backends failed.");
 }

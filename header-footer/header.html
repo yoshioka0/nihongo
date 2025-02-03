@@ -28,7 +28,7 @@
 
   <!-- Right Section: Username and User Icon -->
   <div class="header-right">
-  
+  <a id="login-btn" href="/nihongo/auth/" style="background:green;" "><b>Login</b></a>
     <span class="user-name" id="activeUser"><strong></strong></span>
     <button class="user-icon" onclick="toggleDropdown()" id="dropdownButton">
       <img src="/nihongo/user.png" alt="User">
@@ -49,7 +49,8 @@
       	<div class="profile-img-wrapper">
   	       	<img id="profileImg" src="" alt="Profile Picture" onclick="changeImage()">
           </div>
-		  <div id="activeUser2" class="username">Unauthorised</div>
+		 <div id="activeUser2" class="username">Unauthorised</div>
+		<div id="userEmail" class="username"></div>
 	  	<div id="countdown" class="countdown"></div>
       </div>
       <a id="admin-btn" href="admin/" style="background:purple; display:none;">Admin</a>

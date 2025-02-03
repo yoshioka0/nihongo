@@ -19,6 +19,55 @@ tabs.forEach(tab => {
     });
 });
 
+async function loadGlobalConfig() {
+    try {
+        const response = await apiRequest('/admin/global-config', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+        });
+        const config = await response.json();
+
+        document.getElementById("toggle-site").checked = !config.siteDisabled;
+        document.getElementById("toggle-googleAuth").checked = !config.googleAuthDisabled;
+        document.getElementById("toggle-login").checked = !config.loginDisabled;
+        document.getElementById("toggle-signup").checked = !config.signupDisabled;
+        document.getElementById("toggle-chat").checked = !config.chatDisabled;
+    } catch (error) {
+        console.error("Failed to load global config:", error);
+    }
+}
+
+// Load config when the admin panel loads
+document.addEventListener("DOMContentLoaded", loadGlobalConfig);
+
+async function updateGlobalConfig() {
+    const config = {
+        siteDisabled: !document.getElementById("toggle-site").checked,
+        googleAuthDisabled: !document.getElementById("toggle-googleAuth").checked,
+        loginDisabled: !document.getElementById("toggle-login").checked,
+        signupDisabled: !document.getElementById("toggle-signup").checked,
+        chatDisabled: !document.getElementById("toggle-chat").checked
+    };
+
+    try {
+        const response = await apiRequest('/admin/global-config', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(config)
+        });
+
+        const data = await response.json();
+        alert(data.message);
+    } catch (error) {
+        console.error("Failed to update global config:", error);
+    }
+}
+
 // Fetch users
 async function fetchUsers() {
     const userList = document.getElementById('user-list');
@@ -358,29 +407,3 @@ function logMessage(message, type = 'log') {
     consoleDiv.appendChild(logEntry);
     consoleDiv.scrollTop = consoleDiv.scrollHeight; // Auto-scroll to the bottom
 }
-
-document.getElementById('site-settings-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const siteStatus = document.getElementById('siteStatus').value;
-    const disableLogin = document.getElementById('disableLogin').checked;
-    const disableSignup = document.getElementById('disableSignup').checked;
-
-    try {
-        const response = await apiRequest('/admin/settings', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-               Authorization: `Bearer ${TOKEN}`
-            },
-            body: JSON.stringify({ siteStatus, disableLogin, disableSignup })
-        });
-
-        const data = await response.json();
-        if (data.message) {
-            alert(data.message);
-        }
-    } catch (error) {
-        alert('Error updating settings.');
-    }
-});

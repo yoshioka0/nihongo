@@ -15,7 +15,7 @@
     
     <main>
         <section id="tabs">
-        	   <button class="tab-button active" data-tab="settings">Settings</button>
+        	<button class="tab-button" data-tab="global-settings">Global Settings</button>
             <button class="tab-button" data-tab="users">Users</button>
             <button class="tab-button" data-tab="send-notifications">Send Notifications</button>
             <button class="tab-button" data-tab="view-notifications">View Notifications</button>
@@ -23,26 +23,36 @@
             <button class="tab-button" data-tab="view-logs">View Logs</button>
         </section>
         
-        
-<!-- Site Settings Tab -->
-<section id="site-settings" class="tab-content active">
-    <h2>Site Settings</h2>
-    <form id="site-settings-form">
-        <label for="siteStatus">Site Status</label>
-        <select id="siteStatus" name="siteStatus">
-            <option value="active">Active</option>
-            <option value="disabled">Disabled</option>
-            <option value="blocked">Blocked</option>
-        </select>
-        
-        <label for="disableLogin">Disable Login</label>
-        <input type="checkbox" id="disableLogin" name="disableLogin">
+      <!-- Global Settings Tab -->
+<section id="global-settings" class="tab-content active">
+    <h2>Global Site Settings</h2>
 
-        <label for="disableSignup">Disable Signup</label>
-        <input type="checkbox" id="disableSignup" name="disableSignup">
+    <label>
+        <input type="checkbox" id="toggle-site"> Enable Site
+    </label>
+    <br>
+    	
+        <label>
+        <input type="checkbox" id="toggle-googleAuth"> Enable Google Auth
+    </label>
+    <br>
 
-        <button type="submit">Update Settings</button>
-    </form>
+    <label>
+        <input type="checkbox" id="toggle-login"> Enable Login
+    </label>
+    <br>
+
+    <label>
+        <input type="checkbox" id="toggle-signup"> Enable Signup
+    </label>
+    <br>
+
+    <label>
+        <input type="checkbox" id="toggle-chat"> Enable Chat
+    </label>
+    <br>
+
+    <button onclick="updateGlobalConfig()">Save Changes</button>
 </section>
 
 
