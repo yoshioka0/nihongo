@@ -315,12 +315,12 @@ async function renderMessages(messages) {
 
     for (const message of messages) {
         // Ensure sender and receiver are objects
-        if (typeof message.sender === 'string') {
-            message.sender = { _id: message.sender };
-        }
-        if (typeof message.receiver === 'string') {
-            message.receiver = { _id: message.receiver };
-        }
+        //if (typeof message.sender === 'string') {
+        //    message.sender = { _id: message.sender };
+      //  }
+      //  if (typeof message.receiver === 'string') {
+    //        message.receiver = { _id: message.receiver };
+ //       }
 
         const isSelf = message.sender._id === senderUserId;
         displayMessage(message, isSelf);
@@ -585,23 +585,30 @@ async function sendMessage() {
 socket.on('receiveMessage', async (message) => {
     console.log('📥 Socket msg received from server:', message);
 
-    // Check if the message belongs to the current chat
     if (message.receiver === senderUserId || message.sender === senderUserId) {
         typingIndicator.style.display = 'none';
-
+        
         // Display message in UI
         displayMessage(message, message.sender === senderUserId);
 
+        // Format message correctly
+        const formattedMessage = {
+            ...message,
+            sender: { _id: message.sender },
+            receiver: { _id: message.receiver }
+        };
+
         // 📝 Update Chat Cache
         const currentCache = chatCache.get(currentChatUserId) || [];
-        
-        // Add the new message to the cache if it's not already there
-        if (!currentCache.some(cachedMsg => cachedMsg._id === message._id)) {
-            const updatedCache = [...currentCache, message];
+
+        if (formattedMessage._id && !currentCache.some(cachedMsg => cachedMsg._id === formattedMessage._id)) {
+            const updatedCache = [...currentCache, formattedMessage];
             chatCache.set(currentChatUserId, updatedCache);
 
-            // Optionally, encrypt the message if needed and store it in localStorage
-            const encryptedMessages = await Promise.all(updatedCache.map(msg => encryptMessage(JSON.stringify(msg))));
+            // Encrypt and store messages in localStorage
+            const encryptedMessages = await Promise.all(
+                updatedCache.map(msg => encryptMessage(JSON.stringify(msg)))
+            );
             localStorage.setItem(`chat_${currentChatUserId}`, JSON.stringify(encryptedMessages));
         }
     }
