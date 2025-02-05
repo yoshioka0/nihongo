@@ -1,16 +1,15 @@
 // Constants
-//const BASE_URL = 'http://localhost:3000'; 
-//const BASE_URL = 'http://192.168.1.7:3000'; 
-//const BASE_URL = 'https://nihongo-backend.onrender.com'; 
-//const BASE_URL = ""
+//const SOCKET_URL = 'http://localhost:3000'; 
+//const SOCKET_URL = 'http://192.168.1.7:3000'; 
+const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
+
 const GOOGLE_CLIENT_ID='1015740375628-hig26ebdp3bbt4ma13pfr0ogs687838o.apps.googleusercontent.com';
 const PUBLIC_VAPID_KEY = 'BDdr26kHzz40SAgoMRYN6rVLogOqv1p8OoPw-NqX2cCTRrmK_j4YHwHVRvM8xrjw0kAx36ZuHN976uWRB0qGIjI';
 let BASE_URL
-let socket
 
 // Dynamically Choose the Fastest Server
 const backends = [
-//    { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost
+ //   { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost
     { url: "https://nihongo-backend.onrender.com", latency: Infinity },
     { url: "https://nihongo-backend-env.up.railway.app", latency: Infinity }
 ];
@@ -40,16 +39,7 @@ async function getFastestBackend() {
 (async () => {
     BASE_URL = await getFastestBackend();
 	    if (window.location.pathname === '/nihongo/chats/v3/') {
-			socket = io(BASE_URL, {
-			  auth: { token: localStorage.getItem('accessToken'), }
-			});	
-			socket.on('connect', () => { 
-				console.log('🛜 Socket connected to the server with ID:', socket.id); 
-				document.getElementById('socket-status').textContent = "🛜 Connected";
-				document.getElementById('socket-status').classList.remove('con', 'dis'); document.getElementById('socket-status').classList.add('con');
-			});
-			intializeSocket();
-			socket.on('error', (err) => { console.error('🔴 Socket Error:', err);	});
+		// Socket Connection shifted back to its own place bcz I am not ready for REDIS setup.
 	    }
     console.log("🟢 Using backend:", BASE_URL);
 })();
@@ -66,12 +56,14 @@ async function apiRequest(endpoint, options) {
     for (const backend of backends) {
         try {
             response = await fetch(backend.url + endpoint, options);
+            // Show the popup message if the status code is 403
+            if (response.status === 403) {
+                const data = await response.json();
+                showPopupMessage(data.message || "Access denied.");
+            }
+            
             if (response) {
-                BASE_URL = backend.url; // Update BASE_URL dynamically
-               //  let data = await response.json();
-              //   if (data.message) {
-              //      showPopupMessage(data.message); }
-                
+                BASE_URL = backend.url; // Update BASE_URL dynamically   
                 return response; // Return response from working backend
             }
         } catch (error) {

@@ -58,7 +58,6 @@ window.addEventListener('click', function (event) {
 	function updateActiveUser() {
 	    const activeUser = document.getElementById('activeUser');
 	    const activeUser2 = document.getElementById('activeUser2');
-		const userEmail = document.getElementById('userEmail');
 	    const adminButton = document.getElementById('admin-btn');
 	    const token = getJWTToken();
 							
@@ -70,7 +69,7 @@ window.addEventListener('click', function (event) {
 		    }
 		    activeUser.textContent = username || 'No user';
 		    activeUser2.textContent = username + `•(${role})` || 'No user';
-			userEmail.textContext = localStorage.getItem('email');
+			document.getElementById('mail1').textContent = localStorage.getItem('userEmail');
 		} catch (error) {
 		    activeUser.textContent = 'No user';
 		}
@@ -206,7 +205,7 @@ function HTMLLoaded() {
 			  countdownElement.textContent = "Session expired";
 			  countdownElement.classList.remove("session-active");
 			  countdownElement.classList.add("session-expired");
-			 alert('Session Expired: Refresh to continue using or logout.');
+			 
 			  showPopupMessage('Session Expired');
 			} else {
 			  const minutes = Math.floor(remainingTime / 60000);
@@ -246,9 +245,10 @@ function HTMLLoaded() {
 		surprise();
 	});
 	
-		const savedImage = localStorage.getItem('profileImage');
-	    const img = document.getElementById('profileImg');
-	    img.src = savedImage && imageSources.includes(savedImage) ? savedImage : imageSources[0]; // Default to first image if none saved
+		const savedImage = localStorage.getItem('userProfilePic');
+	    document.getElementById('profileImg').src = savedImage || '/nihongo/img/user.png' ; 
+	    document.getElementById('profileImg1').src = savedImage || '/nihongo/img/user.png' ; 
+	
 	
 	
 }		// End above code will run after header is loaded.

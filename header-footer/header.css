@@ -267,7 +267,7 @@ background: ;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border-radius: 12px;
   overflow: hidden;
-  min-width: 250px;
+  min-width: 300px;
   padding: 10px;
   right: 0;
   z-index: 10;
@@ -278,6 +278,8 @@ background: ;
   display: block;
 }
 
+
+
 .dropdown-content .profile {
   text-align: center;
   padding: 10px;
@@ -286,8 +288,8 @@ background: ;
 
 /* Profile Image Wrapper */
 .dropdown-content .profile-img-wrapper {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
 	background: #4285f4; /* Blue */
   animation: gradientRotation 6s ease infinite;
@@ -299,8 +301,8 @@ background: ;
 
 /* Ensuring the image fits in the circular wrapper */
 .dropdown-content .profile-img-wrapper img {
-  width: 70px; /* Slightly smaller than the wrapper */
-  height: 70px;
+  width: 80px; /* Slightly smaller than the wrapper */
+  height: 80px;
   border-radius: 50%;
   
 }
@@ -310,6 +312,9 @@ background: ;
   font-weight: bold;
   font-size: 18px;
   color: white;
+}
+.mail {
+color: white;
 }
 
 .dropdown-content a {

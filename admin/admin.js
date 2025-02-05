@@ -34,6 +34,7 @@ async function loadGlobalConfig() {
         document.getElementById("toggle-login").checked = !config.loginDisabled;
         document.getElementById("toggle-signup").checked = !config.signupDisabled;
         document.getElementById("toggle-chat").checked = !config.chatDisabled;
+        document.getElementById("toggle-upload").checked = !config.uploadDisabled;
     } catch (error) {
         console.error("Failed to load global config:", error);
     }
@@ -48,7 +49,8 @@ async function updateGlobalConfig() {
         googleAuthDisabled: !document.getElementById("toggle-googleAuth").checked,
         loginDisabled: !document.getElementById("toggle-login").checked,
         signupDisabled: !document.getElementById("toggle-signup").checked,
-        chatDisabled: !document.getElementById("toggle-chat").checked
+        chatDisabled: !document.getElementById("toggle-chat").checked,
+        uploadDisabled: !document.getElementById("toggle-upload").checked,
     };
 
     try {
@@ -176,7 +178,6 @@ async function deleteUser(userId) {
 
         if (response.status === 401) {
             logMessage('Your session has expired. Please log in again.', 'error');
-            logoutUser();
             return;
         }
 
@@ -186,12 +187,6 @@ async function deleteUser(userId) {
     } catch (err) {
         logMessage('Error deleting user: ' + err, 'error');
     }
-}
-
-// Log out the user (clear token)
-function logoutUser() {
-    localStorage.removeItem('jwt');
-    window.location.href = '/login'; // Redirect to login page or home
 }
 
 
@@ -390,13 +385,7 @@ async function fetchLogs() {
 }
 
 
-// Load data on page load
-document.addEventListener('DOMContentLoaded', () => {
-    fetchUsers();
-    fetchSubscriptions(); // Fetch subscriptions on page load
-    fetchNotifications(); // Fetch notifications on page load
-    fetchLogs(); // Fetch logs on page load
-});
+
 
 // Function to log messages to the console div
 function logMessage(message, type = 'log') {

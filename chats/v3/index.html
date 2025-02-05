@@ -6,6 +6,9 @@
     <link rel="stylesheet" href="chat.css">
   <script src="/nihongo/auth-v2.js"></script>
      <script src="/nihongo/config.js"></script>
+<!-- Add Font Awesome in <head> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <title>Nihongo Chats</title>
 </head>
 <body>
@@ -20,13 +23,13 @@
         <div class="left-panel">
             <div class="header">
             	<div class="profile">
-            			  <img class="avatar" src="/nihongo/img/icon.png" onclick="home()"> 
+            			  <img id="avatar" class="avatar" src="/nihongo/img/icon.png" onclick="home()"> 
                 		  <h2><a href="/nihongo/" style="color:white; text-decoration: none;">Nihongo Chats</a></h2>
                   	     <p id="socket-status">🛜 Connecting...</p> 
                   </div>
                   <hr>
              <div class="profile">
-                <img class="avatar" src="/nihongo/img/user.png" alt="Profile">
+                <img id="myavatar" class="avatar" src="/nihongo/img/user.png" alt="Profile">
                 <p id="myUsername" class="username">Username</p> <!-- Dynamically populate this in chat.js -->
                 <div class="countdown-box">
 
@@ -43,13 +46,19 @@
 
         <!-- Right Panel: Chat Window -->
         <div class="right-panel">
-	      <div class="chat-header">
+	       <div class="chat-header">
+		
+		   <button id="back-btn" class="back-btn" ><i class="fa-solid fa-arrow-left"></i> </button> 
 				
 			<div class="chat-user-container">
 			    <h3 id="chat-user" class="chat-user">Select a user to chat</h3>
 			    <p id="status"></p>
 			</div>
-                <div class="block-box"> <button id="block-button" class="block-button" style="display: none;">Block</button> </div>
+						
+                <div class="block-box"> 
+                	      <button id="refresh-btn" class="refresh-btn" onclick="refreshChat()" >  <i class="fa-solid fa-rotate-right"></i></button> 
+                
+						<button id="block-button" class="block-button" style="display: none;">Block</button> </div>
              </div>
 
             <div id="chat-window" class="chat-window">
@@ -64,12 +73,27 @@
     <span id="typing-text">User is typing...</span>
 </div>
 
-            <div class="message-input-area">
+
+
+
+            <div class="message-input-area">  			       	
+ 			   <button id="emoji-button">😊</button>          
+				<div id="emoji-picker" class="hidden"></div> <!-- Emoji Picker -->
+					    <input type="file" id="image-input" accept="image/*" hidden />
+  					  <div id="image-button" class="image-picker-btn"><i class="fa-solid fa-image"></i> </div>
                 <input id="message-input" type="text" placeholder="Type a message..." />
-                <button id="send-button">Send</button>
+                <div id="send-button" class="send-btn">  <i class="fa-solid fa-paper-plane"></i> </div>
             </div>
         </div>
     </div>
+    
+    
+    <!-- Image Preview -->
+<div id="image-preview-container" style="display: none;">
+	<div id="image-loader" class="loader"></div>
+    <img id="image-preview" />
+    <button id="cancel-preview">❌</button>
+</div>
     
     <script>
     // Dynamically set the viewport height for better compatibility
@@ -80,6 +104,10 @@
     window.addEventListener('resize', setViewportHeight);
     setViewportHeight();
   </script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+
  
     
     <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>

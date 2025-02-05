@@ -15,12 +15,12 @@
     
     <main>
         <section id="tabs">
-        	<button class="tab-button" data-tab="global-settings">Global Settings</button>
-            <button class="tab-button" data-tab="users">Users</button>
+        	<button class="tab-button" data-tab="global-settings" >Global Settings</button>
+            <button class="tab-button" data-tab="users" onclick="fetchUsers()">Users</button>
             <button class="tab-button" data-tab="send-notifications">Send Notifications</button>
-            <button class="tab-button" data-tab="view-notifications">View Notifications</button>
-            <button class="tab-button" data-tab="subscriptions">Subscriptions</button>
-            <button class="tab-button" data-tab="view-logs">View Logs</button>
+            <button class="tab-button" data-tab="view-notifications" onclick="fetchNotifications()">View Notifications</button>
+            <button class="tab-button" data-tab="subscriptions" onclick="fetchSubscriptions()" >Subscriptions</button>
+            <button class="tab-button" data-tab="view-logs" onclick=" fetchLogs()">View Logs</button>
         </section>
         
       <!-- Global Settings Tab -->
@@ -49,6 +49,11 @@
 
     <label>
         <input type="checkbox" id="toggle-chat"> Enable Chat
+    </label>
+    <br>
+    	
+        <label>
+        <input type="checkbox" id="toggle-upload"> Enable Upload
     </label>
     <br>
 

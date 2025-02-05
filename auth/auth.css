@@ -21,9 +21,14 @@ body {
 }
 
 #buttonDiv {
-  font-size: 1px;
-	padding:0 100px; 
-
+    height: 60px; /* Set your desired height */
+    display: flex;
+    align-items: center; /* Center the button vertically */
+    justify-content: center; /* Center the button horizontally */
+}
+#buttonDiv {
+    transform: scale(1.2); /* Scale the button */
+    transform-origin: center;
 }
 
 
@@ -144,7 +149,7 @@ body {
 /* Modal heading styling */
 .modal h2 {
   font-size: 1.5rem;
-  margin: 0 0 20px;
+  margin: 0 0 10px;
   color: #333; /* Darker text for clarity */
   font-weight: 600; /* Bold heading */
 }

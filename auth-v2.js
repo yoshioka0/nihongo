@@ -71,7 +71,7 @@ async function checkAuthentication() {
     // Check if the token is missing or expired
     if (!token || isTokenExpired(token)) {
         console.log('Access token expired or missing. Attempting to refresh...');
-        showPopupMessage('Credentials expired or missing.');
+     //   showPopupMessage('Credentials expired or missing.');
         // Try to get a new access token using the refresh token
         token = await refreshAccessToken();
 		if (!token) {

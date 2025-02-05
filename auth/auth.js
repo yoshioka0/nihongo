@@ -5,23 +5,30 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-loadCloudflareScript();
-
-// Function to dynamically load the Cloudflare script
-function loadCloudflareScript() {
-    const script = document.createElement('script');
-    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js"; // Cloudflare Turnstile script
-    script.async = true;
-    script.defer = true;
-    script.onload = () => console.log("✅ Cloudflare script loaded.");
-    script.onerror = () => console.error("❌ Failed to load Cloudflare script.");
-    document.head.appendChild(script);
+function renderTurnstile(turnstileId) {
+    const containerElement = document.getElementById(turnstileId);
+    if (!containerElement) {
+        console.error(`❌ Element with ID "${turnstileId}" not found.`);
+        return;
+    }
+    if (containerElement.hasChildNodes()) {
+        console.log(`⚠️ Turnstile already rendered for ${turnstileId}`);
+        return;
+    }
+    turnstile.ready(() => {
+        turnstile.render(containerElement, {
+            sitekey: "0x4AAAAAAA1LZ_hIj3lnMBRX",
+            callback: (token) => {
+                console.log(`✅ Turnstile verified`);                
+            }
+        });
+        console.log(`Turnstile rendered for ${turnstileId}`);
+    });
 }
 
 // Google OAuth
 function handleCredentialResponse(response) {
     const token = response.credential; // Google ID token
-
     	apiRequest("/auth/google", {
         method: "POST",
         headers: {
@@ -48,11 +55,11 @@ function handleCredentialResponse(response) {
         } else {
             // Show error feedback if something went wrong
             alert('error Login failed: ' + data.error);
+            
         }
     })
     .catch(err => {
-        console.error("Error:", err);
-
+        console.error("Error:", err);        
         alert('error', 'An error occurred. Please try again.');
     });
 }
@@ -67,10 +74,10 @@ window.onload = function () {
   document.getElementById("buttonDiv"),
   {
     theme: "filled_blue", // Button style (blue background)
-    size: "xlarge", // Button size (larger button)
-    shape: "circle", // Rounded button
+    size: "large", // Button size (larger button)
+    shape: "pill", // Rounded button
     logo_alignment: "left", // Align Google logo to the left
-    width: "auto", // Adjust the button width based on content
+    width: "300", // Adjust the button width based on content
   }
 );
     google.accounts.id.prompt(); // Show One Tap dialog if available
@@ -79,9 +86,6 @@ window.onload = function () {
 
 // Auth0
 // Plan for future
-
-
-
 
 // General password toggle functionality
 function togglePasswordVisibility(event) {
@@ -153,7 +157,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
       }
 
     showLoadingSpinner(signupForm, 'Creating Account...');
-
+    renderTurnstile("turnstile1") ;
     try {
         const turnstileResponse = turnstile.getResponse(turnstile1);
         if (!turnstileResponse) {
@@ -161,7 +165,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
             hideLoadingSpinner(signupForm);
             return;
         }
-
+    	
         const response = await apiRequest(`/create-user`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -209,7 +213,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
     }
 
     showLoadingSpinner(loginForm, 'Logging In...');
-
+	renderTurnstile("turnstile2") ;
     try {
         const turnstileResponse = turnstile.getResponse(turnstile2);
         if (!turnstileResponse) {

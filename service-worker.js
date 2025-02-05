@@ -24,7 +24,7 @@ self.addEventListener('push', (event) => {
     const title = data.title || 'Notification';
     const options = {
         body: data.body || 'You have a new message!',
-        icon: data.icon || '/default-icon.png', // Path to a default icon
+        icon: data.icon || '/img/icon.png', // Path to a default icon
         image: data.image || undefined,        // Optional image
         data: data.url || '/',                 // URL to open on notification click
     };
@@ -38,19 +38,18 @@ self.addEventListener('notificationclick', (event) => {
 
     event.notification.close(); // Close the notification
 
-    // Open the URL specified in the notification's data
+    const urlToOpen = event.notification.data || '/';
+    
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            const urlToOpen = event.notification.data;
-
-            // If the URL is already open, focus the tab
-            for (const client of clientList) {
-                if (client.url === urlToOpen && 'focus' in client) {
-                    return client.focus();
-                }
+            // Check if the URL is already open
+            const matchingClient = clientList.find(client => client.url.includes(urlToOpen));
+            
+            if (matchingClient && 'focus' in matchingClient) {
+                return matchingClient.focus();
             }
 
-            // Otherwise, open a new tab
+            // Otherwise, open a new window/tab
             if (clients.openWindow) {
                 return clients.openWindow(urlToOpen);
             }

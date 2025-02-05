@@ -3,6 +3,40 @@
 //		recipient Id always available in currentChatUserId
 // *** Be careful userId sometimes corresponds to something else and recipient/receiver/sender may not be available 
 
+let tokenexpired; 
+const token = getJWTToken();
+
+if (token) {
+  const decodedToken = JSON.parse(atob(token.split('.')[1]));
+  const expiryTime = decodedToken.exp * 1000; // Convert to milliseconds
+  startCountdown(expiryTime);
+} else {
+  console.log("No token found");
+}
+
+function startCountdown(expiryTime) {
+  const countdownElement = document.getElementById("countdown");
+
+  const interval = setInterval(() => {
+	    const currentTime = Date.now();
+	    const remainingTime = expiryTime - currentTime;
+	
+		if (remainingTime <= 0) {
+		  clearInterval(interval);
+		  countdownElement.textContent = "Session expired";
+		  countdownElement.classList.remove("session-active");
+		  countdownElement.classList.add("session-expired");
+		  showPopupMessage('Session Expired');
+		tokenexpired = true;
+		} else {
+		  const minutes = Math.floor(remainingTime / 60000);
+		  const seconds = Math.floor((remainingTime % 60000) / 1000);
+		  countdownElement.textContent = `⏰ ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+		  countdownElement.classList.remove("session-expired");
+		  countdownElement.classList.add("session-active");
+		}
+  }, 1000);
+}
 
 // Get user details from JWT
 const accessToken = localStorage.getItem('accessToken');
@@ -12,9 +46,20 @@ if (!accessToken) {
 }
 
 // Connect to the server using Socket.io
-// Shifted to config.js
+// Shifted back from config.js
+const socket = io(SOCKET_URL, {
+  auth: { token: localStorage.getItem('accessToken'), }
+});	
+
+socket.on('connect', () => { 
+	console.log('🛜 Socket connected to the server with ID:', socket.id); 
+	document.getElementById('socket-status').textContent = "🛜 Connected";
+	document.getElementById('socket-status').classList.remove('con', 'dis'); document.getElementById('socket-status').classList.add('con');
+});
+
 
 // DOM Elements
+const searchUser = document.getElementById('search-users'); // Left panel: 
 const chatList = document.getElementById('chat-list'); // Left panel: list of users/chatrooms
 const chatWindow = document.getElementById('chat-window'); // Right panel: chat messages
 const messageInput = document.getElementById('message-input'); // Message input box
@@ -25,6 +70,8 @@ const blockButton = document.getElementById('block-button'); // Block button (to
 const chatUserElement = document.getElementById('chat-user');
 const lastActiveElement = document.getElementById('status');
 const userElement2 = chatUserElement
+
+const loader = document.getElementById("image-loader");
 
 // Decode JWT to get user details
 // Already available in auth-v2.js
@@ -51,160 +98,357 @@ async function fetchAPI(endpoint, method = 'GET', body = null) {
 }
 
 
-let currentChatUserId = null; // Tracks the currently selected recipient user
+// Assuming you're trying to extract a query parameter from the current URL
+const url = new URL(self.location.href); // This works in the context of service workers as well
+const queryParam = url.searchParams.get('username'); // Replace 'yourQueryKey' with the actual query parameter key
+
 let query = null;
-loadChatList(query);
-  
+if (queryParam) {	
+    query = queryParam; // If the query parameter exists, store it in `query`
+    searchUser.value = query;
+    loadChatList(query);
+}else{
+loadChatList(); // Initial call with no query, to load all chatted users
+}
+
+// Debounce timeout to control frequent server calls
+let debounceTimeout;
+
+// Search Users (Trigger on input change)
+function searchUsers() {
+    const query = document.getElementById('search-users').value.trim();
+
+    // Clear the previous debounce timeout
+    clearTimeout(debounceTimeout);
+
+    // Set a new timeout for debouncing the search
+    debounceTimeout = setTimeout(() => {
+        loadChatList(query);  // Pass the search query to load the user list
+    }, 500); // Delay of 500ms before sending the request
+}
+
+let currentChatUserId = null; // Tracks the currently selected recipient user
+
 // 1. Load User List (Left Panel) with Search and Always Show Chatted Users
 async function loadChatList(query = '') {
     try {
-        chatList.innerHTML = '';
+        chatList.innerHTML = ''; // Clear the chat list
 
         // Retrieve previously chatted users from localStorage
         const chattedUsers = JSON.parse(localStorage.getItem('chattedUsers')) || [];
 
-        // If no search query, load all chatted users
-        if (!query) {
-        	console.log('🔴🟢🟠 Loaded User List from LS');
-            chattedUsers.forEach(({ username, userId }) => {
-                const userItem = document.createElement('div');
-                userItem.textContent = username;
-                userItem.classList.add('user-item');
-                userItem.dataset.userId = userId; // Store the userId in the dataset
+        // Create dividers for each section
+        const divider1 = document.createElement('hr'); // Divider between sections
+        const divider2 = document.createElement('hr'); // Divider between sections
 
-                userItem.addEventListener('click', () => openChat(userId, username)); // Pass userId to openChat
+        // Store chatted users' ids in a set for quick lookup
+        const chattedUserIds = new Set(chattedUsers.map(user => user.userId));
+
+        // Arrays to hold users
+        let searchedUsers = [];
+        let alreadyDisplayedChatted = new Set(); // To track chatted users already shown in the top section
+        
+        // Section 1: Load the top section with chatted users that match the search query
+        console.log('🔴🟢🟠 Loaded Chatted Users matching query');
+        chattedUsers.forEach(({ username, userId }) => {
+            // Only show users from chattedUsers that match the search query
+            if (username.toLowerCase().includes(query.toLowerCase())) {
+                const userItem = createUserItem(username, userId);
+                chatList.appendChild(userItem);
+                alreadyDisplayedChatted.add(userId); // Add to displayed set
+            }
+        });
+
+        // Add divider after the top section
+        chatList.appendChild(divider1);
+
+        // Section 2: If there's a search query, load users based on it (excluding already shown users)
+        if (query) {
+            // Validate search query length (min 3 characters)
+            if (query.length < 3) {
+                chatList.innerHTML = '<p>Search query length must be >= 3</p>';
+                return;
+            }
+
+            // Load users based on the search query
+            const users = await fetchAPI(`/api/chats/users?username=${query}`);
+
+            // If no users are found, display a message
+            if (users.length === 0) {
+                chatList.innerHTML = '<p>No users found matching your query.</p>';
+            }
+
+            // Collect searched users, excluding already chatted ones
+            searchedUsers = users.filter(user => !chattedUserIds.has(user._id));
+
+            // Add searched users to the list
+            searchedUsers.forEach((user) => {
+                const userItem = createUserItem(user.username, user._id);
                 chatList.appendChild(userItem);
             });
-        } else {
-            // Load users based on search query
-            const users = await fetchAPI(`/api/chats/users?username=${query}`);
-            users.forEach((user) => {
-                const userItem = document.createElement('div');
-                userItem.textContent = user.username;
-                userItem.classList.add('user-item');
-                userItem.dataset.userId = user._id; // Store the userId in the dataset
 
-                userItem.addEventListener('click', () => openChat(user._id, user.username)); // Pass userId to openChat
-                chatList.appendChild(userItem);
+            // Add divider after the search results if they exist
+            if (searchedUsers.length > 0) {
+                chatList.appendChild(divider2);
+            }
+        }
+
+        // Section 3: Load remaining chatted users (excluding already displayed ones)
+        if (!query) {
+            // If no query, display all chatted users
+            chattedUsers.forEach(({ username, userId }) => {
+                if (!alreadyDisplayedChatted.has(userId)) {
+                    const userItem = createUserItem(username, userId);
+                    chatList.appendChild(userItem);
+                }
             });
         }
 
     } catch (error) {
-        chatList.innerHTML = '<p>No users found. Query length must be >=3</p>';
+        chatList.innerHTML = '<p>No users found matching your query</p>';
         console.error('Error loading chat list:', error.message);
     }
 }
 
-//  Search Users (Trigger on input change)
-function searchUsers() {
-    const query = document.getElementById('search-users').value.trim();
-    if (!query) {loadChatList(query);}
-    if (query.length >= 3) {
-        loadChatList(query);  // Pass the search query to load the user list
-    }
+// Helper function to create a user item element
+function createUserItem(username, userId) {
+    const userItem = document.createElement('div');
+    userItem.textContent = username;
+    userItem.classList.add('user-item');
+    userItem.dataset.userId = userId; // Store the userId in the dataset
+
+    userItem.addEventListener('click', () => openChat(userId, username)); // Pass userId to openChat
+    return userItem;
 }
 
+// Track the current room
+let currentRoomId = null;
+
+// Function to join a chat room
+function joinRoom(recipientUserId) {
+    if (currentRoomId) {
+        // Leave the previous room
+        socket.emit('leave', { roomId: currentRoomId });
+        console.log(`Left room: ${currentRoomId}`);
+    }
+    // Set the new room ID
+    currentRoomId = recipientUserId; 
+    // Join the new room
+    socket.emit('join', { recipientUserId });
+    console.log(`Joined room: ${currentRoomId}`);
+}
+
+const chatCache = new Map(); // Stores chat history for each user
 
 // 2. Open Chat with a User
 async function openChat(recipientUserId, recipientUsername) {
     currentChatUserId = recipientUserId;
     currentChatUsername = recipientUsername;
-		
-	document.getElementById("chat-user").textContent = `💬 ${recipientUsername}`;
-    // Clear the chat window and add a fixed header
-    chatWindow.innerHTML = `
-        <div class="chat-messages"></div> 
-					`;
 
-    const chatMessagesContainer = chatWindow.querySelector('.chat-messages');
+	saveUser(currentChatUsername);
+	
+    document.getElementById("chat-user").textContent = `💬 ${recipientUsername}`;
+    if (tokenexpired) {
+		showPopupMessage('Session Expired');
+		chatWindow.innerHTML = `<h1>Session Expired, Refresh the page.</h1>
+													<img src="/nihongo/img/icon.png" />	`;
+		return 
+		}
+
+	chatWindow.innerHTML = `<div class="loader"></div>`;
+
+    
 
     // Join the chat room
-    if (socket) {
-    socket.emit('join', {recipientUserId });
-    } else { console.error('Join emit failed to socket with user:', recipientUserId ); }
+    joinRoom(recipientUserId);
 
-    try {
-        const messages = await fetchAPI(`/api/chats/history/${senderUserId}/${recipientUserId}`);
-        if (messages.length === 0) {
-            chatMessagesContainer.innerHTML = '<p>No messages yet.</p>';
-            return;
+    // Check if chat history is cached
+    if (chatCache.has(recipientUserId)) {
+        showNotification(`⚡ Using Cached Chat for ${recipientUsername}`);
+        renderMessages(chatCache.get(recipientUserId));
+    } else {
+        showNotification(`📡 Fetching Chat History for ${recipientUsername}`);
+        try {
+            let messages = [];
+
+            // Load from localStorage if available
+            const storedData = localStorage.getItem(`chat_${recipientUserId}`);
+            if (storedData) {
+                showNotification(`🔑 Loading Encrypted Chat Cache for ${recipientUsername}`);
+                messages = await Promise.all(JSON.parse(storedData).map(async msg => JSON.parse(await decryptMessage(msg))));
+            } else {
+                // Fetch from API if no cache is available
+                showNotification('📡 Fetching Chat history from server')
+                messages = await fetchAPI(`/api/chats/history/${senderUserId}/${recipientUserId}`);
+
+                // Cache encrypted messages in localStorage
+                const encryptedMessages = await Promise.all(messages.map(msg => encryptMessage(JSON.stringify(msg))));
+                localStorage.setItem(`chat_${recipientUserId}`, JSON.stringify(encryptedMessages));
+            }
+
+            chatCache.set(recipientUserId, messages);
+            renderMessages(messages);
+        } catch (error) {
+            console.error('Error loading chat messages:', error.message);
+            chatMessagesContainer.innerHTML = '<p>Error loading messages. Please try again later.</p>';
         }
-
-        // Display each message
-        messages.forEach((message) => {
-            const isSelf = message.sender._id === senderUserId;
-            displayMessage(message, isSelf);
-        });
-	
-		// Fetch User availability 
-		checkUserAvailability(currentChatUserId);
-        
-		// Mark messages as read
-        senderId=senderUserId; receiverId=currentChatUserId;
-   	 socket.emit('markAsRead', { senderId, receiverId });
-        
-        updateBlockButton();
-
-    } catch (error) {
-        console.error('Error loading chat messages:', error.message);
-        chatMessagesContainer.innerHTML = '<p>Error loading messages. Please try again later.</p>';
     }
 
-    // Show block button if user is not the current user
-    if (senderUserId !== recipientUserId) {
-        blockButton.style.display = 'inline-block';
-        blockButton.onclick = () => toggleBlockUser(); // Block button action
-    } else {
-        blockButton.style.display = 'none';
+    // Fetch user availability
+    checkUserAvailability(currentChatUserId);
+
+    // Mark messages as read
+    socket.emit('markAsRead', { senderId: senderUserId, receiverId: currentChatUserId });
+    updateBlockButton();
+    // Show or hide block button
+    blockButton.style.display = senderUserId !== recipientUserId ? 'inline-block' : 'none';
+    blockButton.onclick = () => toggleBlockUser();
+}
+
+// Render messages
+async function renderMessages(messages) {
+	// Clear the chat window for message display 
+    chatWindow.innerHTML = `<div class="chat-messages"></div>`;
+    const chatMessagesContainer = chatWindow.querySelector('.chat-messages');
+    
+    chatMessagesContainer.innerHTML = messages.length ? '' : '<p>No messages yet.</p>';
+
+    for (const message of messages) {
+        // Ensure sender and receiver are objects
+        if (typeof message.sender === 'string') {
+            message.sender = { _id: message.sender };
+        }
+        if (typeof message.receiver === 'string') {
+            message.receiver = { _id: message.receiver };
+        }
+
+        const isSelf = message.sender._id === senderUserId;
+        displayMessage(message, isSelf);
+    }
+}
+
+			async function saveUser(currentChatUsername) {
+            if (currentChatUsername) {
+                const chattedUsers = JSON.parse(localStorage.getItem('chattedUsers')) || [];
+
+                if (!chattedUsers.some(user => user.userId === currentChatUserId)) {
+                    chattedUsers.push({
+                        username: currentChatUsername,
+                        userId: currentChatUserId
+                    });
+                    localStorage.setItem('chattedUsers', JSON.stringify(chattedUsers));
+                }
+            } else {
+                console.warn("currentChatUsername is undefined. Skipping localStorage update.");
+            }               
+}
+
+// Append refreshed messages without cleaning previous one
+async function appendMessages(messages) {
+    for (const message of messages) {
+        // Ensure sender and receiver are objects
+        if (typeof message.sender === 'string') {
+            message.sender = { _id: message.sender };
+        }
+        if (typeof message.receiver === 'string') {
+            message.receiver = { _id: message.receiver };
+        }
+        const isSelf = message.sender._id === senderUserId;
+        displayMessage(message, isSelf);
+    }
+}          
+
+
+// Refresh chat with latest messages
+async function refreshChat() {
+    if (!currentChatUserId) {
+        showNotification("⚠️ No chat selected to refresh.");
+        return;
+    }
+
+    showNotification(`🔄 Refreshing chat with ${currentChatUsername}`);
+
+    try {
+        // Fetch latest messages from server
+        const latestMessages = await fetchAPI(`/api/chats/history/${senderUserId}/${currentChatUserId}`);
+        // Get cached messages
+        const cachedMessages = chatCache.get(currentChatUserId) || [];
+        // Filter out messages that are already in the cache
+        const newMessages = latestMessages.filter(newMsg =>
+            !cachedMessages.some(cachedMsg => cachedMsg._id === newMsg._id)
+        );
+        if (newMessages.length === 0) {
+            showNotification(`✅ Chat is already up to date with ${currentChatUsername}`);
+            return;
+        }
+        // Append new messages to cache
+        const updatedMessages = [...cachedMessages, ...newMessages];
+        chatCache.set(currentChatUserId, updatedMessages);
+        // Encrypt and store updated messages in localStorage
+        const encryptedMessages = await Promise.all(updatedMessages.map(msg => encryptMessage(JSON.stringify(msg))));
+        localStorage.setItem(`chat_${currentChatUserId}`, JSON.stringify(encryptedMessages));
+        // Re-render messages
+        appendMessages(newMessages);
+        showNotification("📩 New messages loaded successfully.");
+
+    } catch (error) {
+        console.error("Error refreshing chat:", error);
+        showNotification("❌ Failed to refresh chat. Please try again.");
     }
 }
 
 // 3. Display Messages
 function displayMessage(message, isSelf) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', isSelf ? 'self' : 'other');
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message", isSelf ? "self" : "other");
 
-    // Create the message text element
-    const messageText = document.createElement('p');
-    messageText.textContent = message.message;
-
-    // Create the timestamp element
+    // Create timestamp
     const formattedDate = new Date(message.timestamp).toLocaleDateString([], {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
+        year: "numeric",
+        month: "short",
+        day: "numeric",
     });
     const formattedTime = new Date(message.timestamp).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
     });
     const formattedDateTime = `${formattedDate}, ${formattedTime}`;
-    const timestamp = document.createElement('span');
-    timestamp.classList.add('timestamp');
+    const timestamp = document.createElement("span");
+    timestamp.classList.add("timestamp");
     timestamp.textContent = formattedDateTime;
 
-    // Only show the read receipt on the sender's (self) message
-    const readReceipt = document.createElement('span');
-    readReceipt.classList.add('read-receipt');
-
+    // Read Receipt (only for sender's messages)
+    const readReceipt = document.createElement("span");
+    readReceipt.classList.add("read-receipt");
     if (isSelf) {
-        if (message.isRead) {
-            readReceipt.textContent = '✔✔'; // Double filled tick for read
-        } else {
-            readReceipt.textContent = '✔';  // Single tick for sent (not read yet)
-        }
+        readReceipt.textContent = message.isRead ? "✔✔" : "✔";
     }
 
-    // Append message text, timestamp, and read receipt (if self) to the message div
-    messageDiv.appendChild(messageText);
+    // Check message type (text or image)
+    if (message.type === "image") {
+        const imageElement = document.createElement("img");
+        imageElement.src = message.fileUrl;
+        imageElement.classList.add("chat-image");
+        imageElement.alt = "Sent Image";
+        imageElement.onclick = () => window.open(message.fileUrl, "_blank"); // Open in new tab
+
+        messageDiv.appendChild(imageElement);
+    } else {
+        // Create text message element
+        const messageText = document.createElement("p");
+        messageText.textContent = message.message;
+        messageDiv.appendChild(messageText);
+    }
+
+    // Append timestamp & read receipt
     messageDiv.appendChild(timestamp);
     messageDiv.appendChild(readReceipt);
 
+    // Append to chat window
     chatWindow.appendChild(messageDiv);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
-
 
 // Requires socket defined beforehand 
 function intializeSocket() {
@@ -214,65 +458,155 @@ function intializeSocket() {
 		messageInput.addEventListener('keydown', (e) => {
 		    if (e.key === 'Enter') sendMessage();
 		});
-		
-		
-		//4. Send Message via Websocket 
-		async function sendMessage() {
+
+
+   const imageButton = document.getElementById("image-button");
+const imageInput = document.getElementById("image-input");
+const imagePreviewContainer = document.getElementById("image-preview-container");
+const imagePreview = document.getElementById("image-preview");
+const cancelPreviewButton = document.getElementById("cancel-preview");
+
+let selectedImage = null;
+
+// Open file picker when image button is clicked
+imageButton.addEventListener("click", () => {
+    imageInput.click();
+});
+
+// Cancel image preview
+cancelPreviewButton.addEventListener("click", () => {
+    selectedImage = null;
+    imagePreviewContainer.style.display = "none";
+    imageInput.value = ""; // Reset file input
+});
+
+// Handle image selection
+imageInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        selectedImage = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreviewContainer.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Send Message via WebSocket
+async function sendMessage() {
+    if (!currentChatUserId) return;
+
+    let imageUrl = null;
+
+    // **Send Text Message**
     const messageText = messageInput.value.trim();
-    if (!messageText || !currentChatUserId) return;
+    if (messageText) {
+        const message = {
+            senderUsername,
+            receiver: currentChatUserId,
+            message: messageText,
+            type: "text",
+        };
 
-    const message = {
-        receiver: currentChatUserId,
-        message: messageText,
-    };
-
-    try {
-        // Emit the message and handle the response
-        socket.emit('sendMessage', message, (response) => {
-            if (response?.error) {
-                alert(response.error); // Show pop-up if blocked
-            } else {
-                // Clear the input field only if the message is sent successfully
-                messageInput.value = '';
-
-                // Ensure `currentChatUsername` is defined before using it
-                if (currentChatUsername) {
-                    const chattedUsers = JSON.parse(localStorage.getItem('chattedUsers')) || [];
-
-                    if (!chattedUsers.some(user => user.userId === currentChatUserId)) {
-                        chattedUsers.push({
-                            username: currentChatUsername,
-                            userId: currentChatUserId
-                        });
-                        localStorage.setItem('chattedUsers', JSON.stringify(chattedUsers));
-                    }
-                } else {
-                    console.warn("currentChatUsername is undefined. Skipping localStorage update.");
+        try {
+            socket.emit("sendMessage", message, (response) => {
+                messageInput.value = ""; // Clear input after sending
+                if (response?.error) {
+                    alert(response.error);
                 }
+            });
+        } catch (error) {
+            console.error("Error sending message:", error.message);
+        }
+    }
+
+    // **Send Image**
+    if (selectedImage) {
+        showNotification("Uploading image...");
+        loader.style.display = "block";
+
+        try {
+            const formData = new FormData();
+            formData.append("image", selectedImage);
+
+            const uploadResponse = await apiRequest("/api/upload", {
+                method: "POST",
+                headers: {
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}` 
+            },
+                body: formData,
+            });
+
+            const data = await uploadResponse.json();
+            if (!data.imageUrl) {
+                showNotification("Image upload failed!");
+                loader.style.display = "none";
+                showPopupMessage(data.message || "Access denied.");
+                return;
             }
-        });
-    } catch (error) {
-        console.error('Error sending message:', error.message);
+            
+                 if (data?.error) {
+                 	loader.style.display = "none";
+                    alert(data.error);
+                }
+
+            imageUrl = data.imageUrl;
+
+            const imagemessage = {
+                senderUsername,
+                receiver: currentChatUserId,
+                message: "[Image]", // Placeholder text
+                type: "image",
+                fileUrl: imageUrl,
+        	};
+        
+            socket.emit("sendMessage", imagemessage, (response) => {              
+                if (response?.error) {
+                    alert(response.error);
+                }
+            });
+            
+            // Reset selected image and preview
+            selectedImage = null;
+            loader.style.display = "none";
+            imagePreviewContainer.style.display = "none";
+            imageInput.value = ""; // Reset input field
+        } catch (error) {
+        	loader.style.display = "none";
+        	showNotification("Error: File size exceeded or too many requests");
+            console.error("Error uploading image:", error.message);
+        }
     }
 }
-		
-		// 5. Receive Messages via WebSocket
-		if (socket) {
-		    socket.on('receiveMessage', (message) => {
-		        //console.log('📥 Socket msg received from server');
-		
-		        // Check if the message is relevant to the current chat (either sent or received by the user)
-		        if (message.receiver === senderUserId || message.sender === senderUserId) {
-		            typingIndicator.style.display = 'none';
-		
-		            // Update the isRead property to true
-		           // message.isRead = true;
-		
-		            // Display the updated message
-		            displayMessage(message, message.sender === senderUserId);
-		        }
-		    });
-		}
+
+// 5️⃣ Receive Messages via WebSocket and Update Cache
+socket.on('receiveMessage', async (message) => {
+    console.log('📥 Socket msg received from server:', message);
+
+    // Check if the message belongs to the current chat
+    if (message.receiver === senderUserId || message.sender === senderUserId) {
+        typingIndicator.style.display = 'none';
+
+        // Display message in UI
+        displayMessage(message, message.sender === senderUserId);
+
+        // 📝 Update Chat Cache
+        const currentCache = chatCache.get(currentChatUserId) || [];
+        
+        // Add the new message to the cache if it's not already there
+        if (!currentCache.some(cachedMsg => cachedMsg._id === message._id)) {
+            const updatedCache = [...currentCache, message];
+            chatCache.set(currentChatUserId, updatedCache);
+
+            // Optionally, encrypt the message if needed and store it in localStorage
+            const encryptedMessages = await Promise.all(updatedCache.map(msg => encryptMessage(JSON.stringify(msg))));
+            localStorage.setItem(`chat_${currentChatUserId}`, JSON.stringify(encryptedMessages));
+        }
+    }
+});
+
 		
 		// 6. Handle Typing Indicator
 		let typingTimeout;
@@ -395,7 +729,7 @@ function intializeSocket() {
 			socket.on('messagesRead', (data) => {		
 		   const { chatId, readerId } = data;
 	   //	console.log(`messageRead received lol 😂, chatId: ${chatId} readerId: ${readerId} `);
-			if (currentChatUserId === readerId &&  senderId ===chatId) {	
+			if (currentChatUserId === readerId &&  senderUserId ===chatId) {	
 		   	 console.log(`User ${readerId} read messages in chat ${chatId}`);	
 				lol();  // Lol 😂 function to update message status in the UI	
 			}
@@ -518,20 +852,6 @@ async function markMessagesssssAsRead(senderId, receiverId) {
 }
 
 
-// ### Function to Notify for message
-function displayNotification(message) {
-    const notification = document.createElement('div');
-    notification.classList.add('notification');
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    notification.style.display = 'block';
-
-    setTimeout(() => {
-        notification.style.display = 'none';
-    }, 3000); // Hide after 3 seconds
-}
-
-
 // Function to check block-status
 async function updateBlockButton() {
     if (!currentChatUserId) {
@@ -622,39 +942,6 @@ async function checkUserAvailability(userId) {
     }
 }
 
-// Assuming the token 
-const token = getJWTToken();
-
-if (token) {
-  const decodedToken = JSON.parse(atob(token.split('.')[1]));
-  const expiryTime = decodedToken.exp * 1000; // Convert to milliseconds
-  startCountdown(expiryTime);
-} else {
-  console.log("No token found");
-}
-
-function startCountdown(expiryTime) {
-  const countdownElement = document.getElementById("countdown");
-
-  const interval = setInterval(() => {
-	    const currentTime = Date.now();
-	    const remainingTime = expiryTime - currentTime;
-	
-		if (remainingTime <= 0) {
-		  clearInterval(interval);
-		  countdownElement.textContent = "Session expired";
-		  countdownElement.classList.remove("session-active");
-		  countdownElement.classList.add("session-expired");
-		  showPopupMessage('Session Expired');
-		} else {
-		  const minutes = Math.floor(remainingTime / 60000);
-		  const seconds = Math.floor((remainingTime % 60000) / 1000);
-		  countdownElement.textContent = `⏰ ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-		  countdownElement.classList.remove("session-expired");
-		  countdownElement.classList.add("session-active");
-		}
-  }, 1000);
-}
 
 // Function to update status, change text color, and make it bold if online
 function updateStatus(status) {
@@ -719,7 +1006,7 @@ document.querySelector('#chat-list').addEventListener('click', (e) => {
     }
 });
 
-document.querySelector('#chat-user').addEventListener('click', (e) => {
+document.querySelector('.back-btn').addEventListener('click', (e) => {
     if (window.innerWidth <= 768) {
         showUserListPanel(); // Switch back to user list when clicking the chat header
     }
@@ -728,3 +1015,120 @@ document.querySelector('#chat-user').addEventListener('click', (e) => {
 function home() {
     window.location.href = '/nihongo';  // Redirect to the homepage (root URL)
 }
+
+const savedImage = localStorage.getItem('userProfilePic');
+	    document.getElementById('myavatar').src = savedImage || '/nihongo/img/user.png' ; 
+	
+
+// 🔔 Show notifications
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.cssText = "position: fixed; top: 70px; right: 10px; background: #007bff; color: white; padding: 8px; border-radius: 4px; z-index: 1000;";  
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+
+// 🔐🔐🔐 Secure Chat Cache Encryption & Storage
+
+async function generateKey() {
+    if (sessionStorage.getItem('encryptionKey')) return;
+
+    const key = await crypto.subtle.generateKey(
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+    );
+
+    const exportedKey = new Uint8Array(await crypto.subtle.exportKey("raw", key));
+    sessionStorage.setItem('encryptionKey', JSON.stringify(Array.from(exportedKey))); // Store as JSON array
+}
+generateKey(); // Generate key on page load
+
+async function getKey() {
+    const rawKey = JSON.parse(sessionStorage.getItem('encryptionKey'));
+    const keyBuffer = new Uint8Array(rawKey); // Convert back to Uint8Array
+    return await crypto.subtle.importKey("raw", keyBuffer, { name: "AES-GCM" }, true, ["encrypt", "decrypt"]);
+}
+
+async function encryptMessage(text) {
+    const key = await getKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12)); // Random IV for security
+    const encodedText = new TextEncoder().encode(text);
+    const encryptedData = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encodedText);
+
+    return JSON.stringify({
+        iv: Array.from(iv), // Store IV as array
+        data: Array.from(new Uint8Array(encryptedData)) // Store encrypted data as array
+    });
+}
+
+async function decryptMessage(encrypted) {
+    try {
+        const key = await getKey();
+        const parsed = JSON.parse(encrypted);
+        const iv = new Uint8Array(parsed.iv);
+        const encryptedData = new Uint8Array(parsed.data);
+
+        const decryptedData = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encryptedData);
+        return new TextDecoder().decode(decryptedData);
+    } catch (error) {
+        console.error('Decryption failed:', error);
+        return null;
+    }
+}
+
+// For single key cache localstorage
+/*
+async function saveChatCache() {
+    const encryptedChats = {};
+    for (const [userId, messages] of chatCache.entries()) {
+        encryptedChats[userId] = await Promise.all(messages.map(msg => encryptMessage(JSON.stringify(msg))));
+    }
+    localStorage.setItem('chatCache', JSON.stringify(encryptedChats));
+}
+
+async function loadChatCache() {
+    const storedChats = localStorage.getItem('chatCache');
+    if (!storedChats) return;
+
+    const encryptedChats = JSON.parse(storedChats);
+    for (const [userId, encryptedMessages] of Object.entries(encryptedChats)) {
+        chatCache.set(userId, await Promise.all(encryptedMessages.map(async msg => JSON.parse(await decryptMessage(msg)))));
+    }
+}
+
+loadChatCache(); // Load chat cache on page load	
+*/
+	
+document.addEventListener("DOMContentLoaded", () => {
+    const emojiButton = document.getElementById("emoji-button");
+    const chatInput = document.getElementById("message-input");
+    const emojiPickerContainer = document.getElementById("emoji-picker");
+
+    const picker = new EmojiMart.Picker({
+        onEmojiSelect: (emoji) => {
+            chatInput.value += emoji.native;
+            chatInput.focus();
+        },
+        theme: 'light', // or 'dark'
+    });
+
+    emojiPickerContainer.appendChild(picker);
+
+    emojiButton.addEventListener("click", () => {
+        emojiPickerContainer.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!emojiPickerContainer.contains(event.target) && event.target !== emojiButton) {
+            emojiPickerContainer.classList.add("hidden");
+        }
+    });
+});
+	
+
+
+	
+intializeSocket();
+socket.on('error', (err) => { console.error('🔴 Socket Error:', err);	});

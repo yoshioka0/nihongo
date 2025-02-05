@@ -16,6 +16,7 @@
     <script src="/nihongo/config.js"></script>
  <script src="/nihongo/auth-v2.js" defer></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
 
 </head>
 <body>
@@ -27,9 +28,9 @@
 <!-- Modal for user creation -->
 <div id="signup-modal" class="modal" style="display:flex">
   <div class="modal-content">
-    <h2>Create a userID</h2>
-        <div id="buttonDiv"></div>
-  
+    <h1>Create a userID</h1>
+      <h3>OR</h3>
+      <div id="buttonDiv"> </div>
     <form id="signup-form">
     	
       <input type="text" id="signup-username" name="signup-username" placeholder="Enter username" required>
@@ -45,13 +46,13 @@
         <i id="show-confirm-password-icon" class="fas fa-eye"></i> <!-- Eye icon for toggling -->
       </div>
 
-      <div style="display: flex; align-items: center; gap: 5px; justify-content: center; margin-bottom:10px;">
+      <div style="display: flex; align-items: center; gap: 5px; margin-bottom:10px;">
         <input type="checkbox" id="keep-logged-in-signup">
         <label for="keep-logged-in-signup"><strong>Remember Me</strong>
       </div>
 
       <!-- class of the turnstile will be added by auth-v2.js if user is unauthenticated -->
-      <div id="turnstile1" data-sitekey="0x4AAAAAAA1LZ_hIj3lnMBRX" class="cf-turnstile" data-theme="light"></div>
+      <div id="turnstile1"  data-theme="light"></div>
 
       <button type="submit">Sign Up</button> <br> <br>
       <p>Already have an account? <a><span id="login-here" class="login-txt">Login Here</span></a></p>
@@ -64,7 +65,7 @@
   
   <div id="login-modal" class="modal">
     <div class="modal-content">
-      <h2>Log In</h2>
+      <h1>Log In</h1>
 
       
       
@@ -78,11 +79,11 @@
 </div>
 <div style="display: flex; align-items: center; gap: 5px; justify-content: flex-start; margin-bottom:10px;">
     <input type="checkbox" id="keep-logged-in">
-    <label for="keep-logged-in-signup"><strong>Keep me logged in</strong>
+    <label for="keep-logged-in"><strong>Keep me logged in</strong>
 </div>
 			
 			<!-- class of the turnstile will be added by auth-v2.js if user unauthicated -->
-			<div id="turnstile2"  data-sitekey="0x4AAAAAAA1LZ_hIj3lnMBRX" class="cf-turnstile" data-theme="light"></div>
+			<div id="turnstile2"  data-theme="light"></div>
 				
 			  <button id="login-button" type="submit">Log In</button> <br> <br>
 			  <p>Don't have an account? <a><span id="signup-here" class="signup-txt">Sign Up</span></a></p>
