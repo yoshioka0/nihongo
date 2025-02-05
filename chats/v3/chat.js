@@ -1108,6 +1108,40 @@ async function loadChatCache() {
 loadChatCache(); // Load chat cache on page load	
 */
 	
+// Load chat cache from localStorage on page load
+async function loadChatCache() {
+    showNotification("🔑 Loading Encrypted Chat Cache...");
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+
+        // Check if key belongs to chat history (format: "chat_<userId>")
+        if (key.startsWith("chat_")) {
+            const userId = key.split("_")[1];
+            const storedData = localStorage.getItem(key);
+
+            if (storedData) {
+                try {
+                    // Decrypt all messages
+                    const decryptedMessages = await Promise.all(
+                        JSON.parse(storedData).map(async msg => JSON.parse(await decryptMessage(msg)))
+                    );
+
+                    chatCache.set(userId, decryptedMessages);
+                } catch (error) {
+                    console.error(`Failed to decrypt chat for ${userId}:`, error);
+                }
+            }
+        }
+    }
+
+    showNotification("✅ Chat Cache Loaded Successfully.");
+}
+
+// Call function to load chat cache on page load
+window.addEventListener("load", loadChatCache);
+
+	
 document.addEventListener("DOMContentLoaded", () => {
     const emojiButton = document.getElementById("emoji-button");
     const chatInput = document.getElementById("message-input");
