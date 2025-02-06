@@ -7,6 +7,10 @@
   box-sizing: border-box;
 }
 
+a {
+text-decoration: none;
+}
+
 #countdown, #login-btn {
   font-family: 'Arial', sans-serif;
   font-size: 16px;
@@ -116,7 +120,7 @@
 .hamburger {
     width: 35px;
     height: 30px;
-    display: none;
+    display: flex;
     flex-direction: column;
     justify-content: space-between;
     cursor: pointer;

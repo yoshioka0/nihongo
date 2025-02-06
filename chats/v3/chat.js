@@ -1131,6 +1131,10 @@ async function loadChatCache() {
                     chatCache.set(userId, decryptedMessages);
                 } catch (error) {
                     console.error(`Failed to decrypt chat for ${userId}:`, error);
+                    
+                    // Remove corrupted chat data from localStorage
+                    localStorage.removeItem(key);
+                    console.warn(`Removed corrupted chat cache for user ${userId}`);
                 }
             }
         }
