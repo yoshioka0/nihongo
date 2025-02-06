@@ -172,10 +172,7 @@ function clearAllData() {
 	    sessionStorage.clear();
 	    
 	    // Clear all cookies
-	    clearCookies();
-	    
-	    // Revoke Google OAuth session (optional but recommended)
-	    revokeGoogleSession();
+	    document.cookie = "refreshToken=; Path=/; Max-Age=0";
 	    
 		// Clear IndexedDb 
 		var req = indexedDB.deleteDatabase('SecureChatDB');
