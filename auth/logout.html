@@ -84,13 +84,7 @@
 	    
 	    // Clear sessionStorage
 	    sessionStorage.clear();
-	    
-	    // Clear all cookies
-	    clearCookies();
-	    
-	    // Revoke Google OAuth session (optional but recommended)
-	    revokeGoogleSession();
-	    
+	        
 		// Clear IndexedDb 
 		var req = indexedDB.deleteDatabase('SecureChatDB');
 		req.onsuccess = function () {
@@ -103,9 +97,6 @@
 		    console.log("Couldn't delete database due to the operation being blocked");
 		};
 		
-	    // Redirect to login or home page
-	    window.location.href = '/login'; // Or wherever you need to send the user
-	}
     clearAllData();
     </script>
 

@@ -172,19 +172,7 @@ function clearAllData() {
 	    sessionStorage.clear();
 	    
 	    // Clear all cookies
-	    document.cookie = "refreshToken=; Path=/; Max-Age=0";
-	    
-		// Clear IndexedDb 
-		var req = indexedDB.deleteDatabase('SecureChatDB');
-		req.onsuccess = function () {
-		    console.log("Deleted database successfully");
-		};
-		req.onerror = function () {
-		    console.log("Couldn't delete database");
-		};
-		req.onblocked = function () {
-		    console.log("Couldn't delete database due to the operation being blocked");
-		};
+	    document.cookie = "refreshToken=; Path=/; Max-Age=0";	    		
 }
     
 
