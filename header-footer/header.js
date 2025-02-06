@@ -21,7 +21,7 @@ function loadHTML(url, elementId) {
             document.getElementById(elementId).innerHTML = data;
             isHTMLLoaded = true;  // Set flag to true when the HTML is loaded          
             console.log("HTML (H&F) loaded, proceed with other actions.");            
-            HTMLLoaded();
+            HTMLLoaded();            
         })
         .catch(error => {
             console.error('Error loading HTML:', error);

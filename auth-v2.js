@@ -1,5 +1,15 @@
 // constants in config.js
 
+//To prevent the page to be embedded
+if (window.self !== window.top) {
+    // Prevent iframe embedding
+    document.body.innerHTML = "<h1>Embedding is not allowed.</h1>";
+    setTimeout(() => {
+        window.top.location = window.self.location;
+    }, 1000); // Redirect after 1 second
+}
+
+
 // Function to get the access token from localStorage
 function getJWTToken() {
     return localStorage.getItem('accessToken');

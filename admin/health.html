@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Health Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="/nihongo/config.js"></script>
+     <script src="/nihongo/auth-v2.js" defer></script>
+    <style>
+        body { background-color: #f4f4f4; }
+        .card { border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .card-title { font-weight: bold; }
+        .loader {
+            width: 30px; height: 30px; border: 4px solid #ddd; border-top: 4px solid #007bff;
+            border-radius: 50%; animation: spin 1s linear infinite; display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .status-online { color: green; font-weight: bold; }
+        .status-offline { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Server Health Dashboard</h2>
+        <div id="status-message" class="alert d-none"></div>
+
+        <div class="row" id="server-data">
+            <div class="text-center">
+                <div class="loader"></div> Loading server status...
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function fetchServerHealth() {
+    $("#server-data").html('<div class="text-center"><div class="loader"></div> Loading server status...</div>');
+
+    const token = localStorage.getItem("accessToken");  // Get token from localStorage
+    if (!token) {
+        $("#status-message").removeClass("d-none alert-success").addClass("alert-danger").text("Error: No access token found!");
+        return;
+    }
+
+    apiRequest('/admin/server-health', {
+        method: "GET",
+        headers: { 
+            "Authorization": `Bearer ${token}`, // Attach token to request
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Unauthorized or Invalid Token");
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) throw new Error("Failed to fetch server health");
+
+        const s = data.serverHealth;
+        const serverTime = new Date(s.serverTime).toLocaleString(); // Convert to local time
+        const html = `
+            <div class="col-md-6 mb-3">
+                <div class="card p-3">
+                    <h5>🕒 Server Time</h5>                  
+                    <p><strong>${serverTime}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card p-3">
+                    <h5>⏳ Uptime</h5>
+                    <p><strong>${s.uptime}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>🆔 Process ID</h5>
+                    <p><strong>${s.processId}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>🖥️ Node.js Version</h5>
+                    <p><strong>${s.nodeVersion}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>💾 Memory Usage</h5>
+                    <p><strong>${s.memoryUsage}</strong> (Free: ${s.freeMemory} / Total: ${s.totalMemory})</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>🔄 Load Average</h5>
+                    <p><strong>${s.loadAverage.join(', ')}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>🖥️ CPU Usage</h5>
+                    <p><strong>${s.cpuUsage}</strong> (Cores: ${s.cpuCores})</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>📡 Network</h5>
+                    <p>Sent: <strong>${s.networkStats.totalSent} MB</strong>, Received: <strong>${s.networkStats.totalReceived} MB</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>📁 Disk Usage</h5>
+                    <p><strong>${s.diskUsage}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>🟢 Online Users</h5>
+                    <p><strong>${s.onlineUsers} / ${s.totalUsers}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>📩 Notifications</h5>
+                    <p><strong>${s.totalNotifications}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>🗂️ Logs</h5>
+                    <p><strong>${s.totalLogs}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>🔗 Active WebSockets</h5>
+                    <p><strong>${s.activeWebSockets}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3">
+                    <h5>🕐 Response Time</h5>
+                    <p><strong>${s.responseTime}</strong></p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-3 ${s.mongoDB === 'Connected' ? 'text-success' : 'text-danger'}">
+                    <h5>📦 MongoDB Status</h5>
+                    <p><strong>${s.mongoDB}</strong></p>
+                </div>
+            </div>
+        `;
+
+        $("#server-data").html(html);
+    })
+    .catch(err => {
+        $("#status-message").removeClass("d-none alert-success").addClass("alert-danger").text("Error: " + err.message);
+    });
+}
+
+fetchServerHealth();
+    </script>
+</body>
+</html>

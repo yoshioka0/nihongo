@@ -104,6 +104,14 @@
     window.addEventListener('resize', setViewportHeight);
     setViewportHeight();
   </script>
+  <script>
+    let checkDevTools = setInterval(() => {
+        if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
+            document.body.innerHTML = "<h1>DevTools detected! Site locked.</h1>";
+            clearInterval(checkDevTools); // Stop checking after detection
+        }
+    }, 500);
+</script>
   
   
   <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>

@@ -11,7 +11,7 @@ a {
 text-decoration: none;
 }
 
-#countdown, #login-btn {
+#countdown {
   font-family: 'Arial', sans-serif;
   font-size: 16px;
   color: #fff;
@@ -227,6 +227,19 @@ text-decoration: none;
   text-transform: capitalize;
 }
 
+#login-btn {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  color: #fff;
+  background-color: #333;
+  padding: 5px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+}
+
 .user-icon {
   width: 40px;
   height: 40px;
@@ -369,19 +382,16 @@ color: white;
 
 /* Responsive Design */
 @media (max-width: 768px) {
-
-    
   .user-name {
   	display:none;	
-}
-.site-name {
+	}
+	.site-name {
   font-size: 1.2rem;
-  }
-  .heading h1 {
-    font-size: 1.8rem;
-  }
-  
-
+	}
+	.heading h1 {
+		font-size: 1.8rem;
+	}
+	
 }
 
 /* Surprise Button */
