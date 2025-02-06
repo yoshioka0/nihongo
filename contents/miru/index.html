@@ -7,9 +7,9 @@
   <link rel="stylesheet" href="/nihongo/styles.css">
   <link rel="stylesheet" href="/nihongo/header-footer/header.css">
   <script src="/nihongo/auth-v2.js" defer></script>
+  <script src="/nihongo/config.js"></script>
   <script  src="/nihongo/header-footer/header.js" defer></script>   
-   <script src="/nihongo/script.js" defer></script>
-   <script src="/nihongo/config.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
@@ -198,7 +198,7 @@
                 videoContainer.innerHTML = `
                     <iframe 
                         src="https://vidsrc.in/embed/movie?imdb=${imdbID}" 
-                        allowfullscreen>
+                        allowfullscreen referrerpolicy="no-referrer" sandbox>
                     </iframe>
                 `;
                 videoContainer.style.opacity = "1"; // Fade in effect
