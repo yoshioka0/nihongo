@@ -1036,8 +1036,8 @@ function showNotification(message) {
     setTimeout(() => notification.remove(), 3000);
 }
 
-// 🔐🔐🔐 Secure Chat Cache Encryption & Storage
-
+// 🔐🔐🔐 Secure Chat Cache Encryption but session only
+/*
 async function generateKey() {
     if (sessionStorage.getItem('encryptionKey')) return;
 
@@ -1085,29 +1085,6 @@ async function decryptMessage(encrypted) {
     }
 }
 
-// For single key cache localstorage
-/*
-async function saveChatCache() {
-    const encryptedChats = {};
-    for (const [userId, messages] of chatCache.entries()) {
-        encryptedChats[userId] = await Promise.all(messages.map(msg => encryptMessage(JSON.stringify(msg))));
-    }
-    localStorage.setItem('chatCache', JSON.stringify(encryptedChats));
-}
-
-async function loadChatCache() {
-    const storedChats = localStorage.getItem('chatCache');
-    if (!storedChats) return;
-
-    const encryptedChats = JSON.parse(storedChats);
-    for (const [userId, encryptedMessages] of Object.entries(encryptedChats)) {
-        chatCache.set(userId, await Promise.all(encryptedMessages.map(async msg => JSON.parse(await decryptMessage(msg)))));
-    }
-}
-
-loadChatCache(); // Load chat cache on page load	
-*/
-	
 // Load chat cache from localStorage on page load
 async function loadChatCache() {
     showNotification("🔑 Loading Encrypted Chat Cache...");
@@ -1140,7 +1117,124 @@ async function loadChatCache() {
 
 // Call function to load chat cache on page load
 window.addEventListener("load", loadChatCache);
+*/
 
+// 🔐 Secure Chat Cache Encryption with Persistent Key Storage (IndexedDB)
+
+async function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("SecureChatDB", 1);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            db.createObjectStore("keys");
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+async function storeKeyInDB(key) {
+    const db = await openDB();
+    const tx = db.transaction("keys", "readwrite");
+    const store = tx.objectStore("keys");
+    await store.put(Array.from(new Uint8Array(await crypto.subtle.exportKey("raw", key))), "encryptionKey");
+}
+
+async function getKeyFromDB() {
+    const db = await openDB();
+    const tx = db.transaction("keys", "readonly");
+    const store = tx.objectStore("keys");
+    const rawKeyArray = await store.get("encryptionKey");
+
+    if (!rawKeyArray) return null;
+    return crypto.subtle.importKey("raw", new Uint8Array(rawKeyArray), { name: "AES-GCM" }, true, ["encrypt", "decrypt"]);
+}
+
+async function generateKey() {
+    const existingKey = await getKeyFromDB();
+    if (existingKey) return;
+
+    const key = await crypto.subtle.generateKey(
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+    );
+
+    await storeKeyInDB(key);
+}
+generateKey(); // Generate key on page load
+
+async function getKey() {
+    const key = await getKeyFromDB();
+    if (!key) {
+        console.error("Encryption key missing. Chat history will be unreadable.");
+        return null;
+    }
+    return key;
+}
+
+async function encryptMessage(text) {
+    const key = await getKey();
+    if (!key) return null;
+
+    const iv = crypto.getRandomValues(new Uint8Array(12)); // Random IV
+    const encodedText = new TextEncoder().encode(text);
+    const encryptedData = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encodedText);
+
+    return JSON.stringify({
+        iv: Array.from(iv),
+        data: Array.from(new Uint8Array(encryptedData))
+    });
+}
+
+async function decryptMessage(encrypted) {
+    try {
+        const key = await getKey();
+        if (!key) return null;
+
+        const parsed = JSON.parse(encrypted);
+        const iv = new Uint8Array(parsed.iv);
+        const encryptedData = new Uint8Array(parsed.data);
+
+        const decryptedData = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encryptedData);
+        return new TextDecoder().decode(decryptedData);
+    } catch (error) {
+    	showPopupMessage("Decryption failed");
+        console.error("Decryption failed:", error);
+        return null;
+    }
+}
+
+// Load chat cache from localStorage on page load
+async function loadChatCache() {
+    showNotification("🔑 Loading Encrypted Chat Cache...");
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+
+        if (key.startsWith("chat_")) {
+            const userId = key.split("_")[1];
+            const storedData = localStorage.getItem(key);
+
+            if (storedData) {
+                try {
+                    const decryptedMessages = await Promise.all(
+                        JSON.parse(storedData).map(async msg => JSON.parse(await decryptMessage(msg)))
+                    );
+
+                    chatCache.set(userId, decryptedMessages);
+                } catch (error) {
+                    console.error(`Failed to decrypt chat for ${userId}:`, error);
+                }
+            }
+        }
+    }
+
+    showNotification("✅ Chat Cache Loaded Successfully.");
+}
+
+window.addEventListener("load", loadChatCache);
+	
 	
 document.addEventListener("DOMContentLoaded", () => {
     const emojiButton = document.getElementById("emoji-button");

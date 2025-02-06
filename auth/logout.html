@@ -91,6 +91,18 @@
 	    // Revoke Google OAuth session (optional but recommended)
 	    revokeGoogleSession();
 	    
+		// Clear IndexedDb 
+		var req = indexedDB.deleteDatabase('SecureChatDB');
+		req.onsuccess = function () {
+		    console.log("Deleted database successfully");
+		};
+		req.onerror = function () {
+		    console.log("Couldn't delete database");
+		};
+		req.onblocked = function () {
+		    console.log("Couldn't delete database due to the operation being blocked");
+		};
+		
 	    // Redirect to login or home page
 	    window.location.href = '/login'; // Or wherever you need to send the user
 	}

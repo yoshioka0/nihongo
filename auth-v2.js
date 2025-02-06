@@ -150,10 +150,8 @@ async function logout() {
 	}else{
 		console.log('Logout server uncalled');
 		}
-    // Clear tokens and session data
-    localStorage.clear();
-    sessionStorage.clear();
-    document.cookie = "refreshToken=; Path=/; Max-Age=0";
+    // Clear tokens, session data, cookies, IndexedDb 
+	clearAllData();
     window.location.href = '/nihongo/auth/logout.html';
 }
 
@@ -165,6 +163,36 @@ document.addEventListener('DOMContentLoaded', checkAuthentication);
 
 
 //Helper Function ⭐⭐
+
+function clearAllData() {
+	    // Clear localStorage
+	    localStorage.clear();
+	    
+	    // Clear sessionStorage
+	    sessionStorage.clear();
+	    
+	    // Clear all cookies
+	    clearCookies();
+	    
+	    // Revoke Google OAuth session (optional but recommended)
+	    revokeGoogleSession();
+	    
+		// Clear IndexedDb 
+		var req = indexedDB.deleteDatabase('SecureChatDB');
+		req.onsuccess = function () {
+		    console.log("Deleted database successfully");
+		};
+		req.onerror = function () {
+		    console.log("Couldn't delete database");
+		};
+		req.onblocked = function () {
+		    console.log("Couldn't delete database due to the operation being blocked");
+		};
+}
+    
+
+
+
 
 // Function to show a popup message with a progress bar
 // Maximum number of pop-ups allowed at once
