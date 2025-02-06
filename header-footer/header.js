@@ -169,7 +169,6 @@ window.addEventListener('click', function (event) {
 function HTMLLoaded() {
  	
 	 updateActiveUser();	
-	 fetchSubscriptions(); 
 	
 	// Footer visibility on scroll (⭐Footer Script was small so merged in header :⁠-⁠))
 	const footer = document.querySelector('.footer-content');

@@ -1079,8 +1079,7 @@ async function decryptMessage(encrypted) {
 
         const decryptedData = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encryptedData);
         return new TextDecoder().decode(decryptedData);
-    } catch (error) {
-    	showPopupMessage('Decryption failed: Logout to fix.');
+    } catch (error) {   	
         console.error('Decryption failed:', error);
         return null;
     }
@@ -1113,34 +1112,46 @@ loadChatCache(); // Load chat cache on page load
 async function loadChatCache() {
     showNotification("🔑 Loading Encrypted Chat Cache...");
 
+    let decryptionFailed = false; // Track failures
+
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
 
-        // Check if key belongs to chat history (format: "chat_<userId>")
         if (key.startsWith("chat_")) {
             const userId = key.split("_")[1];
             const storedData = localStorage.getItem(key);
 
             if (storedData) {
                 try {
-                    // Decrypt all messages
+                    // Attempt to decrypt messages
                     const decryptedMessages = await Promise.all(
-                        JSON.parse(storedData).map(async msg => JSON.parse(await decryptMessage(msg)))
+                        JSON.parse(storedData).map(async msg => {
+                            const decrypted = await decryptMessage(msg);
+                            if (decrypted === null) throw new Error("Decryption failed");
+                            return JSON.parse(decrypted);
+                        })
                     );
 
                     chatCache.set(userId, decryptedMessages);
                 } catch (error) {
                     console.error(`Failed to decrypt chat for ${userId}:`, error);
-                    
-                    // Remove corrupted chat data from localStorage
+
+                    // Remove corrupted chat data
                     localStorage.removeItem(key);
                     console.warn(`Removed corrupted chat cache for user ${userId}`);
+
+                    decryptionFailed = true; // Mark failure
                 }
             }
         }
     }
 
-    showNotification("✅ Chat Cache Loaded Successfully.");
+    // Adjust final message
+    if (decryptionFailed) {
+        showNotification("⚠️ Some chats failed to load due to decryption errors.");
+    } else {
+        showNotification("✅ Chat Cache Loaded Successfully.");
+    }
 }
 
 // Call function to load chat cache on page load
