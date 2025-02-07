@@ -59,7 +59,7 @@ async function apiRequest(endpoint, options) {
             // Show the popup message if the status code is 403
             if (response.status === 403) {
                 const data = await response.json();
-                showPopupMessage(data.message || "Access denied.");
+                showPopupMessage2(data.message || "Access denied.", 5000);
             }
             
             if (response) {

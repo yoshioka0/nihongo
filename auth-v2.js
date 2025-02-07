@@ -252,4 +252,26 @@ function showPopupMessage(message, duration = 3000) {
     }, duration);
 }
 
+function showPopupMessage2(message, duration = 3000) {
+    let alertBox = document.getElementById('custom-alert') || (() => {
+        let box = document.createElement('div');
+        box.id = 'custom-alert';
+        document.body.appendChild(box);
+        document.head.insertAdjacentHTML('beforeend', `<style>
+            #custom-alert {
+                position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
+                background: #ff4b5c; color: white; padding: 15px 20px;
+                border-radius: 5px; font-size: 16px; font-weight: bold;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); transition: top 0.5s;
+                z-index: 9999; min-width: 250px; text-align: center;
+            }
+        </style>`);
+        return box;
+    })(); 
+    alertBox.innerText = message;
+    alertBox.style.top = "10px";
+    setTimeout(() => alertBox.style.top = "-200px", duration);
+}
 
+// Example usage (Default: 3sec)
+//showPopupMessage2("This is a custom alert!", 4000);

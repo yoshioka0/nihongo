@@ -9,35 +9,142 @@
         <script src="/nihongo/config.js"></script>
      <script src="/nihongo/auth-v2.js" defer></script>
     <style>
-        body { background-color: #f4f4f4; }
+        body { background: linear-gradient(135deg, #1e3c72, #2a5298);  color: #ffffff; } 
         .card { border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
         .card-title { font-weight: bold; }
-        .loader {
-            width: 30px; height: 30px; border: 4px solid #ddd; border-top: 4px solid #007bff;
-            border-radius: 50%; animation: spin 1s linear infinite; display: inline-block;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .status-online { color: green; font-weight: bold; }
         .status-offline { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container mt-4">
-        <h2 class="text-center mb-4">Server Health Dashboard</h2>
+        <h2 class="text-center mb-4">🚀 Server Health Dashboard</h2>
+        <hr>
         <div id="status-message" class="alert d-none"></div>
 
         <div class="row" id="server-data">
-            <div class="text-center">
-                <div class="loader"></div> Loading server status...
-            </div>
+        	<div class="col-md-6 mb-3">
+    <div class="card p-3">
+        <h5>🕒 Server Time</h5>                  
+        <p><strong id="server-time">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-6 mb-3">
+    <div class="card p-3">
+        <h5>⏳ Uptime</h5>
+        <p><strong id="server-uptime">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>🆔 Process ID</h5>
+        <p><strong id="server-process-id">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>🖥️ Node.js Version</h5>
+        <p><strong id="server-node-version">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>💾 Memory Usage</h5>
+        <p><strong id="server-memory-usage">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>🔄 Load Average</h5>
+        <p><strong id="server-load-average">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>🖥️ CPU Usage</h5>
+        <p><strong id="server-cpu-usage">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>📡 Network</h5>
+        <p id="server-network">Loading...</p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>📁 Disk Usage</h5>
+        <p><strong id="server-disk-usage">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>🟢 Online Users</h5>
+        <p><strong id="server-online-users">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>📩 Notifications</h5>
+        <p><strong id="server-notifications">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>🗂️ Logs</h5>
+        <p><strong id="server-logs">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>🔗 Active WebSockets</h5>
+        <p><strong id="server-active-websockets">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>🕐 Response Time</h5>
+        <p><strong id="server-response-time">Loading...</strong></p>
+    </div>
+</div>
+<div class="col-md-4 mb-3">
+    <div class="card p-3">
+        <h5>📦 MongoDB Status</h5>
+        <p><strong id="server-mongodb" class="text-danger">Loading...</strong></p>
+    </div>
+</div>
+       
+
         </div>
     </div>
+<script> 
+	function formatUptime(seconds) {
+    // Ensure the input is a valid number
+    seconds = parseFloat(seconds);  
+    if (isNaN(seconds)) return "Invalid uptime";
 
+    seconds = Math.floor(seconds); // Remove decimal part
+
+    let days = Math.floor(seconds / 86400);
+    seconds %= 86400;
+    let hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+    let minutes = Math.floor(seconds / 60);
+    seconds %= 60;
+
+    let result = [];
+    if (days > 0) result.push(`${days}d`);
+    if (hours > 0) result.push(`${hours}h`);
+    if (minutes > 0) result.push(`${minutes}m`);
+    if (seconds > 0 || result.length === 0) result.push(`${seconds}s`); // Show at least "0s"
+
+    return result.join(" ");
+}
+	</script>
+	
     <script>
     function fetchServerHealth() {
-    $("#server-data").html('<div class="text-center"><div class="loader"></div> Loading server status...</div>');
-
-    const token = localStorage.getItem("accessToken");  // Get token from localStorage
+    const token = localStorage.getItem("accessToken");  
     if (!token) {
         $("#status-message").removeClass("d-none alert-success").addClass("alert-danger").text("Error: No access token found!");
         return;
@@ -46,7 +153,7 @@
     apiRequest('/admin/server-health', {
         method: "GET",
         headers: { 
-            "Authorization": `Bearer ${token}`, // Attach token to request
+            "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
         }
     })
@@ -58,108 +165,41 @@
         if (!data.success) throw new Error("Failed to fetch server health");
 
         const s = data.serverHealth;
-        const serverTime = new Date(s.serverTime).toLocaleString(); // Convert to local time
-        const html = `
-            <div class="col-md-6 mb-3">
-                <div class="card p-3">
-                    <h5>🕒 Server Time</h5>                  
-                    <p><strong>${serverTime}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-6 mb-3">
-                <div class="card p-3">
-                    <h5>⏳ Uptime</h5>
-                    <p><strong>${s.uptime}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>🆔 Process ID</h5>
-                    <p><strong>${s.processId}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>🖥️ Node.js Version</h5>
-                    <p><strong>${s.nodeVersion}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>💾 Memory Usage</h5>
-                    <p><strong>${s.memoryUsage}</strong> (Free: ${s.freeMemory} / Total: ${s.totalMemory})</p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>🔄 Load Average</h5>
-                    <p><strong>${s.loadAverage.join(', ')}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>🖥️ CPU Usage</h5>
-                    <p><strong>${s.cpuUsage}</strong> (Cores: ${s.cpuCores})</p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>📡 Network</h5>
-                    <p>Sent: <strong>${s.networkStats.totalSent} MB</strong>, Received: <strong>${s.networkStats.totalReceived} MB</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>📁 Disk Usage</h5>
-                    <p><strong>${s.diskUsage}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>🟢 Online Users</h5>
-                    <p><strong>${s.onlineUsers} / ${s.totalUsers}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>📩 Notifications</h5>
-                    <p><strong>${s.totalNotifications}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>🗂️ Logs</h5>
-                    <p><strong>${s.totalLogs}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>🔗 Active WebSockets</h5>
-                    <p><strong>${s.activeWebSockets}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>🕐 Response Time</h5>
-                    <p><strong>${s.responseTime}</strong></p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card p-3 ${s.mongoDB === 'Connected' ? 'text-success' : 'text-danger'}">
-                    <h5>📦 MongoDB Status</h5>
-                    <p><strong>${s.mongoDB}</strong></p>
-                </div>
-            </div>
-        `;
+        const serverTime = new Date(s.serverTime).toLocaleString();
+        const uptime = formatUptime(s.uptime);
 
-        $("#server-data").html(html);
+        // Update only the text inside existing elements
+        $("#server-time").text(serverTime);
+        $("#server-uptime").text(uptime);
+        $("#server-process-id").text(s.processId);
+        $("#server-node-version").text(s.nodeVersion);
+        $("#server-memory-usage").html(`${s.memoryUsage} (Free: ${s.freeMemory} / Total: ${s.totalMemory})`);
+        $("#server-load-average").text(s.loadAverage.join(", "));
+        $("#server-cpu-usage").html(`${s.cpuUsage} (Cores: ${s.cpuCores})`);
+        $("#server-network").html(`Sent: <strong>${s.networkStats.totalSent} MB</strong>, Received: <strong>${s.networkStats.totalReceived} MB</strong>`);
+        $("#server-disk-usage").text(s.diskUsage);
+        $("#server-online-users").text(`${s.onlineUsers} / ${s.totalUsers}`);
+        $("#server-notifications").text(s.totalNotifications);
+        $("#server-logs").text(s.totalLogs);
+        $("#server-active-websockets").text(s.activeWebSockets);
+        $("#server-response-time").text(s.responseTime);
+
+        // Update MongoDB status with color
+        $("#server-mongodb").text(s.mongoDB)
+            .removeClass("text-success text-danger")
+            .addClass(s.mongoDB === "Connected" ? "text-success" : "text-danger");
+
     })
     .catch(err => {
         $("#status-message").removeClass("d-none alert-success").addClass("alert-danger").text("Error: " + err.message);
     });
 }
 
+// Initial Fetch
 fetchServerHealth();
+
+// Auto-refresh every 5 seconds (5000ms)
+setInterval(fetchServerHealth, 5000);
     </script>
 </body>
 </html>
