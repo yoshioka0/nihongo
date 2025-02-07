@@ -9,7 +9,7 @@ let BASE_URL
 
 // Dynamically Choose the Fastest Server
 const backends = [
-   { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost 
+//   { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost 
     { url: "https://nihongo-backend.onrender.com", latency: Infinity },	// ✅ Use this fully functional 
 //    { url: "https://nihongo-backend-env.up.railway.app", latency: Infinity }	// ❌Don't Use if you want refreshtoken function in cookie to work
 ];
