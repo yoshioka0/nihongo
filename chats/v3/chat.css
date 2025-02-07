@@ -745,9 +745,8 @@ hr {
 
 .loader {
 	display: block;
-    position: absolute;
-    top: 40%;
-    left: 40%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
     border: 5px solid #f3f3f3; /* Light gray background */
     border-top: 5px solid #3498db; /* Blue spinner */

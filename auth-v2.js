@@ -138,33 +138,42 @@ function redirect() {
 // Logout user and call the logout endpoint on the server to blacklist the token
 async function logout() { 
     const accessToken = localStorage.getItem("accessToken");
-	if (accessToken) {
-		   try {
-		       const response = await apiRequest('/api/logout', {
-		            method: 'POST',
-		            headers: {
-		                'Content-Type': 'application/json',
-		                'Authorization': `Bearer ${accessToken}`,
-		            },
-		            body: JSON.stringify({ accessToken }),
-		            credentials: 'include', 
-		        });
-		
-		        if (!response.ok) {
-		            throw new Error('Logout request failed');
-		        }
-		
-		    } catch (error) {
-		        console.error('Error during logout API request:', error);
-		    }
-	}else{
-		console.log('Logout server uncalled');
-		}
-    // Clear tokens, session data, cookies, IndexedDb 
-	clearAllData();
-    window.location.href = '/nihongo/auth/logout.html';
-}
+    if (!accessToken) {
+        alert("No active session found. Please clear cookies and try again.");
+        clearAllData();
+        return;
+    }
 
+    try {
+        const response = await apiRequest('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            credentials: 'include' // Ensures cookies are sent
+        });
+
+        if (!response.ok) {
+            throw new Error('Logout request failed');
+        }
+
+        const data = await response.json();
+        showPopupMessage2?.(data.message || "Logged out successfully"); // Use optional chaining
+
+        // Clear tokens, session data, cookies, IndexedDB 
+        clearAllData();
+
+        setTimeout(() => {
+            window.location.href = '/nihongo/auth/logout.html';
+        }, 1500); // Delay for message visibility
+
+    } catch (error) {
+        console.error('Error during logout API request:', error);
+        alert("Error: Unable to reach the server. Local credentials have been cleared. Please manually clear site cookies and data to ensure a complete logout.");
+        clearAllData(); // Clear even on failure
+    }    
+}
 
 
 
@@ -172,17 +181,19 @@ async function logout() {
 document.addEventListener('DOMContentLoaded', checkAuthentication);
 
 
-//Helper Function ⭐⭐
-
+// Helper Function ⭐⭐
 function clearAllData() {
-	    // Clear localStorage
-	    localStorage.clear();
-	    
-	    // Clear sessionStorage
-	    sessionStorage.clear();
-	    
-	    // Clear all cookies
-	    document.cookie = "refreshToken=; Path=/; Max-Age=0";	    		
+    // Clear localStorage
+    localStorage.clear();
+    
+    // Clear sessionStorage
+    sessionStorage.clear();
+    
+    // Clear all cookies (Loop through them)
+    document.cookie.split(";").forEach(cookie => {
+        document.cookie = cookie.replace(/^ +/, "")
+            .replace(/=.*/, "=; Path=/; Max-Age=0; domain=" + location.hostname);
+    });
 }
     
 
