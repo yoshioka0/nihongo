@@ -255,8 +255,8 @@ async function openChat(recipientUserId, recipientUsername) {
 		return 
 		}
 
-	chatWindow.innerHTML = `<div class="loader"></div>`;
-
+	
+	chatWindow.innerHTML = ` <div class="loader-container"> <div class="loader"></div> <span>Loading Chats...</span> </div>	`;
     
 
     // Join the chat room

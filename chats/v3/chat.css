@@ -743,23 +743,37 @@ hr {
     background-color: rgba(0, 0, 0, 0.5); 
 }
 
+.loader-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: 50px; 
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff; 
+}
 .loader {
-	display: block;
+    display: block;
+    position: ;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border: 5px solid #f3f3f3; /* Light gray background */
-    border-top: 5px solid #3498db; /* Blue spinner */
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
-    width: 80px;
-    height: 80px;
+    border: 8px solid transparent;
+    border-top: 8px solid #4285F4;  /* Google Blue */
+    border-right: 8px solid #EA4335; /* Google Red */
+    border-bottom: 8px solid #34A853; /* Google Green */
+    border-left: 8px solid #FBBC05;  /* Google Yellow */
     animation: spin 1s linear infinite;
-    background-color: rgba(0, 0, 0, 0.1); 
 }
 
+/* Spinner Animation */
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Popup Notification Style */
