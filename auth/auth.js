@@ -27,8 +27,10 @@ function renderTurnstile(turnstileId) {
 }
 
 const loginWindow = document.querySelector('.modal');
+
 // Google OAuth
 function handleCredentialResponse(response) {
+	showPopupMessage2('Tip: To keep your session longer allow 3rd party cookies for this site.',5000,'green')
 	loginWindow.innerHTML = ` <div class="loader-container"> <div class="loader"></div> <span>Signing In...</span> </div>	`;
     const token = response.credential; // Google ID token
     	apiRequest("/auth/google", {
@@ -63,7 +65,7 @@ function handleCredentialResponse(response) {
     })
     .catch(err => {
         console.error("Error:", err);        
-        alert('error', 'An error occurred. Please try again.');
+        alert('error: An error occurred. Please try again.');
         location.reload();           
     });
 }
@@ -188,7 +190,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
 				//document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800;`;
 			}
 
-        	showPopupMessage(`User created successfully! (${username})`);
+        	showPopupMessage2(`User created successfully! (${username})`,3000,'green');
             await delay(500);
             alert(`User created successfully! (${username})`);
             window.location.href = '/nihongo/';
@@ -244,7 +246,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 				// Store refresh token in a cookie (HttpOnly and Secure flags(in https environment) for better security)
 				//document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800;`;	// 7 days
 			}
-			showPopupMessage(`Welcome back, ${username}!`);            
+			showPopupMessage2(`Welcome back, ${username}!`,3000,'green');            
 			await delay(500);
             alert(`Welcome back, ${username}!`);
             window.location.href = '/nihongo/';         

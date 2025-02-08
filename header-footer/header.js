@@ -243,12 +243,7 @@ function HTMLLoaded() {
 	}
 		
 	// Call checkLoginStatus to ensure the logout button is shown when appropriate
-	checkLoginStatus();
-		
-	// Surprise Button Interaction
-	document.getElementById("surprise-button").addEventListener("click", () => {
-		surprise();
-	});
+	checkLoginStatus();		
 	
 		const savedImage = localStorage.getItem('userProfilePic');
 	    document.getElementById('profileImg').src = savedImage || '/nihongo/img/user.png' ; 
@@ -289,8 +284,12 @@ function HTMLLoaded() {
 	
 	
 	function surprise() { 
-	  document.getElementById("surprise-message").classList.add("show");
-	
+	var element = document.getElementById("surprise-message");
+	if (element.classList.contains("show")) {
+    	element.classList.remove("show");
+ 	   return;
+	}   
+	element.classList.add("show");	
 	  // Show the party (balloons and confetti)
 	  const party = document.getElementById("party");
 	  party.classList.remove("hidden");
@@ -333,9 +332,19 @@ function HTMLLoaded() {
 	
 	
 	    // Change button text to indicate surprise was unlocked
-	  this.textContent = "Wow, look at that! 🎉";
-	  this.disabled = true; // Disable the button after clicking
+	  const sBtn = document.getElementById("surprise-button");
+	  sBtn.textContent = "Wow, look at that! 🎉";
+	  sBtn.disabled = true; // Disable the button after clicking
 	
 	  // Optional: Play a sound for added fun
-	  new Audio('/nihongo/jingle.mp3').play();
+	  //new Audio('/nihongo/jingle.mp3').play();
+	// Create or retrieve the global audio instance
+	if (!window.jingleAudio) {
+		window.jingleAudio = new Audio('/nihongo/jingle.mp3');
+	}
+	// Check if the audio is paused (i.e. not currently playing) before playing it
+	if (window.jingleAudio.paused) {
+  	window.jingleAudio.play();
+	}
+
 }	

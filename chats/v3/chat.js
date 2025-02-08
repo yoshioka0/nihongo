@@ -267,7 +267,7 @@ async function openChat(recipientUserId, recipientUsername) {
         showNotification(`⚡ Using Cached Chat for ${recipientUsername}`);
         renderMessages(chatCache.get(recipientUserId));
     } else {
-        showNotification(`📡 Fetching Chat History for ${recipientUsername}`);
+        //showNotification(`📡 Fetching Chat History for ${recipientUsername}`);
         try {
             let messages = [];
 

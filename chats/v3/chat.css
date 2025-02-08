@@ -751,8 +751,9 @@ hr {
     gap: 50px; 
     font-size: 18px;
     font-weight: bold;
-    color: #fff; 
+    color: black; 
     height: 100vh;
+    z-index: 100;
 }
 .loader {
     display: block;

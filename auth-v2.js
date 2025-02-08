@@ -295,7 +295,7 @@ function showPopupMessage(message, duration = 3000) {
     }, duration);
 }
 
-function showPopupMessage2(message, duration = 3000) {
+function showPopupMessage2(message, duration = 3000, background = '#ff4b5c') {
     let alertBox = document.getElementById('custom-alert') || (() => {
         let box = document.createElement('div');
         box.id = 'custom-alert';
@@ -303,18 +303,24 @@ function showPopupMessage2(message, duration = 3000) {
         document.head.insertAdjacentHTML('beforeend', `<style>
             #custom-alert {
                 position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
-                background: #ff4b5c; color: white; padding: 15px 20px;
+                background: ${background}; color: white; padding: 15px 20px;
                 border-radius: 5px; font-size: 16px; font-weight: bold;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); transition: top 0.5s;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+                transition: top 0.5s ease-in-out;
                 z-index: 9999; min-width: 250px; text-align: center;
             }
         </style>`);
         return box;
-    })(); 
+    })();   
     alertBox.innerText = message;
-    alertBox.style.top = "10px";
-    setTimeout(() => alertBox.style.top = "-200px", duration);
+    alertBox.style.top = "-200px"; 
+    setTimeout(() => {
+        alertBox.style.top = "10px"; // Slide down into view
+    }, 10); // Small delay to trigger transition    
+    setTimeout(() => {
+        alertBox.style.top = "-200px"; // Slide up to hide
+    }, duration);
 }
 
 // Example usage (Default: 3sec)
-//showPopupMessage2("This is a custom alert!", 4000);
+//showPopupMessage2("This is a custom alert!", 4000, green);

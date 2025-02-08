@@ -206,7 +206,7 @@ text-decoration: none;
 
 #notification-dropdown {
   display: none;
-  position: absolute;
+  position: fixed;
   color: white;
   background: rgba(0, 0, 0, 0.8); /* Frosted glass effect */
   backdrop-filter: blur(8px); /* Adds the blur effect */
@@ -217,6 +217,7 @@ text-decoration: none;
   padding: 10px;
   z-index: 1000;
   margin: 5px 5px;  
+  margin-top: 55px;
     
 }
 
@@ -329,7 +330,7 @@ background: ;
 
 .dropdown-content {
   display:none;
-  position:absolute;
+  position:fixed;
   background: rgba(0, 0, 0, 0.8); /* Frosted glass effect */
   backdrop-filter: blur(8px); /* Adds the blur effect */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -340,6 +341,7 @@ background: ;
   right: 0;
   z-index: 10;
   margin: 5px 5px;
+  margin-top: 55px;
 }
 
 .dropdown-content.active {
@@ -578,9 +580,10 @@ color: white;
 /* Surprise message styling */
 #surprise-message {
   display: none;
+  position: fixed; 
   text-align: center;
   padding: 20px;
-  margin-top: 20px;
+  margin-top: 60px;
   background-color: #f0f8ff;
   border-radius: 8px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
