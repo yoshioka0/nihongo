@@ -122,8 +122,10 @@ async function checkAuthentication() {
         	await clearAllData();
             throw new Error('Invalid token');
         }
-
+		
         console.log('User is authenticated', result.userId);
+        location.reload(); 
+        
         if (window.location.pathname === '/nihongo/auth/') {
        	showPopupMessage('Already logged in!');
        	 alert(`Already logged in!`);
