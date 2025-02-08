@@ -116,7 +116,8 @@ async function checkAuthentication() {
         const result = await response.json();
 
         if (!response.ok || !result.userId) {
-        	await clearAllData();
+        	await clearAllData();  
+			location.reload();       
             throw new Error('Invalid token');
         }
 		
@@ -151,6 +152,7 @@ async function logout() {
     if (!accessToken) {
         alert("No active session found. Please clear cookies and try again.");
         await clearAllData();
+        location.reload(); 
         return;
     }
 
@@ -183,7 +185,7 @@ async function logout() {
         console.error('Error during logout API request:', error);
         await clearAllData(); // Clear even on failure
         alert("Error: Unable to reach the server. Local credentials have been cleared. Please manually clear site cookies and data to ensure a complete logout.");
-        
+        location.reload();        
     }    
 }
 
@@ -223,8 +225,7 @@ async function clearAllData() {
             registration.unregister();
             console.log('Service Worker unregistered');
         });
-    }
-    location.reload(); 
+    }    
 }
     
 
