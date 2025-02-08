@@ -1019,10 +1019,6 @@ document.querySelector('.back-btn').addEventListener('click', (e) => {
     }
 });
 
-function home() {
-    window.location.href = '/nihongo';  // Redirect to the homepage (root URL)
-}
-
 const savedImage = localStorage.getItem('userProfilePic');
 	    document.getElementById('myavatar').src = savedImage || '/nihongo/img/user.png' ; 
 	

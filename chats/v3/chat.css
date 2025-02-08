@@ -752,6 +752,8 @@ hr {
     font-size: 18px;
     font-weight: bold;
     color: #fff; 
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    height: 100vh;
 }
 .loader {
     display: block;

@@ -180,6 +180,3 @@ async function subscribeUserToPush(registration, userId) {
         console.log('🔴 Failed to subscribe user to push:', error);
     }
 }
-
-
-

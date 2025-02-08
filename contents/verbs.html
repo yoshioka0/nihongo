@@ -7,8 +7,8 @@
   <link rel="stylesheet" href="/nihongo/styles.css">
   <link rel="stylesheet" href="/nihongo/header-footer/header.css">
   <script src="/nihongo/auth-v2.js" defer></script>
-   <script src="/nihongo/script.js" defer></script>
    <script src="/nihongo/config.js"></script>
+     <script  src="/nihongo/header-footer/header.js" defer></script>   
 </head>
 <body>
 	 <!-- Noscript message: if JavaScript is disabled, redirect user -->
@@ -16,61 +16,7 @@
     <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
   </noscript>
   
-   <header class="custom-header">
-  <!-- Left Section: Site Name and Icon -->
-  <a href="../">
-  <div class="header-logo">
-    <button class="hamburger" id="hamburger-btn">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
-    <img src="/nihongo/img/icon.png" alt="Nihongo" class="site-icon">
-    <span class="site-name">Nihongo</span>
-  </div>
- </a> 
-
-  <!-- Middle Section: Chat and Notification -->
-  <div class="header-center">
-	<a href="chats/chats.html"> <button class="chat-btn" id="chat-btn"> <i class="chat-icon">💬</i>
-  		</button>
-	</a>
-	
-    <div class="notification-btn" id="notification-btn">
-      <i class="notification-icon">🔔</i>
-      <div class="notification-dropdown" id="notification-dropdown">
-        <ul>
-          <li>Enable Notifications</li>
-          <li>Disable Notifications</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- Right Section: Username and User Icon -->
-  <div class="header-right">
-  
-    <span class="user-name" id="activeUser"><strong></strong></span>
-    <button class="user-icon" onclick="toggleDropdown()" id="dropdownButton">
-      <img src="/nihongo/img/user.png" alt="User">
-    </button>
-    
-  </div>
-</header>
-
-<div class="dropdown">
-    <div class="dropdown-content" id="dropdownMenu">
-      <div class="profile">
-      	<div class="profile-img-wrapper">
-  	       	<img id="profileImg" src="" alt="Profile Picture" onclick="changeImage()">
-          </div>
-		  <div id="activeUser2" class="username">Username</div>
-      </div>
-      <a href="#changePassword">Change Password</a>
-      <a href="#addRecovery">Add Recovery</a>
-      <a href="#surprise">Surprise</a>
-      <a id="logout-btn" href="#logout" style="background:red;"><b>Logout</b></a>
-    </div>	      
+  <div id="header" ></div>
   
     <div class="heading">
     <a href="#"><h1>Verbs & Conjugations</h1></a>
@@ -78,12 +24,15 @@
  </div>
  
  <div class="container">
-   <nav>
-      <a href="../" class="active">Home</a>
-      <a href="nouns.html">👘 Nouns</a>
-      <a href="adjectives.html">🍡 Adjectives</a>
-      <a href="sentence-structure.html">📝 Sentence Structure</a>
-      <a href="particles.html">⚡ Particles</a>
+   <div class="hamburger2" onclick="toggleNav()">
+            <span></span><span></span><span></span>
+     </div>
+    <nav class="nav-menu">
+        <a href="nouns.html">👘 Nouns</a>
+        <a href="adjectives.html">🍡 Adjectives</a>
+        <a href="vocabs.html">🪭 Vocabs</a>
+        <a href="particles.html">⚡ Particles</a>
+        <a href="extras.html">🏆 Extras</a>
     </nav>
     
   <div class="main-container">  
@@ -260,13 +209,7 @@
   </div>
   </div> <!-- End of container -->
 
-  <footer>
-    <div class="footer-content">
-        <p>© 2024 Nihongo Guidebook | All Rights Reserved</p>
-        <p><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Use</a></p>
-        <p class="made-with-love">Made with<img src="img/heart.png" alt="Heart Icon" class="footer-icon"> for<img src="img/jp.png" alt="Heart Icon" class="footer-icon"> by<a href="https://yoshioka0.github.io/" class="custom-link">Yoshioka</a></p>
-    </div>
-</footer>
+  <div id="footer" ></div>
 
 <!-- Scroll Buttons -->
 <button id="scroll-up" class="scroll-btn">&#8593;</button>

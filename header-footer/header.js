@@ -33,6 +33,12 @@ function toggleMenu() {
     document.querySelector(".menu").classList.toggle("active");
 }
 
+function toggleNav() {
+    const menu = document.querySelector(".nav-menu");
+	document.querySelector(".hamburger2").classList.toggle("active");
+    menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+}
+
 function notifDrop() {
 	const notificationDropdown = document.getElementById("notification-dropdown");	
 	notificationDropdown.style.display = notificationDropdown.style.display === "block" ? "none" : "block";	 

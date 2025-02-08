@@ -54,6 +54,10 @@ function isTokenExpired(token) {
 
 // Function to refresh the access token using the refresh token
 async function refreshAccessToken() {
+	if (window.location.pathname !== '/nihongo/auth/'  && window.location.pathname !== '/nihongo/') {
+		document.body.innerHTML = ` <div class="loader-container"> <div class="loader"></div> <span>Verifying...</span> </div>	`;
+	}
+	
     try {
         const response = await apiRequest('/refresh-token', {
             method: 'POST',
@@ -76,8 +80,7 @@ async function refreshAccessToken() {
 
 // Function to check if the user is authenticated
 async function checkAuthentication() {
-    let token = getJWTToken();
-    
+    let token = getJWTToken();  
     // Check if the token is missing or expired
     if (!token || isTokenExpired(token)) {
         console.log('Access token expired or missing. Attempting to refresh...');
@@ -96,7 +99,7 @@ async function checkAuthentication() {
 		}
     }
 
-    try {
+    try {  	
         const response = await apiRequest(`/validate-token`, {
             method: 'GET',
             headers: {
@@ -131,20 +134,26 @@ async function checkAuthentication() {
 
 function redirect() {
     if (window.location.pathname !== '/nihongo/auth/'  && window.location.pathname !== '/nihongo/') {
-		window.location.href = '/nihongo/unauthorized.html';
+			window.location.href = '/nihongo/unauthorized.html';
     }
 }
- 
+
+function home() {
+    window.location.href = '/nihongo';  // Redirect to the homepage (root URL)
+}
+
 // Logout user and call the logout endpoint on the server to blacklist the token
 async function logout() { 
+	document.body.innerHTML = ` <div class="loader-container"> <div class="loader"></div> <span>Logging Out...</span> </div>	`;
     const accessToken = localStorage.getItem("accessToken");
     if (!accessToken) {
         alert("No active session found. Please clear cookies and try again.");
-        clearAllData();
+        await clearAllData();
         return;
     }
 
     try {
+    	
         const response = await apiRequest('/api/logout', {
             method: 'POST',
             headers: {
@@ -162,7 +171,7 @@ async function logout() {
         showPopupMessage2?.(data.message || "Logged out successfully"); // Use optional chaining
 
         // Clear tokens, session data, cookies, IndexedDB 
-        clearAllData();
+        await clearAllData();
 
         setTimeout(() => {
             window.location.href = '/nihongo/auth/logout.html';
@@ -170,8 +179,9 @@ async function logout() {
 
     } catch (error) {
         console.error('Error during logout API request:', error);
+        await clearAllData(); // Clear even on failure
         alert("Error: Unable to reach the server. Local credentials have been cleared. Please manually clear site cookies and data to ensure a complete logout.");
-        clearAllData(); // Clear even on failure
+        
     }    
 }
 
@@ -182,7 +192,7 @@ document.addEventListener('DOMContentLoaded', checkAuthentication);
 
 
 // Helper Function ⭐⭐
-function clearAllData() {
+async function clearAllData() {
     // Clear localStorage
     localStorage.clear();
     
@@ -194,6 +204,25 @@ function clearAllData() {
         document.cookie = cookie.replace(/^ +/, "")
             .replace(/=.*/, "=; Path=/; Max-Age=0; domain=" + location.hostname);
     });
+
+    // Clear IndexedDB (browser-specific, could leave data in some browsers)
+    if (window.indexedDB) {
+        const request = indexedDB.deleteDatabase('your-database-name');
+        await new Promise((resolve, reject) => {
+            request.onsuccess = resolve;
+            request.onerror = reject;
+        });
+    }
+
+    // Clear Service Worker cache (if applicable)
+    if (navigator.serviceWorker) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        registrations.forEach(registration => {
+            registration.unregister();
+            console.log('Service Worker unregistered');
+        });
+    }
+    location.reload(); 
 }
     
 
