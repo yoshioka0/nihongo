@@ -100,6 +100,9 @@ async function checkAuthentication() {
     }
 
     try {  	
+    	if (window.location.pathname !== '/nihongo/auth/'  && window.location.pathname !== '/nihongo/') {
+			document.body.innerHTML = ` <div class="loader-container"> <div class="loader"></div> <span>Verifying...</span> </div>	`;
+		}
         const response = await apiRequest(`/validate-token`, {
             method: 'GET',
             headers: {
@@ -116,6 +119,7 @@ async function checkAuthentication() {
         const result = await response.json();
 
         if (!response.ok || !result.userId) {
+        	await clearAllData();
             throw new Error('Invalid token');
         }
 
