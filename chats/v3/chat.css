@@ -208,7 +208,9 @@ hr {
 }
 
 
-
+#chat-window-container {
+padding: 0px;
+}
 
 .chat-window {
   overflow-y: auto;
@@ -239,6 +241,7 @@ hr {
     backdrop-filter: blur(var(--blur-value, 5px)); /* Default blur */
     z-index: 0;
     transition: backdrop-filter 0.3s ease;
+    pointer-events: none;
 }
 
 /* Hidden by default */
@@ -648,6 +651,8 @@ hr {
     margin: 8px 0;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 5;
+    position: relative;
 }
 
 /* Hover effect for better interactivity */
@@ -718,7 +723,16 @@ hr {
     align-items: center;
     justify-content: center; /* Center the dots */
     padding: 8px;
-    min-height: 20px; /* Ensure enough space */
+    min-height: 20px;
+    background: transparent;
+    z-index: 10;
+    position: absolute; /* Place it within the chat container */
+    bottom: 0; /* Stick it to the bottom */
+    left: 50%; 
+    transform: translateX(-50%); /* Center it */
+    width: auto; /* Ensure it doesn't take full width */
+    max-width: 60%; /* Adjust if needed */
+    pointer-events: none; /* Prevent interaction issues */
 }
 
 .typing-dots {
@@ -728,8 +742,8 @@ hr {
 }
 
 .typing-dots span {
-    width: 8px;  /* Increased size */
-    height: 8px; /* Increased size */
+    width: 10px;  /* Increased size */
+    height: 10px; /* Increased size */
     background-color: #555; /* Darker color for visibility */
     border-radius: 50%;
     display: inline-block; /* Ensure they are visible */

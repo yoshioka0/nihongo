@@ -257,7 +257,7 @@ async function openChat(recipientUserId, recipientUsername) {
     if (tokenexpired) {
 		showPopupMessage('Session Expired');
 		chatWindow.innerHTML = `<h1>Session Expired, Refresh the page.</h1>
-													<img src="/nihongo/img/icon.png" />	`;
+													<img style="height:50px; width:50px;" src="/nihongo/img/icon.png" />	`;
 		return 
 		}
 
@@ -471,8 +471,8 @@ function displayMessage(message, isSelf) {
 // Function to confirm and delete message
 function confirmDelete(messageDiv) {
     if (confirm("Are you sure you want to delete this message?")) {
-        //messageDiv.remove();
-        showPopupMessage2('Function unavailable!')
+        messageDiv.remove();
+        showPopupMessage2('Function unavailable! Message not deleted its just a demo.')
     }
 }
 
@@ -615,6 +615,8 @@ socket.on('receiveMessage', async (message) => {
     if (message.receiver === senderUserId || message.sender === senderUserId) {
         typingIndicator.style.display = 'none';
         
+        playNotificationSound();
+        
         // Display message in UI
         displayMessage(message, message.sender === senderUserId);
 
@@ -640,6 +642,14 @@ socket.on('receiveMessage', async (message) => {
         }
     }
 });
+
+// Create a single Audio instance
+const notificationSound = new Audio('/nihongo/media/notification.mp3');
+
+function playNotificationSound() {
+    notificationSound.currentTime = 0; // Restart sound from beginning
+    notificationSound.play().catch(error => console.error('Error playing sound:', error));
+}
 
 		
 		// 6. Handle Typing Indicator
