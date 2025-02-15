@@ -1251,10 +1251,12 @@ function closeModal() {
     document.getElementById("wallpaperModal").style.display = "none";
 }
 
-// Set Chat Background and Save to Local Storage
-function setChatBackground(gradient) {
-    document.querySelector(".chat-window").style.background = gradient;
-    localStorage.setItem("chatWallpaper", gradient);
+function setChatBackground(bg) {
+    const chatArea = document.querySelector(".chat-window"); // Replace with your chat container class
+    chatArea.style.background = bg;
+    chatArea.style.backgroundSize = "cover";
+    chatArea.style.backgroundPosition = "center";
+    localStorage.setItem("chatWallpaper", bg);
     closeModal();
 }
 
@@ -1269,9 +1271,44 @@ function resetChatBackground() {
 window.onload = function () {
     let savedWallpaper = localStorage.getItem("chatWallpaper");
     if (savedWallpaper) {
-        document.querySelector(".chat-window").style.background = savedWallpaper;
+        let chatWindow = document.querySelector(".chat-window");
+        chatWindow.style.backgroundImage = savedWallpaper; 
+        chatWindow.style.backgroundSize = "cover"; 
+        chatWindow.style.backgroundPosition = "center";
     }
 };
+
+document.addEventListener("DOMContentLoaded", function () {
+    const blurBtn = document.getElementById("blur-btn");
+    const blurSliderContainer = document.getElementById("blur-slider-container");
+    const blurSlider = document.getElementById("blur-slider");
+    const blurValueDisplay = document.getElementById("blur-value");
+    const closeBlurSlider = document.getElementById("close-blur-slider");
+
+    // Load saved blur value
+    let savedBlur = localStorage.getItem("chatBlur") || 5;
+    document.documentElement.style.setProperty("--blur-value", `${savedBlur}px`);
+    blurSlider.value = savedBlur;
+    blurValueDisplay.textContent = savedBlur;
+
+    // Show slider on button click
+    blurBtn.addEventListener("click", function () {
+        blurSliderContainer.style.display = "block";
+    });
+
+    // Adjust blur dynamically
+    blurSlider.addEventListener("input", function () {
+        document.documentElement.style.setProperty("--blur-value", `${this.value}px`);
+        blurValueDisplay.textContent = this.value;
+        localStorage.setItem("chatBlur", this.value);
+    });
+
+    // Close slider
+    closeBlurSlider.addEventListener("click", function () {
+        blurSliderContainer.style.display = "none";
+    });
+});
+
 	
 
 function clearChatCache(recipientUserId) {

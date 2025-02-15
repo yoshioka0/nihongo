@@ -70,6 +70,10 @@
 							        <i class="fa-solid fa-image"></i> Chat Wallpaper
 							    </button>
 							
+								<button id="blur-btn" class="dropdown-item" >
+							        <i class="fa-solid fa-droplet"></i>Blur Wallpaper
+							    </button>
+							
 							    <!-- Delete Chat History -->
 							    <button id="clearChatCache-btn" class="dropdown-item" onclick="clearChatCache(currentChatUserId)">
 							        <i class="fa-solid fa-trash"></i> Clear Chat Cache
@@ -81,7 +85,7 @@
 							    </button>               
 							
 							    <!-- Mute/Unmute Chat -->
-							    <button id="mute-btn" class="dropdown-item">
+							    <button id="mute-btn" class="dropdown-item" onclick="showPopupMessage2('Not a fan of their messages? Block them for now and stay tuned while we work on a proper mute feature!', 5000, 'rgba(34, 153, 195, 0.9)')"> 
 							        <i class="fa-solid fa-bell-slash"></i> <span id="mute-text">Mute Notifications</span>
 							    </button>
 							
@@ -177,12 +181,27 @@
 		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #11998e, #38ef7d)')"></div>
 		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #fc4a1a, #f7b733)')"></div>
 		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #30cfd0, #330867)')"></div>
+			<!-- Image Backgrounds -->
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg1.jpg)')"></div>
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg2.jpeg)')"></div>
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg3.png)')"></div>
+			<div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg4.png)')"></div>
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg5.jpeg)')"></div>
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg6.jpeg)')"></div>
+			<div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg7.jpeg)')"></div>
+		
 		</div>
         <button class="button" onclick="resetChatBackground()">Reset to Default</button>
     </div>
 </div>
 
 
+<!-- Blur slider container (hidden by default) -->
+<div id="blur-slider-container">
+    <label for="blur-slider">Blur Intensity: <span id="blur-value">5</span>px</label>
+    <input type="range" id="blur-slider" min="0" max="20" value="5">
+    <button id="close-blur-slider">✖</button>
+</div>
 
 
 
