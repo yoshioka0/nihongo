@@ -615,10 +615,12 @@ socket.on('receiveMessage', async (message) => {
     if (message.receiver === senderUserId || message.sender === senderUserId) {
         typingIndicator.style.display = 'none';
         
-        playNotificationSound();
-        
         // Display message in UI
         displayMessage(message, message.sender === senderUserId);
+        
+       if (message.sender !== senderUserId) {
+			playNotificationSound();
+        }
 
         // Format message correctly
         const formattedMessage = {
