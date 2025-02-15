@@ -261,10 +261,10 @@ function showPopupMessage(message, duration = 3000) {
     // Calculate vertical position for stacking (using the number of existing pop-ups)
     const allPopups = document.querySelectorAll('.popup-notification');
     const popupCount = allPopups.length;  // Total number of currently visible pop-ups
-    const verticalOffset = 100; // Vertical space between pop-ups (adjust as needed)
+    const verticalOffset = 80; // Vertical space between pop-ups (adjust as needed)
 
     // Stack the new popup slightly above the previous one
-    popup.style.bottom = `${popupCount * verticalOffset}px`; 
+    popup.style.bottom = `${popupCount * verticalOffset}px`;     
 
     // If the number of pop-ups exceeds the limit, remove the oldest one
     if (popupCount > MAX_POPUPS) {
@@ -293,13 +293,20 @@ function showPopupMessage(message, duration = 3000) {
         // Remove the popup from the DOM after animation
         setTimeout(() => popup.remove(), 300);
     }, duration);
+
+
 }
 
+
+
 function showPopupMessage2(message, duration = 3000, background = '#ff4b5c') {
-    let alertBox = document.getElementById('custom-alert') || (() => {
-        let box = document.createElement('div');
-        box.id = 'custom-alert';
-        document.body.appendChild(box);
+    let alertBox = document.getElementById('custom-alert');
+    
+    if (!alertBox) {
+        alertBox = document.createElement('div');
+        alertBox.id = 'custom-alert';
+        document.body.appendChild(alertBox);
+        
         document.head.insertAdjacentHTML('beforeend', `<style>
             #custom-alert {
                 position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
@@ -310,17 +317,25 @@ function showPopupMessage2(message, duration = 3000, background = '#ff4b5c') {
                 z-index: 9999; min-width: 250px; text-align: center;
             }
         </style>`);
-        return box;
-    })();   
+    }
+
+    // Reset transition before changing styles to restart animation
+    alertBox.style.transition = 'none';
+    alertBox.style.top = "-200px";
+    alertBox.offsetHeight; // Force a reflow to apply the reset
+    
+    // Now apply new styles
     alertBox.innerText = message;
-    alertBox.style.top = "-200px"; 
-    setTimeout(() => {
-        alertBox.style.top = "10px"; // Slide down into view
-    }, 10); // Small delay to trigger transition    
-    setTimeout(() => {
-        alertBox.style.top = "-200px"; // Slide up to hide
+    alertBox.style.background = background; // Update background if needed
+    alertBox.style.transition = 'top 0.5s ease-in-out'; // Restore transition
+    setTimeout(() => { alertBox.style.top = "10px"; }, 10); // Slide down
+
+    // Hide the alert after duration
+    clearTimeout(alertBox.dismissTimer);
+    alertBox.dismissTimer = setTimeout(() => {
+        alertBox.style.top = "-200px";
     }, duration);
 }
 
 // Example usage (Default: 3sec)
-//showPopupMessage2("This is a custom alert!", 4000, green);
+//showPopupMessage2("This is a custom alert!", 4000, 'green');

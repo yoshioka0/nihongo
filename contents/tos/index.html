@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | Nihongo Guidebook</title>
+ <link rel="stylesheet" href="/nihongo/styles.css">
+    <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/nihongo/header-footer/header.css">
+  <script  src="/nihongo/header-footer/header.js" defer></script>   
+</head>
+
+<body>
+ <!-- Noscript message: if JavaScript is disabled, redirect user -->
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
+  </noscript>
+  
+<div id="header" ></div>
+  
+    <div class="heading">
+    <h1>Terms of Service</h1>
+  </div>
+
+    <div class="container">
+        <p><strong>Last Updated:</strong> February, 2025</p>
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>By using Nihongo Guidebook, you agree to these Terms of Service. If you do not agree, please do not use our services.</p>
+
+        <h2>2. Use of the Website</h2>
+        <p>You may not use the site for illegal activities, hacking, or disrupting the platform.</p>
+
+        <h2>3. User Accounts & Security</h2>
+        <p>You are responsible for maintaining the security of your account. Report any unauthorized access immediately.</p>
+
+        <h2>4. Content Ownership</h2>
+        <p>All content on this site belongs to Nihongo Guidebook unless otherwise stated.</p>
+
+        <h2>5. Privacy Policy</h2>
+        <p>We respect your privacy. Read our <a href="../privacy">Privacy Policy</a> to learn more.</p>
+
+        <h2>6. Limitation of Liability</h2>
+        <p>We are not responsible for any issues arising from the use of our website.</p>
+
+        <h2>7. Changes to Terms</h2>
+        <p>We may update these terms from time to time. Continued use of the site means you accept any changes.</p>
+
+        <h2>8. Contact</h2>
+        <p>If you have questions, <a href="mailto:yoshioka020@gmail.com">contact us</a>.</p>
+    </div>
+
+<div id="footer" ></div>
+
+<script>
+	// Function to get the access token from localStorage
+function getJWTToken() {
+    return localStorage.getItem('accessToken');
+}
+
+// Function to get the refresh token from cookies
+function getRefreshToken() {
+    const value = `; ${document.cookie}`;
+    const parts = value.split('; refreshToken=');
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+// Function to decode JWT token and extract payload
+function decodeJWT(token) {
+    if (!token) return null; // Return null if no token is provided
+
+    try {
+        const base64Url = token.split('.')[1];
+        if (!base64Url) throw new Error('Invalid token format');
+
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = atob(base64)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('');
+
+        return JSON.parse(decodeURIComponent(jsonPayload));
+    } catch (error) {
+        console.error('Error decoding JWT:', error);
+        return null;
+    }
+}
+
+// Function to check if the token is expired
+function isTokenExpired(token) {
+    const decoded = decodeJWT(token);
+    if (!decoded || !decoded.exp) return true; // Consider expired if decoding fails or no expiration
+
+    return Date.now() >= decoded.exp * 1000;
+}
+
+</script>
+	
+</body>
+</html>

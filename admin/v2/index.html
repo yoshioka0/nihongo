@@ -10,13 +10,12 @@
 </head>
 <body>
     <header>
-        <h1><a href="/nihongo/" style="color:white;">Admin Panel</a></h1>
+        <h1><a href="/nihongo/" style="color:white;">Admin Panel (v2)</a></h1>
     </header>
     
     <main>
         <section id="tabs">
-        	<button class="tab-button" style="background: #F5ED8D; color: black;"><a href="./health.html"><b>Server Health</b></a></button>
-        	<button class="tab-button" style="background: #FFB589; color: white;"><a href="./v2/"><b>V2</b></a></button>
+        	<button class="tab-button" style="background: #F5ED8D; color: black;"><a href="../health.html"><b>Server Health</b></a></button>
         	<button class="tab-button" data-tab="global-settings" >Global Settings</button>
             <button class="tab-button" data-tab="users" onclick="fetchUsers()">Users</button>
             <button class="tab-button" data-tab="send-notifications">Send Notifications</button>
@@ -64,26 +63,12 @@
 
 
         <!-- Manage Users Tab -->
-        <section id="users" class="tab-content">
-            <h2>Manage Users</h2>
-            <table>
-                <thead>
-                    <tr>
-      				  <th>UserId</th>                  
-						<th>Username</th>
-                        <th>IP Address</th>
-                        <th>Role</th>
-                        <th>IsOnline</th>
-                        <th>Last Active</th>
-                        <th>IsSuspended</th>                                     
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="user-list">
-                    <!-- Users will load here -->
-                </tbody>
-            </table>
-        </section>
+<section id="users" class="tab-content">
+    <h2>Manage Users</h2>
+    <div id="user-list" class="user-container">
+        <!-- Users will be dynamically added here -->
+    </div>
+</section>
 
         <!-- Send Notifications Tab -->
         <section id="send-notifications" class="tab-content">
@@ -150,13 +135,22 @@
 		                <th>Timestamp</th>
 		            </tr>
 		        </thead>
-		        <tbody id="log-list">
+		        <tbody id="log-list2">
 		            <!-- Logs will load here -->
 		        </tbody>
 		    </table>
 		</section>
 
    </main>
+   
+   <div id="log-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeLogs()">&times;</span>
+        <h2 id="log-modal-title">Logs</h2>
+        <div id="log-list"></div>
+        <div id="pagination-controls" class="pagination"></div>
+    </div>
+</div>
     
      <!-- Console area to display logs -->
     <div id="console"></div>

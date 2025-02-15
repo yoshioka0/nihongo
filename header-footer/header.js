@@ -8,6 +8,7 @@ function loadCSS(filename) {
 loadCSS("/nihongo/header-footer/footer.css");
 
 let isHTMLLoaded = false;  // Flag to track whether the HTML has been loaded
+let loadedCount = 0; // Counter to track loaded elements
 
 document.addEventListener("DOMContentLoaded", function() {
     loadHTML('/nihongo/header-footer/header.html', 'header');
@@ -19,9 +20,13 @@ function loadHTML(url, elementId) {
         .then(response => response.text())
         .then(data => {
             document.getElementById(elementId).innerHTML = data;
-            isHTMLLoaded = true;  // Set flag to true when the HTML is loaded          
-            console.log("HTML (H&F) loaded, proceed with other actions.");            
-            HTMLLoaded();            
+            loadedCount++; // Increment counter when one file is loaded
+
+            if (loadedCount === 2 && !isHTMLLoaded) {  // Ensure both are loaded before calling HTMLLoaded()
+                isHTMLLoaded = true;
+                console.log("HTML (H&F) loaded, proceed with other actions.");
+                HTMLLoaded();
+            }
         })
         .catch(error => {
             console.error('Error loading HTML:', error);

@@ -29,25 +29,27 @@ function renderTurnstile(turnstileId) {
 const loginWindow = document.querySelector('.modal');
 
 // Google OAuth
-function handleCredentialResponse(response) {
-	showPopupMessage2('Tip: To keep your session longer allow 3rd party cookies for this site.',5000,'green')
-	loginWindow.innerHTML = ` <div class="loader-container"> <div class="loader"></div> <span>Signing In...</span> </div>	`;
+// Google OAuth
+async function handleCredentialResponse(response) {
+    showPopupMessage2('Tip: To keep your session longer allow 3rd party cookies for this site.', 5000, 'green');
+    loginWindow.innerHTML = `<div class="loader-container"> <div class="loader"></div> <span>Signing In...</span> </div>`;
+
     const token = response.credential; // Google ID token
-    	apiRequest("/auth/google", {
-        method: "POST",
-        credentials: "include",  // Ensures cookies are sent
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,  // Add the token in the Authorization header
-        },
-        body: JSON.stringify({ token: token }),  // Alternatively, pass it in the body
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+        const res = await apiRequest("/auth/google", {
+            method: "POST",
+            credentials: "include",  // Ensures cookies are sent
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,  // Add the token in the Authorization header
+            },
+            body: JSON.stringify({ token: token }),  // Alternatively, pass it in the body
+        });
+        
+        const data = await res.json();
         if (data.success) {
             // Store JWT and other user details
             localStorage.setItem("accessToken", data.accessToken);
-          //  document.cookie = `refreshToken=${data.refreshToken}; Path=/; Max-Age=604800;`;	//cookies are now http set by server
             localStorage.setItem("userEmail", data.user.email);
             localStorage.setItem("userProfilePic", data.user.profilePicture);
             localStorage.setItem("username", data.user.username);
@@ -59,15 +61,16 @@ function handleCredentialResponse(response) {
             window.location.href = "/nihongo/";  // or any other page
         } else {
             // Show error feedback if something went wrong
-            alert('error Login failed: ' + data.error);
+            alert('Login failed: ' + data.error);
             location.reload();           
         }
-    })
-    .catch(err => {
-        console.error("Error:", err);        
-        alert('error: An error occurred. Please try again.');
-        location.reload();           
-    });
+    } catch (err) {
+        console.error("Error:", err);
+        loginWindow.innerHTML = `<div class="loader-container"> <div class="loader"></div> <span>🔴 An error has occurred. Please try again. The page will refresh in 5 seconds. </span> </div>`;
+      //  showPopupMessage(`${err || "Error: An error occurred. Please try again."}`);
+        await delay(5000);
+        location.reload();
+    }
 }
 
 
@@ -131,7 +134,7 @@ signupHere.addEventListener("click", () => {
 // Helper functions
 const isValidUsername = (username) => /^[a-zA-Z0-9_-]{3,15}$/.test(username);
 const isStrongPassword = (password) =>
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#^%*?&])[A-Za-z\d@$!%#^*?&]{8,}$/.test(password);
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#^%*?&])[A-Za-z\d@$!%#^*?&]{8,20}$/.test(password);
 
 // New User Creation
 document.getElementById('signup-form').addEventListener('submit', async (event) => {
@@ -146,13 +149,13 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
     errorMessage.textContent = '';
 
     if (!isValidUsername(username)) {
-        showPopupMessage('Username must be 3-15 characters and contain only letters, numbers, underscores, or hyphens.');
+        showPopupMessage('Username must be 3-15 characters and contain only letters, numbers, underscores, or hyphens.', 5000);
         errorMessage.textContent = 'Username must be 3-15 characters and contain only letters, numbers, underscores, or hyphens.';
         return;
     }
 
     if (!isStrongPassword(password)) {
-        showPopupMessage('Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character. (Aa1@)');
+        showPopupMessage('Password must be between 8 to 20 characters, include uppercase, lowercase, a number, and a special character. (Aa1@)', 5000);
         return;
     }
     

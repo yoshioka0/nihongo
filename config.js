@@ -10,7 +10,7 @@ let BASE_URL
 // Dynamically Choose the Fastest Server
 const backends = [
 //   { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost 
-    { url: "https://nihongo-backend.onrender.com", latency: Infinity },	// ✅ Use this fully functional 
+      { url: "https://nihongo-backend.onrender.com", latency: Infinity },	// ✅ Use this fully functional 
 //    { url: "https://nihongo-backend-env.up.railway.app", latency: Infinity }	// ❌Don't Use if you want refreshtoken function in cookie to work
 ];
 
@@ -59,7 +59,7 @@ async function apiRequest(endpoint, options) {
             // Show the popup message if the status code is 403
             if (response.status === 403) {
                 const data = await response.json();
-                showPopupMessage2(data.message || "Access denied.", 5000);
+                showPopupMessage2(data.message || "Access denied.", 5000, '#ff4b5c');
             }
             
             if (response) {

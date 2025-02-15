@@ -3,6 +3,12 @@
 //		recipient Id always available in currentChatUserId
 // *** Be careful userId sometimes corresponds to something else and recipient/receiver/sender may not be available 
 
+history.pushState(null, null, location.href);
+window.onpopstate = function () {
+    history.pushState(null, null, location.href);
+};
+
+
 let tokenexpired; 
 const token = getJWTToken();
 
@@ -300,9 +306,6 @@ async function openChat(recipientUserId, recipientUsername) {
     // Mark messages as read
     socket.emit('markAsRead', { senderId: senderUserId, receiverId: currentChatUserId });
     updateBlockButton();
-    // Show or hide block button
-    blockButton.style.display = senderUserId !== recipientUserId ? 'inline-block' : 'none';
-    blockButton.onclick = () => toggleBlockUser();
 }
 
 // Render messages
@@ -402,6 +405,16 @@ function displayMessage(message, isSelf) {
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message", isSelf ? "self" : "other");
 
+
+	messageDiv.dataset.originalText = message.message; // Store original text (i18Next translation)
+    messageDiv.dataset.language = detectLanguage(message.message); // Detect language (i18Next translation)
+  
+      // Create delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.classList.add("delete-button");
+    deleteButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    deleteButton.onclick = () => confirmDelete(messageDiv);
+  
     // Create timestamp
     const formattedDate = new Date(message.timestamp).toLocaleDateString([], {
         year: "numeric",
@@ -441,14 +454,28 @@ function displayMessage(message, isSelf) {
         messageDiv.appendChild(messageText);
     }
 
-    // Append timestamp & read receipt
+    // Append delete, timestamp & read receipt
+    messageDiv.appendChild(deleteButton);
     messageDiv.appendChild(timestamp);
     messageDiv.appendChild(readReceipt);
 
     // Append to chat window
     chatWindow.appendChild(messageDiv);
     chatWindow.scrollTop = chatWindow.scrollHeight;
+    
+
+    updateMessages();	//Safe to remove this code (i18 translation)
+    
 }
+
+// Function to confirm and delete message
+function confirmDelete(messageDiv) {
+    if (confirm("Are you sure you want to delete this message?")) {
+        //messageDiv.remove();
+        showPopupMessage2('Function unavailable!')
+    }
+}
+
 
 // Requires socket defined beforehand 
 function intializeSocket() {
@@ -583,7 +610,7 @@ async function sendMessage() {
 
 // 5️⃣ Receive Messages via WebSocket and Update Cache
 socket.on('receiveMessage', async (message) => {
-    console.log('📥 Socket msg received from server:', message);
+    //console.log('📥 Socket msg received from server:', message);
 
     if (message.receiver === senderUserId || message.sender === senderUserId) {
         typingIndicator.style.display = 'none';
@@ -777,9 +804,18 @@ socket.on('receiveMessage', async (message) => {
 		
 // 10. Toggle Block User
 async function toggleBlockUser() {
+	    if (!currentChatUserId) {
+        showPopupMessage2("Error: No user selected to block.");
+        return;
+    }
+
 	const isBlocked = blockButton.dataset.blocked === 'true'; // Read status from dataset
     const action = isBlocked ? 'unblock-user' : 'block-user';
-    
+   
+     if (!confirm(`Are you sure you want to ${action} ${currentChatUsername}?`)) {
+        return; // Exit if user cancels
+    }
+ 
 	try {
         // Constructing the request body with the blockUserId
         const requestBody = {
@@ -806,7 +842,7 @@ async function toggleBlockUser() {
 		    // Leave the room first
 		    socket.emit('leaveRoom', { currentChatUserId });
 		
-		    alert(`${currentChatUsername} has been ${isBlocked ? 'unblocked' : 'blocked'}.`);
+		    showPopupMessage(`${currentChatUsername} has been ${isBlocked ? 'unblocked' : 'blocked'}.`);
 		
 		    // If unblocked, rejoin the room
 		    if (isBlocked) {
@@ -862,7 +898,7 @@ async function markMessagesssssAsRead(senderId, receiverId) {
 // Function to check block-status
 async function updateBlockButton() {
     if (!currentChatUserId) {
-        console.error("Error: currentChatUserId is undefined");
+        showPopupMessage("Error: No user selected to block.");
         return;
     }
 
@@ -890,6 +926,31 @@ async function updateBlockButton() {
         blockButton.style.display = "none"; // Hide button on error
     }
 }
+
+//
+function toggleDropdown() {
+    const dropdown = document.getElementById("dropdown-menu");
+    
+    // Toggle class instead of changing display directly
+    if (dropdown.classList.contains("show")) {
+        dropdown.classList.remove("show");
+        setTimeout(() => dropdown.style.display = "none", 200); // Smooth closing
+    } else {
+        dropdown.style.display = "block";
+        setTimeout(() => dropdown.classList.add("show"), 10);
+    }
+}
+
+// Hide dropdown when clicking outside
+document.addEventListener("click", function(event) {
+    const dropdown = document.getElementById("dropdown-menu");
+    const moreBtn = document.getElementById("more-btn");
+
+    if (!moreBtn.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.classList.remove("show");
+        setTimeout(() => dropdown.style.display = "none", 200);
+    }
+});
 
 
 // Function to check user availability and update UI
@@ -1179,9 +1240,60 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+// Wallpaper Gradiants 
+document.getElementById("wallpaper-btn").onclick = function () {
+    document.getElementById("wallpaperModal").style.display = "block";
+};
+
+// Close the modal
+function closeModal() {
+    document.getElementById("wallpaperModal").style.display = "none";
+}
+
+// Set Chat Background and Save to Local Storage
+function setChatBackground(gradient) {
+    document.querySelector(".chat-window").style.background = gradient;
+    localStorage.setItem("chatWallpaper", gradient);
+    closeModal();
+}
+
+// Reset Chat Background to Default and Remove from Local Storage
+function resetChatBackground() {
+    document.querySelector(".chat-window").style.background = "";
+    localStorage.removeItem("chatWallpaper");
+    closeModal();
+}
+
+// Load Saved Wallpaper on Page Load
+window.onload = function () {
+    let savedWallpaper = localStorage.getItem("chatWallpaper");
+    if (savedWallpaper) {
+        document.querySelector(".chat-window").style.background = savedWallpaper;
+    }
+};
 	
 
+function clearChatCache(recipientUserId) {
+    // Ask for confirmation
+    if (!confirm(`Are you sure you want to clear the chat cache for ${currentChatUsername}?`)) {
+        return; // Exit if user cancels
+    }
 
+    // Remove from chatCache (Map)
+    if (chatCache.has(recipientUserId)) {
+        chatCache.delete(recipientUserId);
+    }
+
+    // Remove from localStorage
+    const storageKey = `chat_${recipientUserId}`;
+    if (localStorage.getItem(storageKey)) {
+        localStorage.removeItem(storageKey);
+    }
+
+    // Show confirmation message
+    showPopupMessage2(`Chat cache cleared for user ${currentChatUsername}`);
+}
 	
 intializeSocket();
 socket.on('error', (err) => { console.error('🔴 Socket Error:', err);	});
