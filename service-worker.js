@@ -1,12 +1,9 @@
-const CACHE_NAME = 'pwa-cache-v4.6';
+const CACHE_NAME = 'pwa-cache-v4.6.1';
 const OFFLINE_URL = '/nihongo/offline.html';
 
 const urlsToCache = [
     '/',
     '/nihongo/',
-    '/nihongo/chats/',
-    '/nihongo/img/',
-    '/nihongo/contents/',
     '/nihongo/config.js', 
     '/nihongo/auth-v2.js',
     '/nihongo/index.html',
