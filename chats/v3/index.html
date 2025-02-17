@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="chat.css">
+    <script src="/nihongo/auth-v2.js"></script>
+    <script src="/nihongo/config.js"></script>
+
+<!-- Add Font Awesome in <head> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- Include i18next Library -->
+<script src="https://cdn.jsdelivr.net/npm/i18next@21.6.14/dist/umd/i18next.min.js"></script>
+
+    <title>Nihongo Chats</title>
+</head>
+<body>
+		 <!-- Noscript message: if JavaScript is disabled, redirect user -->
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
+  </noscript>
+	
+	
+    <div class="chat-container">
+        <!-- Left Panel: User List -->
+        <div class="left-panel">
+            <div class="header">
+            	<div class="profile">
+            			  <img id="avatar" class="avatar" src="/nihongo/img/icon.png" onclick="home()"> 
+                		  <h2><a href="/nihongo/" style="color:white; text-decoration: none;">Nihongo Chats</a></h2>
+                  	     <p id="socket-status">🛜 Connecting...</p> 
+                  </div>
+                  <hr>
+             <div class="profile">
+                <img id="myavatar" class="avatar" src="/nihongo/img/user.png" alt="Profile">
+                <p id="myUsername" class="username">Username</p> <!-- Dynamically populate this in chat.js -->
+                <div class="countdown-box">
+
+						<div id="countdown" class="countdown">Loading...</div>
+				</div>
+            </div>
+                <input id="search-users" type="text" placeholder="Search users..." oninput="searchUsers()" />
+            </div>
+            <div id="chat-list" class="chat-list">
+                <!-- User items will be dynamically loaded here -->
+            </div>
+            <button id="logoutBtn" class="logout-button" onclick=logout() >Logout</button>
+        </div>
+
+        <!-- Right Panel: Chat Window -->
+        <div class="right-panel">
+	       <div class="chat-header">
+		
+			   <button id="back-btn" class="back-btn" ><i class="fa-solid fa-arrow-left"></i> </button> 
+					
+				<div class="chat-user-container">
+				    <h3 id="chat-user" class="chat-user">Select a user to chat</h3>
+				    <p id="status"></p>
+				</div>
+						
+                <div class="block-box"> 
+						<button id="refresh-btn" class="refresh-btn" onclick="refreshChat()" >  <i class="fa-solid fa-rotate-right"></i></button>      
+						    <button id="more-btn" class="more-btn" onclick="toggleDropdown()"> 
+					        <i class="fa-solid fa-ellipsis-vertical"></i>
+					    </button>
+					    
+					
+             			<div id="dropdown-menu" class="dropdown-menu">
+							    <!-- Chat Wallpaper -->
+							    <button id="wallpaper-btn" class="dropdown-item" >
+							        <i class="fa-solid fa-image"></i> Chat Wallpaper
+							    </button>
+							
+								<button id="blur-btn" class="dropdown-item" >
+							        <i class="fa-solid fa-droplet"></i>Blur Wallpaper
+							    </button>
+							
+							    <!-- Delete Chat History -->
+							    <button id="clearChatCache-btn" class="dropdown-item" onclick="clearChatCache(currentChatUserId)">
+							        <i class="fa-solid fa-trash"></i> Clear Chat Cache
+							    </button>					   
+
+							 <!-- Delete Chat History -->
+							    <button id="deleteChat-btn" class="dropdown-item" onclick="showPopupMessage2('Deleting chat history will be introduced in a future update.',5000,'red')">
+							        <i class="fa-solid fa-trash"></i> Delete History
+							    </button>               
+							
+							    <!-- Mute/Unmute Chat -->
+							    <button id="mute-btn" class="dropdown-item" onclick="showPopupMessage2('Not a fan of their messages? Block them for now and stay tuned while we work on a proper mute feature!', 5000, 'rgba(34, 153, 195, 0.9)')"> 
+							        <i class="fa-solid fa-bell-slash"></i> <span id="mute-text">Mute Notifications</span>
+							    </button>
+							
+							    <!-- Translate Chat -->
+							    <button id="translate-btn" class="dropdown-item" onclick="showPopupMessage2('This feature incurs additional costs, which we are currently unable to accommodate.',5000,'orange')">
+							        <i class="fa-solid fa-language"></i> <span id="translate-text">AI Translate</span>
+							    </button>
+							<button id="translate-btn" class="dropdown-item" onclick="">
+							        <i class="fa-solid fa-language"></i> <span id="translate-text">Manual Translate</span>
+							<div class="dropdown-container">
+								    <select id="language-switcher" onchange="switchLanguage(this.value)">
+								        <option value="original">Original</option>
+								        <option value="en">English</option>
+								        <option value="hi">हिन्दी</option>
+								        <option value="ja">日本語</option>
+								    </select>
+								</div>
+							</button>
+								
+							
+							    <!-- Export Chat -->
+							    <button id="exportChat-btn" class="dropdown-item" onclick="showPopupMessage2('Export feature coming soon.',5000,'green')">
+							        <i class="fa-solid fa-file-export"></i> Export Chat
+							    </button>
+							
+							    <!-- Report User -->
+							    <button id="report-btn" class="dropdown-item" onclick="showPopupMessage2('Report feature coming soon.',5000,'red')">
+							        <i class="fa-solid fa-flag"></i> Report User
+							    </button>
+							
+							    <!-- Block/Unblock User -->
+							    <button onclick="toggleBlockUser()" class="dropdown-item" style="background: red; color:white;">
+							        <i class="fa-solid fa-ban"></i> <span id="block-button">Block</span>
+							    </button>
+						</div>
+				</div>
+			</div>
+		
+		<div id="chat-window-container" class="chat-window">
+            <div id="chat-window" class="chat-window">
+                <div id="messages" class="messages">
+                    <!-- Messages will be dynamically loaded here -->
+                </div> 
+            </div>
+            
+		   	<div id="typing-indicator" class="typing-indicator" style="display: none;">
+    				<span id="typing-text">User is typing...</span>
+				</div>
+			</div>	
+
+
+
+
+            <div class="message-input-area">  			       	
+ 			   <button id="emoji-button">😊</button>          
+				<div id="emoji-picker" class="hidden"></div> <!-- Emoji Picker -->
+					    <input type="file" id="image-input" accept="image/*" hidden />
+  					  <div id="image-button" class="image-picker-btn"><i class="fa-solid fa-image"></i> </div>
+  					
+  					<div id="file-button" class="file-picker-btn" onclick="showPopupMessage2('File Upload feature coming soon.',5000,'#FF8A00')"><i class="fa-solid fa-file"></i> </div>
+                <input id="message-input" type="text" placeholder="Type a message..." />
+                <div id="send-button" class="send-btn">  <i class="fa-solid fa-paper-plane"></i> </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <!-- Image Preview -->
+<div id="image-preview-container" style="display: none;">
+	<div id="image-loader" class="loader"></div>
+    <img id="image-preview" />
+    <button id="cancel-preview">❌</button>
+</div>
+  
+  
+  <!-- Wallpaper Modal -->
+<div id="wallpaperModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Select a Wallpaper</h2>
+		<div class="wallpaper-options">
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #ff7e5f, #feb47b)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #4facfe, #00f2fe)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #667eea, #764ba2)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #ff9a9e, #fad0c4)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #ff6a00, #ee0979)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #00c6ff, #0072ff)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #ff0084, #33001b)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #12c2e9, #c471ed, #f64f59)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #a8ff78, #78ffd6)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #36d1dc, #5b86e5)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #ff512f, #dd2476)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #11998e, #38ef7d)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #fc4a1a, #f7b733)')"></div>
+		    <div class="gradient" onclick="setChatBackground('linear-gradient(to right, #30cfd0, #330867)')"></div>
+			<!-- Image Backgrounds -->
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg1.jpg)')"></div>
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg2.jpeg)')"></div>
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg3.png)')"></div>
+			<div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg4.png)')"></div>
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg5.jpeg)')"></div>
+		    <div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg6.jpeg)')"></div>
+			<div class="image" onclick="setChatBackground('url(/nihongo/img/bg/bg7.jpeg)')"></div>
+		
+		</div>
+        <button class="button" onclick="resetChatBackground()">Reset to Default</button>
+    </div>
+</div>
+
+
+<!-- Blur slider container (hidden by default) -->
+<div id="blur-slider-container">
+    <label for="blur-slider">Blur Intensity: <span id="blur-value">5</span>px</label>
+    <input type="range" id="blur-slider" min="0" max="20" value="5">
+    <button id="close-blur-slider">✖</button>
+</div>
+
+
+
+
+    <script>
+    // Dynamically set the viewport height for better compatibility
+    function setViewportHeight() {
+      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    }
+
+    window.addEventListener('resize', setViewportHeight);
+    setViewportHeight();
+  </script>
+
+
+<script>
+// Initialize i18next
+// Initialize i18next
+function initI18n() {
+    i18next.init({
+        lng: 'en', // Default language
+        fallbackLng: 'en',
+        resources: {} // Empty initially
+    }).then(() => {
+        loadTranslations();
+    });
+}
+
+// Regex to detect language 
+function detectLanguage(text) {
+    if (/[\u0900-\u097F]/.test(text)) return "hi"; // Hindi (Devanagari script)
+    if (/[\u3040-\u30FF\u4E00-\u9FFF]/.test(text)) return "ja"; // Japanese (Kana/Kanji)
+    return "en"; // Default to English
+}
+
+// Load translation files dynamically
+function loadTranslations() {
+    Promise.all([
+        fetch('/nihongo/locales/en/translation.json').then(res => res.json()),
+        fetch('/nihongo/locales/hi/translation.json').then(res => res.json()),
+        fetch('/nihongo/locales/ja/translation.json').then(res => res.json())
+    ]).then(([enData, hiData, jaData]) => {
+        i18next.addResourceBundle('en', 'translation', enData);
+        i18next.addResourceBundle('hi', 'translation', hiData);
+        i18next.addResourceBundle('ja', 'translation', jaData);
+    }).catch(err => console.error('Error loading translations:', err));
+}
+
+let savedLanguage = "original";
+    
+// Switch Language from Dropdown
+function switchLanguage(language) {
+	savedLanguage = language;
+    if (language === "original") {
+        restoreOriginalMessages(); // Show original
+    } else {
+        i18next.changeLanguage(language, updateMessages);
+    }
+}
+
+// Restore Original Messages
+function restoreOriginalMessages() {
+    document.querySelectorAll('.message').forEach(message => {
+        message.textContent = message.dataset.originalText; // Show original text
+    });
+}
+
+// Translate chat messages
+function updateMessages() {
+    document.getElementById("language-switcher").value = savedLanguage;
+    if (savedLanguage === "original") {
+    	return;
+	}
+    document.querySelectorAll('.message').forEach(message => {
+        let originalText = message.dataset.originalText;
+        if (!originalText) return;
+		
+		originalText = originalText.trim().toLowerCase(); // Trim and convert to lowercase
+		
+        const originalLang = message.dataset.language;
+        const currentLang = i18next.language;
+
+		// Only translate if the original and target languages are different  
+  	  message.textContent = (originalLang === currentLang) ? originalText : i18next.t(originalText);  
+    });
+}
+
+// Initialize i18next
+initI18n();
+</script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+
+ 
+    
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+    <script src="chat-of.js"></script>
+</body>
+</html>

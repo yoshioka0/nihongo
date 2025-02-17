@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Nihongo 日本語</title>
+  <meta name="description" content="Learn Japanese through a comprehensive guide by Yoshioka sensei, covering writing systems, grammar, essential vocabulary, cultural insights, and practical tips for beginners. A user-friendly resource for mastering the language step by step.">
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+  <link rel="manifest" href="../favicon/site.webmanifest">
+  <link rel="stylesheet" href="auth.css">
+  	     <script src="https://accounts.google.com/gsi/client" async></script>
+
+    <script src="/nihongo/config.js"></script>
+ <script src="/nihongo/auth-v2.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
+
+</head>
+<body>
+	 <!-- Noscript message: if JavaScript is disabled, redirect user -->
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
+  </noscript>
+
+<!-- Modal for user creation -->
+<div id="signup-modal" class="modal" style="display:flex">
+  <div class="modal-content">
+    <h1>Create a userID</h1>
+      <h3>OR</h3>
+      <div id="buttonDiv"> </div>
+    <form id="signup-form">
+    	
+      <input type="text" id="signup-username" name="signup-username" placeholder="Enter username" required>
+      
+      <div class="password-wrapper">
+        <input id="signup-password" name="signup-password" type="password" placeholder="Password" required />
+        <i id="show-password-icon" class="fas fa-eye"></i> <!-- Eye icon for toggling -->
+      </div>
+
+      <!-- Confirm Password input -->
+      <div class="password-wrapper">
+        <input id="signup-confirm-password" name="signup-confirm-password" type="password" placeholder="Confirm Password" required />
+        <i id="show-confirm-password-icon" class="fas fa-eye"></i> <!-- Eye icon for toggling -->
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 5px; margin-bottom:10px;">
+        <input type="checkbox" id="keep-logged-in-signup">
+        <label for="keep-logged-in-signup"><strong>Remember Me</strong>
+      </div>
+
+      <!-- class of the turnstile will be added by auth-v2.js if user is unauthenticated -->
+      <div id="turnstile1"  data-theme="light"></div>
+
+      <button type="submit">Sign Up</button> <br> <br>
+      <p>Already have an account? <a><span id="login-here" class="login-txt">Login Here</span></a></p>
+      <p id="ErrorMessage" class="error-message" style="color: red;"></p>
+    </form>
+  </div>
+</div>
+  
+  
+  
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <h1>Log In</h1>
+
+      
+      
+	   	<form id="login-form">
+			  <input type="text" id="login-username" name="login-username" placeholder="Enter username" required>
+			
+<div class="password-wrapper">
+    <input id="login-password" name="login-password" type="password" placeholder="Password" required />
+    <i id="show-password-icon" class="fas fa-eye"></i> <!-- Eye icon for toggling -->
+    	
+</div>
+<div style="display: flex; align-items: center; gap: 5px; justify-content: flex-start; margin-bottom:10px;">
+    <input type="checkbox" id="keep-logged-in">
+    <label for="keep-logged-in"><strong>Keep me logged in</strong>
+</div>
+			
+			<!-- class of the turnstile will be added by auth-v2.js if user unauthicated -->
+			<div id="turnstile2"  data-theme="light"></div>
+				
+			  <button id="login-button" type="submit">Log In</button> <br> <br>
+			  <p>Don't have an account? <a><span id="signup-here" class="signup-txt">Sign Up</span></a></p>
+			</form>
+			
+    </div>
+  </div>
+	
+	<script  src="auth.js" async></script>  
+
+</body>
+</html>

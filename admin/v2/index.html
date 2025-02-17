@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="admin.css">
+    <script src="/nihongo/config.js"></script>
+     <script src="/nihongo/auth-v2.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1><a href="/nihongo/" style="color:white;">Admin Panel (v2)</a></h1>
+    </header>
+    
+    <main>
+        <section id="tabs">
+        	<button class="tab-button" style="background: #F5ED8D; color: black;"><a href="../health.html"><b>Server Health</b></a></button>
+        	<button class="tab-button" data-tab="global-settings" >Global Settings</button>
+            <button class="tab-button" data-tab="users" onclick="fetchUsers()">Users</button>
+            <button class="tab-button" data-tab="send-notifications">Send Notifications</button>
+            <button class="tab-button" data-tab="view-notifications" onclick="fetchNotifications()">View Notifications</button>
+            <button class="tab-button" data-tab="subscriptions" onclick="fetchSubscriptions()" >Subscriptions</button>
+            <button class="tab-button" data-tab="view-logs" onclick=" fetchLogs()">View Logs</button>
+        </section>
+        
+      <!-- Global Settings Tab -->
+<section id="global-settings" class="tab-content active">
+    <h2>Global Site Settings</h2>
+
+    <label>
+        <input type="checkbox" id="toggle-site"> Enable Site
+    </label>
+    <br>
+    	
+        <label>
+        <input type="checkbox" id="toggle-googleAuth"> Enable Google Auth
+    </label>
+    <br>
+
+    <label>
+        <input type="checkbox" id="toggle-login"> Enable Login
+    </label>
+    <br>
+
+    <label>
+        <input type="checkbox" id="toggle-signup"> Enable Signup
+    </label>
+    <br>
+
+    <label>
+        <input type="checkbox" id="toggle-chat"> Enable Chat
+    </label>
+    <br>
+    	
+        <label>
+        <input type="checkbox" id="toggle-upload"> Enable Upload
+    </label>
+    <br>
+
+    <button onclick="updateGlobalConfig()">Save Changes</button>
+</section>
+
+
+        <!-- Manage Users Tab -->
+<section id="users" class="tab-content">
+    <h2>Manage Users</h2>
+    <div id="user-list" class="user-container">
+        <!-- Users will be dynamically added here -->
+    </div>
+</section>
+
+        <!-- Send Notifications Tab -->
+        <section id="send-notifications" class="tab-content">
+            <h2>Send Notification</h2>
+            <form id="notification-form">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" required>
+                
+                <label for="message">Message</label>
+                <textarea id="message" name="message" required></textarea>
+                
+                <label for="icon">Icon URL (optional)</label>
+                <input type="url" id="icon" name="icon">
+                
+                <label for="image">Image URL (optional)</label>
+                <input type="url" id="image" name="image">
+                
+				<label for="username">Send to (optional)</label>
+				<select id="username" name="username">
+				    <option value="">Leave blank for all users</option>
+				</select>
+                
+                <button type="submit">Send Notification</button>
+            </form>
+        </section>
+
+<!-- View Notifications Tab -->
+<section id="view-notifications" class="tab-content">
+    <h2>View All Notifications</h2>
+    <div id="notification-list" class="notification-container">
+        <!-- Notifications will be dynamically added here -->
+    </div>
+</section>
+
+        <!-- Subscriptions Tab -->
+        <section id="subscriptions" class="tab-content">
+            <h2>Monitor Subscriptions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th >Endpoint</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="subscription-list">
+                    <!-- Subscriptions will load here -->
+                </tbody>
+            </table>
+        </section>
+     
+		
+		<!-- New section to display logs -->
+		<section id="view-logs" class="tab-content">
+		    <h2>View Activity Logs</h2>
+		    <table>
+		        <thead>
+		            <tr>
+		                <th>User ID</th>
+		                <th>Username</th>
+		                <th>Action</th>
+		                <th>Details</th>
+		                <th>IP Address</th>
+		                <th>Timestamp</th>
+		            </tr>
+		        </thead>
+		        <tbody id="log-list2">
+		            <!-- Logs will load here -->
+		        </tbody>
+		    </table>
+		</section>
+
+   </main>
+   
+   <div id="log-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeLogs()">&times;</span>
+        <h2 id="log-modal-title">Logs</h2>
+        <div id="log-list"></div>
+        <div id="pagination-controls" class="pagination"></div>
+    </div>
+</div>
+    
+     <!-- Console area to display logs -->
+    <div id="console"></div>
+
+        
+    <script src="admin2-of.js"></script>
+</body>
+</html>

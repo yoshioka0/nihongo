@@ -1,0 +1,415 @@
+/* Reset and basic styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Ensure the page uses the full height */
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+
+  color: #333;
+  line-height: 1.6;
+}
+
+#buttonDiv {
+    height: 60px; /* Set your desired height */
+    display: flex;
+    align-items: center; /* Center the button vertically */
+    justify-content: center; /* Center the button horizontally */
+}
+#buttonDiv {
+    transform: scale(1.2); /* Scale the button */
+    transform-origin: center;
+}
+
+
+/* Popup Notification Style */
+.popup-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ff5555;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  width: 300px; /* Set a fixed width for the popup */
+  z-index:2000;
+  margin-bottom: -60px;
+}
+
+.popup-notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Progress bar above the popup */
+.popup-notification .progress-bar-wrapper {
+  position: relative;
+  height: 5px;
+  background-color: rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.popup-notification .progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: orange;
+  width: 0%;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+/* Spinner Style */
+.spinner {
+  border: 4px solid rgba(0,0,0,0.7);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+}
+
+.loader-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: 50px; /* Space between loader and text */
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff; 
+}
+.loader {
+    display: block;
+    position: ;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 8px solid transparent;
+    border-top: 8px solid #4285F4;  /* Google Blue */
+    border-right: 8px solid #EA4335; /* Google Red */
+    border-bottom: 8px solid #34A853; /* Google Green */
+    border-left: 8px solid #FBBC05;  /* Google Yellow */
+    animation: spin 1s linear infinite;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+/* Loading Message Style */
+.loading-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: green;
+  font-weight:700;
+}
+
+/* Hyperlink for Sign Up / Login */
+.modal a {
+  text-decoration: none;
+  color: #3498db; /* A nice blue shade */
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0.2em 0.4em;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.modal a:hover {
+  color: #ffffff; /* White text on hover */
+  background-color: #3498db; /* Background matches the link color */
+  border-color: #3498db; /* Add border on hover */
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3); /* Slight text glow effect */
+}
+
+/* Modal container styles, currently occupies whole display*/
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: red;
+  background-color: rgba(0, 0, 0, 0.3); /* Darker overlay for a more sophisticated look */
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Modal content box styling */
+.modal-content {
+  background: linear-gradient(145deg, #ffffff, #f2f2f2); /* Soft gradient background */
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px; /* Limit the width for better responsiveness */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Deeper shadow for a floating effect */
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+
+/* Modal heading styling */
+.modal h2 {
+  font-size: 1.5rem;
+  margin: 0 0 10px;
+  color: #333; /* Darker text for clarity */
+  font-weight: 600; /* Bold heading */
+}
+
+.modal button {
+    padding: 10px 20px;
+    cursor: pointer;
+	color: #0078D7;
+	font-weight: bold;
+	font-size: 1.2em;
+	display: inline-block;
+	padding: 10px 20px;
+	border: 2px solid #0078D7;
+	border-radius: 5px;
+	transition: all 0.3s;  
+}
+
+.modal button:hover {
+  background-color: #0078D7;
+   color: #fff;
+}
+
+button:disabled {
+    background-color: #ccc; /* Greyed-out for disabled state */
+    cursor: not-allowed;
+}
+
+
+/* Input field styles */
+/* Apply styles only to text inputs, not checkboxes */
+input {
+  font-size: 16px;
+  letter-spacing: 1.5px; /* Adjust the value as needed */
+}
+
+input:not([type="checkbox"]) {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px; /* Rounded edges for a more modern look */
+  
+  transition: border-color 0.3s ease;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin: 10px;
+  transform: scale(1.5); /* Slightly bigger for better visibility */
+}
+
+input:focus {
+  border-color: #3498db; /* Highlight the input field with blue on focus */
+  outline: none;
+}
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 60px; /* Space for the eye icon */
+    padding-left: 10px; /* Optional, for better alignment */
+    font-size: 18px;
+    background: ;
+}
+
+#show-password-icon, #show-confirm-password-icon  {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    cursor: pointer;
+    color: #333;
+    background:;
+    padding: 10px;
+    margin-right: -10px;
+}
+
+.password-wrapper input[type="password"]:focus + #show-password-icon {
+    color: #007bff; /* Optional: change color when input is focused */
+}
+
+.password-wrapper input[type="password"]:focus + #show-confirm-password-icon {
+    color: #007bff; /* Optional: change color when input is focused */
+}
+
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-top: 0px;
+  padding: 0px;
+}
+
+
+/* Main content area */
+.main-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  margin-top: 30px;
+  padding: 30px;
+}
+
+
+
+@media (min-width: 768px) { 
+
+		/* Geometric Background Shapes */
+
+		body::before {
+
+		    content: '';
+
+		    position: absolute;
+
+		    top: 10%;
+
+		    left: 10%;
+
+		    width: 200px;
+
+		    height: 200px;
+
+		    background: rgba(255, 255, 255, 0.1);
+
+		    z-index: -1;
+
+		    animation: rotate 15s linear infinite, morph 8s ease-in-out infinite;
+
+		}
+
+		
+
+		body::after {
+
+		    content: '';
+
+		    position: absolute;
+
+		    bottom: 10%;
+
+		    right: 10%;
+
+		    width: 300px;
+
+		    height: 300px;
+
+		    background: rgba(255, 255, 255, 0.1);
+
+		    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+
+		    z-index: -1;
+
+		    animation: rotate 15s linear infinite reverse, morph 12s ease-in-out infinite;
+
+		}
+
+		
+
+		@keyframes rotate {
+
+		    0% { transform: rotate(0deg); }
+
+		    100% { transform: rotate(360deg); }
+
+		}
+
+		
+
+		
+
+		/* Keyframes for Shape Transformation */
+
+		@keyframes morph {
+
+		    0% {
+
+		        clip-path: circle(0% at 50% 50%); /* Circle */
+
+		    }
+
+		     10% {
+
+		        clip-path: circle(50% at 50% 50%); /* Circle */
+
+		    }
+
+		    20% {
+
+		        clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle */
+
+		    }
+
+		    35% {
+
+		        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); /* Square */
+
+		    }
+
+		    70% {
+
+		        clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); /* Pentagon */
+
+		    }
+
+			85% {
+
+		        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+
+		    }
+
+		    100% {
+
+		        clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%);
+
+		    }	
+
+		}
+
+		
+
+}

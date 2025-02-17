@@ -1,0 +1,18 @@
+
+        h1, h2 {
+            color: #d32f2f;
+            text-align: center;
+        }
+
+        p {
+            line-height: 1.6;
+        }
+
+        a {
+            color: #d32f2f;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }

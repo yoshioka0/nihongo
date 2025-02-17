@@ -1,0 +1,626 @@
+/* header.css */
+
+/* Basic reset for margin, padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.loader-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: 50px; /* Space between loader and text */
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff; 
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    height:100vh;
+}
+.loader {
+    display: block;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 8px solid transparent;
+    border-top: 8px solid #4285F4;  /* Google Blue */
+    border-right: 8px solid #EA4335; /* Google Red */
+    border-bottom: 8px solid #34A853; /* Google Green */
+    border-left: 8px solid #FBBC05;  /* Google Yellow */
+    animation: spin 1s linear infinite;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+a {
+text-decoration: none;
+}
+
+.chat-icon, .notification-icon {
+    font-size: 18px;  /* Adjust size */
+    color: #007bff;  /* Change color (blue) */
+}
+
+#countdown {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  color: #fff;
+  background-color: #333;
+  padding: 5px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  min-width: 100px;
+}
+
+#countdown {
+  background-color: #2d2d2d;
+  color: #fff;
+  font-weight: bold;
+}
+
+#countdown.session-expired {
+  background-color: #e74c3c;
+}
+
+#countdown.session-active {
+  background-color: #27ae60;
+}
+
+#countdown:hover {
+  transform: scale(1.1);
+}
+
+/* Header Styling */
+.custom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 10px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  width:100%;
+}
+
+/* Left Section: Logo */
+.header-logo {
+  display: flex;
+  align-items: center;
+}
+
+.site-icon {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.site-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+
+/* Menu */
+  .menu {
+     	display: flex;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 250px;
+        height: 100vh;       
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: 0.3s ease-in-out;
+        box-shadow: -5px 0 10px rgba(0, 0, 0, 0.2);
+        background:#CC5E6E;
+        opacity:0.9;
+    }
+
+    .menu.active {
+        right: 0;
+    }
+
+    .menu li {
+        margin: 20px 0;
+    }
+
+.menu a {
+  font-size: 1.2rem;
+  color: #333;
+  text-decoration: none;
+  padding: 10px 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  animation: pop-in 1s ease-out;
+  font-weight:800;
+}
+
+.menu a:hover {
+  background-color: yellow;
+}
+
+/* Hamburger Button */
+.hamburger {
+    width: 35px;
+    height: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    margin-right: 5px;
+    padding:2px;
+}
+
+.hamburger span {
+    width: 100%;
+    height: 5px;
+    background: #FF6980;
+    border-radius: 5px;
+    transition: 0.3s ease-in-out;
+}
+
+    /* Hamburger Animation */
+    .hamburger.active span:nth-child(1) {
+        transform: translateY(10px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+        transform: translateY(-10px) rotate(-45deg);
+    }
+
+/* Middle Section: Chat & Notification Buttons */
+.header-center {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-btn, .notification-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+#notification-dropdown {
+  display: none;
+  position: fixed;
+  color: white;
+  background: rgba(0, 0, 0, 0.8); /* Frosted glass effect */
+  backdrop-filter: blur(8px); /* Adds the blur effect */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 300px;
+  padding: 10px;
+  z-index: 1000;
+  margin: 5px 5px;  
+  margin-top: 55px;
+    
+}
+
+.subscription-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+#notification-dropdown button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: 5px
+}
+
+#notification-dropdown h3{
+	color: yellow;
+}
+
+#notification-dropdown button:hover {
+    background-color: darkred;
+}
+
+/* Show the dropdown when the user hovers over the notification button */
+#notification-active:hover #notification-dropdown {
+    display: block;
+}
+
+
+/* Right Section: User Info */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-name {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #0073e6;
+  text-transform: capitalize;
+}
+
+#login-btn {
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  color: #fff;
+  background-color: #333;
+  padding: 5px 20px;
+  border-radius: 8px;
+  display: inline-block;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  margin-left: 5px;
+}
+
+.user-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.user-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+/* Header styling */
+.heading {
+  display: flex;
+  flex-direction: column;
+  background: #ff94a4;
+  padding: 10px 0;
+  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  animation: float 3s ease-in-out infinite;  
+  z-index: 1;
+  margin:0px;
+  margin-top: 60px;
+}
+
+.heading h1 {
+background: ;
+  font-size: 2.5rem;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 2px;
+  display: inline-block;
+}
+
+.dropdown {
+  position: relative;  
+  margin-top: 0px;
+  padding: 0px;
+  z-index: 1000;
+}
+
+
+.dropdown-content {
+  display:none;
+  position:fixed;
+  background: rgba(0, 0, 0, 0.8); /* Frosted glass effect */
+  backdrop-filter: blur(8px); /* Adds the blur effect */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 300px;
+  padding: 10px;
+  right: 0;
+  z-index: 10;
+  margin: 5px 5px;
+  margin-top: 55px;
+}
+
+.dropdown-content.active {
+  display: block;
+}
+
+
+
+.dropdown-content .profile {
+  text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Profile Image Wrapper */
+.dropdown-content .profile-img-wrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+	background: #4285f4; /* Blue */
+  animation: gradientRotation 6s ease infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0px auto;
+}
+
+/* Ensuring the image fits in the circular wrapper */
+.dropdown-content .profile-img-wrapper img {
+  width: 80px; /* Slightly smaller than the wrapper */
+  height: 80px;
+  border-radius: 50%;
+  
+}
+
+.dropdown-content .profile .username {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  color: white;
+}
+.mail {
+color: white;
+}
+
+.dropdown-content a {
+      display: block;
+      padding: 12px 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background-color 0.3s, transform 0.2s;
+      border-radius: 8px;
+      margin: 8px 0;
+      background-color: rgba(255, 255, 255, 0.1); /* Slight background */
+    }
+	.dropdown-content a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes gradientRotation {
+  0% {
+    background-color: #4285f4; /* Blue */
+  }
+  25% {
+    background-color: #34a853; /* Green */
+  }
+  50% {
+    background-color: #fbbc05; /* Yellow */
+  }
+  75% {
+    background-color: #ea4335; /* Red */
+  }
+  100% {
+    background-color: #4285f4; /* Blue */
+  }
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+	.hamburger {
+		width: 30px;
+    	height: 25px;
+    }
+    #login-btn {
+    	padding: 5px 10px;
+    }
+  .user-name {
+  	display:none;	
+	}
+	.site-name {
+  font-size: 1.2rem;
+	}
+	.heading h1 {
+		font-size: 1.8rem;
+	}
+	
+}
+
+/* Surprise Button */
+#surprise-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#surprise-button:hover {
+  background-color: #45a049;
+}
+
+/* Party Elements (Balloons and Confetti) */
+#party {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  pointer-events: none; /* Prevents interaction with party elements */
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#party.hidden {
+  display: none;
+}
+
+/* Balloons */
+.balloon {
+  position: absolute;
+  bottom: -50px; /* Start at the bottom */
+  width: 60px;
+  height: 80px;
+  background-color: #ff69b4;
+  border-radius: 50%;
+  animation: fluid 5s ease-in infinite;
+  opacity: 0.8;
+}
+
+.balloon:nth-child(1) {
+  background-color: #ff69b4;
+  animation-duration: 6s;
+  left: 10%;
+}
+
+.balloon:nth-child(2) {
+  background-color: #ff1493;
+  animation-duration: 7s;
+  left: 30%;
+}
+
+.balloon:nth-child(3) {
+  background-color: #ff4500;
+  animation-duration: 8s;
+  left: 50%;
+}
+
+.balloon:nth-child(4) {
+  background-color: #32cd32;
+  animation-duration: 6.5s;
+  left: 70%;
+}
+
+.balloon:nth-child(5) {
+  background-color: #1e90ff;
+  animation-duration: 7.5s;
+  left: 90%;
+}
+
+/* Balloon Floating Animation */
+@keyframes fluid {
+  0% {
+    bottom: -50px; /* Start below the screen */
+    transform: rotate(0deg);
+  }
+  100% {
+    bottom: 100vh; /* Move to the top of the screen */
+    transform: rotate(360deg);
+  }
+}
+
+/* Confetti container and animations*/
+    #confetti-container {
+      position: fixed;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      animation: confettiFall 3s ease-in infinite, confettiParticles 1.5s infinite;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(-10px);
+      }
+      100% {
+        transform: translateY(110vh);
+      }
+    }
+
+    @keyframes confettiParticles {
+      0% {
+        opacity: 1;
+        transform: translateX(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(50px) rotate(360deg);
+      }
+    }
+
+/* Confetti (added for fun!) */
+.confetti2 {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('img/confetti2.gif');
+  background-size: cover;
+  opacity: 0.5;
+
+}
+
+/* Surprise message styling */
+#surprise-message {
+  display: none;
+  position: fixed; 
+  text-align: center;
+  padding: 20px;
+  margin-top: 60px;
+  background-color: #f0f8ff;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
+}
+
+#surprise-message p {
+  font-weight: bold;
+  color: #3498db;
+}
+
+/* Show the message when triggered */
+#surprise-message.show {
+  display: block;
+}
+
+
+
+/* Show surprise message with animation */
+@keyframes showMessage {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#surprise-message {
+  animation: showMessage 0.5s ease-out forwards;
+}
+
+

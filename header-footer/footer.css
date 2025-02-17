@@ -1,0 +1,60 @@
+	/* Footer */
+footer {
+    background-color: #fdd7e4; 
+    color: #333;
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 14px;
+    border-top: 1px solid #ddd;
+    margin-top: 0px; /* Space between content and footer */
+}
+
+/* Footer links */
+footer a {
+    text-decoration: none;
+    color: #555;
+    margin: 0 10px;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: #333;
+}
+
+/* Additional */
+.footer-content p.made-with-love {
+    margin-top: 15px;
+    font-size: 16px;
+    color: #000; 
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    opacity: 0; /* Initially hidden */
+    transform: translateY(20px); /* Start position */
+    transition: opacity 1s ease, transform 1s ease; /* Animation */
+}
+.custom-link {
+    color: #ff6f91; /* Custom color for this link */
+}
+
+.custom-link:hover {
+    color: #ff3b5c; /* Hover effect */
+}
+
+.footer-content p.made-with-love span {
+    color: #ff6f91; /* author name Yoshioka*/
+}
+
+.footer-icon {
+    width: 20px;  /* Set the desired size */
+    height: 20px;
+    vertical-align: middle;  /* Align with text */
+    margin-left: 5px;  /* Space between text and icon */
+}
+
+/* Visible state triggered by Intersection Observer */
+.footer-content.p-visible p.made-with-love {
+    opacity: 1; /* Fade in */
+    transform: translateY(0); /* Final position */
+}
+

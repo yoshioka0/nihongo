@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Nihongo 日本語</title>
+  <meta name="description" content="Learn Japanese through a comprehensive guide by Yoshioka sensei, covering writing systems, grammar, essential vocabulary, cultural insights, and practical tips for beginners. A user-friendly resource for mastering the language step by step.">
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+  <link rel="manifest" href="favicon/site.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+   <link rel="stylesheet" href="header-footer/header.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+   <script src="/nihongo/auth-v2.js"></script>
+  <script src="/nihongo/config.js"></script>
+</head>
+<body>
+	 <!-- Noscript message: if JavaScript is disabled, redirect user -->
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
+  </noscript>
+  
+<div id="header" ></div>
+  
+  
+    <div class="heading">
+		<h1>Japanese Learning Guidebook 🌸</h1>
+    </div>
+  </div>
+
+
+
+   <div id="master" class="container">
+	 <div class="hamburger2" onclick="toggleNav()">
+            <span></span><span></span><span></span>
+     </div>
+    <nav class="nav-menu">
+        <a href="/nihongo/contents/nouns.html">👘 Nouns</a>
+        <a href="/nihongo/contents/adjectives.html">🍡 Adjectives</a>
+        <a href="/nihongo/contents/verbs.html">🔑 Verbs</a>
+        <a href="/nihongo/contents/vocabs.html">🪭 Vocabs</a>
+        <a href="/nihongo/contents/particles.html">⚡ Particles</a>
+        <a href="/nihongo/contents/extras.html">🏆 Extras</a>
+    </nav>
+
+      <div id="main" class="main-content">
+        <!-- Wrap the cards with anchor tags -->
+        <a href="/nihongo/contents/nouns.html" class="card" id="nouns">
+          <h3>🍣 Nouns</h3>
+          <p>Learn all about Japanese nouns and their usage.</p>
+        </a>
+        <a href="/nihongo/contents/adjectives.html" class="card" id="adjectives">
+          <h3>🍓 Adjectives</h3>
+          <p>Understand how adjectives work in Japanese.</p>
+        </a>
+        <a href="/nihongo/contents/verbs.html" class="card" id="conjugations">
+          <h3>🔑 Verbs & Conjugations</h3>
+          <p>Get to know verb conjugation patterns.</p>
+        </a>
+        <a href="/nihongo/contents/sentence-structure.html" class="card" id="sentence-structure">
+          <h3>📖 Sentence Structure</h3>
+          <p>Learn how to build sentences in Japanese.</p>
+        </a>
+        <a href="/nihongo/contents/particles.html" class="card" id="particles">
+          <h3>✨ Particles</h3>
+          <p>Understand the different particles in Japanese grammar.</p>
+        </a>
+        <a href="/nihongo/contents/vocabs.html" class="card" id="vocabs">
+          <h3>🪭 Vocabs</h3>
+          <p>Appetite for vocabularies, here you have .</p>
+        </a>      
+        <a href="/nihongo/contents/extras.html" class="card" id="extras">
+          <h3>🏆 Extras</h3>
+          <p>General queries and questions about words differences: what to use and when.</p>
+        </a>      
+      </div>
+      </div>
+     
+<div id="footer" ></div>
+
+    <!-- Floating Notification Button -->
+<button id="enable-notifications" class="floating-button" style="display: none;">
+    📢
+</button>
+
+<script>
+    document.getElementById('enable-notifications').addEventListener('click', () => {
+        subscribeUserToPush();
+    });
+</script>
+
+    <!-- Scroll Buttons -->
+    <button id="scroll-up" class="scroll-btn" style="display: none;" aria-label="Scroll Up">&#8593;</button>
+    <button id="scroll-down" class="scroll-btn" style="display: none;" aria-label="Scroll Down">&#8595;</button>
+  
+  <style>
+    .container {
+      padding: 0px 20px;
+    }
+
+    h2 {
+      color: #333;
+      margin: 0px;
+    }
+
+    h3 {
+      color: #444;
+      margin: 0px;
+    }
+  </style>
+
+	<script  src="header-footer/header.js"></script> 
+	<script  src="script.js"></script>  
+
+</body>
+</html>

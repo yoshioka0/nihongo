@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extras </title>
+  <link rel="stylesheet" href="/nihongo/styles.css">
+  <link rel="stylesheet" href="/nihongo/header-footer/header.css">
+  <script src="/nihongo/auth-v2.js" defer></script>
+  <script src="/nihongo/config.js"></script>
+  <script  src="/nihongo/header-footer/header.js" defer></script>   
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+            transition: 0.3s;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        #videoContainer {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            border-radius: 8px;
+            overflow: hidden;
+            background: black;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .btn {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .video-list {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .video-list button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .video-list button:hover {
+            background: #007bff;
+            transform: scale(1.1);
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background: #ff9800;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background: #e68900;
+            transform: scale(1.05);
+        }
+		
+        /* Light Mode */
+        .light-mode {
+            background-color: white;
+            color: black;
+        }
+
+        .light-mode .container {
+            background: #f5f5f5;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .light-mode .video-list button {
+            background: #ddd;
+            color: black;
+        }
+
+        .light-mode .btn {
+            background: #28a745;
+        }
+
+        .light-mode .btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+
+<body>
+ <!-- Noscript message: if JavaScript is disabled, redirect user -->
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
+  </noscript>
+  
+<div id="header" ></div>
+
+    <div class="container">
+        <h1>Suki na eiga o miru</h1>
+        
+        <!-- Search Bar -->
+        <input type="text" class="search-bar" placeholder="Enter IMDb ID (e.g. tt16428256)" id="searchInput">
+
+        <!-- Video Container -->
+        <div id="videoContainer"></div>
+
+        <!-- Video Selection Buttons -->
+        <div class="video-list">
+            <button onclick="loadVideo('tt16428256')">Suzume</button>
+            <button onclick="loadVideo('tt1375666')">Inception</button>
+            <button onclick="loadVideo('tt0816692')">Interstellar</button>
+            <button onclick="loadVideo('tt0111161')">Shawshank</button>
+            <button onclick="loadVideo('tt0110912')">Pulp Fiction</button>
+            <button onclick="loadVideo('tt0848228')">Avengers</button>
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    </div>
+    
+<div id="footer" ></div>
+
+
+    <script>
+   
+        function loadVideo(imdbID) {
+            let videoContainer = document.getElementById("videoContainer");
+            videoContainer.style.opacity = "0"; // Hide before loading
+
+            setTimeout(() => {
+                videoContainer.innerHTML = `
+                    <iframe 
+                        src="https://vidsrc.in/embed/movie?imdb=${imdbID}" 
+                        allowfullscreen referrerpolicy="no-referrer" sandbox>
+                    </iframe>
+                `;
+                videoContainer.style.opacity = "1"; // Fade in effect
+                videoContainer.style.transform = "scale(1)";
+            }, 500);
+        }
+
+        // Load a default video on page load
+        window.onload = () => {
+            loadVideo('tt16428256');
+            showPopupMessage2("This page is temporarily disabled to ensure your privacy and security.", 5000);
+        };
+
+        // Search bar functionality
+        document.getElementById("searchInput").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                let imdbID = event.target.value.trim();
+                if (imdbID) {
+                    loadVideo(imdbID);
+                }
+            }
+        });
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle("light-mode");
+        }
+    </script>
+
+</body>
+</html>

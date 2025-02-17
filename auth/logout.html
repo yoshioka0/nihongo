@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Out</title>
+    <style>
+        /* Page Background */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(270deg, #ff416c, #ff4b2b);
+			background-size: 400% 400%;
+			animation: gradientMove 3s infinite alternate;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        /* Card Style */
+        .logout-container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        /* Button Style */
+        .login-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .login-btn:hover {
+            background: #0056b3;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+       
+		@keyframes gradientMove {
+		    0% { background-position: 0% 50%; }
+		    100% { background-position: 100% 50%; }
+		}
+    </style>
+</head>
+<body>
+
+    <div class="logout-container">
+        <h1>Logged Out Successfully</h1>
+        <p>You have been successfully logged out. Have a great day!</p>
+        <a href="/nihongo/auth/" class="login-btn" style="background:green;">Login Again</a>
+        <a href="/nihongo/" class="login-btn">Go to Home</a>
+    </div>
+
+    <script>
+        // Clear session storage or local storage if needed
+	function clearAllData() {
+	    // Clear localStorage
+	    localStorage.clear();
+	    
+	    // Clear sessionStorage
+	    sessionStorage.clear();
+	        
+		// Clear IndexedDb 
+		var req = indexedDB.deleteDatabase('SecureChatDB');
+		req.onsuccess = function () {
+		    console.log("Deleted database successfully");
+		};
+		req.onerror = function () {
+		    console.log("Couldn't delete database");
+		};
+		req.onblocked = function () {
+		    console.log("Couldn't delete database due to the operation being blocked");
+		};
+		
+		document.cookie.split(";").forEach((cookie) => {
+    document.cookie = cookie.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+});
+		
+    clearAllData();
+    </script>
+
+</body>
+</html>

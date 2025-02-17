@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | Nihongo Guidebook</title>
+  <link rel="stylesheet" href="/nihongo/styles.css">
+    <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/nihongo/header-footer/header.css">
+  <script  src="/nihongo/header-footer/header.js" defer></script>   
+</head>
+
+<body>
+ <!-- Noscript message: if JavaScript is disabled, redirect user -->
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
+  </noscript>
+  
+<div id="header" ></div>
+  
+    <div class="heading">
+    <h1>Privacy Policy</h1>
+  </div>
+ 
+ 
+ <div class="container">
+        <p>Last updated: <strong>February 2025</strong></p><br>
+        <p>Welcome to <strong>Nihongo Guidebook</strong>. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your information.</p>
+
+        <h2>1. Information We Collect</h2>
+        <p>We may collect the following information:</p>
+        <ul>
+            <li><strong>Personal Data:</strong> If you sign up, we may collect your email, username, and profile information.</li>
+            <li><strong>Chat Data:</strong> Messages sent in private chats are end-to-end encrypted and not stored permanently.</li>
+            <li><strong>Usage Data:</strong> We may collect information such as browser type, device, and pages visited to improve our services.</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <p>We use your data to:</p>
+        <ul>
+            <li>Currently we don't process your data and have no intention to do so.</li>
+        </ul>
+
+        <h2>3. Data Security</h2>
+        <p>We prioritize security and take necessary measures to protect your data. However, no system is 100% secure, so please use strong passwords and be mindful of the data you share.</p>
+
+        <h2>4. Third-Party Services</h2>
+        <p>We do not sell your personal data. However, we may use third-party services (like analytics or authentication providers) that have their own privacy policies.</p>
+
+        <h2>5. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li>Request access to your data.</li>
+            <li>Delete your account and associated data.</li>
+            <li>Opt-out of certain data collection practices.</li>
+        </ul>
+
+        <h2>6. Updates to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. Changes will be posted on this page.</p>
+
+        <h2>7. Contact Us</h2>
+        <p>If you have any questions regarding this Privacy Policy, <a href="mailto:yoshioka020@gmail.com">contact us</a>.</p>
+    
+
+  </div> <!-- End of container -->
+  	
+
+<div id="footer" ></div>
+
+<script>
+	// Function to get the access token from localStorage
+function getJWTToken() {
+    return localStorage.getItem('accessToken');
+}
+
+// Function to get the refresh token from cookies
+function getRefreshToken() {
+    const value = `; ${document.cookie}`;
+    const parts = value.split('; refreshToken=');
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+// Function to decode JWT token and extract payload
+function decodeJWT(token) {
+    if (!token) return null; // Return null if no token is provided
+
+    try {
+        const base64Url = token.split('.')[1];
+        if (!base64Url) throw new Error('Invalid token format');
+
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = atob(base64)
+            .split('')
+            .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('');
+
+        return JSON.parse(decodeURIComponent(jsonPayload));
+    } catch (error) {
+        console.error('Error decoding JWT:', error);
+        return null;
+    }
+}
+
+// Function to check if the token is expired
+function isTokenExpired(token) {
+    const decoded = decodeJWT(token);
+    if (!decoded || !decoded.exp) return true; // Consider expired if decoding fails or no expiration
+
+    return Date.now() >= decoded.exp * 1000;
+}
+
+</script>
+
+</body>
+</html>
