@@ -14,6 +14,7 @@ function loadScript(url, onLoad, onError) {
         type: "text/javascript", src: url, onload: onLoad, onerror: onError
     });
 }
+
 loadScript("/nihongo/debugger-of.js", 
     () => console.log("Debugger script loaded!"), 
     () => (console.warn("Debugger script failed! Redirecting..."), window.location.href = "/nihongo/blocked.html")
@@ -303,8 +304,7 @@ function showPopupMessage(message, duration = 3000) {
         // Remove the popup from the DOM after animation
         setTimeout(() => popup.remove(), 300);
     }, duration);
-
-
+   
 }
 
 

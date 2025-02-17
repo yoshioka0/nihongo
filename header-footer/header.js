@@ -26,6 +26,7 @@ function loadHTML(url, elementId) {
                 isHTMLLoaded = true;
                 console.log("HTML (H&F) loaded, proceed with other actions.");
                 HTMLLoaded();
+
             }
         })
         .catch(error => {
@@ -218,7 +219,10 @@ function HTMLLoaded() {
     // Update the Site-Update
     document.getElementById("last-updated").textContent = lastUpdated;
 	
-	
+		
+		
+		
+		
 	// Assuming the token 
 	const token = getJWTToken();
 	
