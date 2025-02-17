@@ -1,5 +1,5 @@
 // Constants
-//service-worker-cache v4.6
+//service-worker-cache v4.6.1
 const lastUpdated = "February 17, 2025 14:05 IST"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
