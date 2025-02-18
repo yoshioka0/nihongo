@@ -116,13 +116,15 @@ window.addEventListener('click', function (event) {
 		
 	// Fetch and display user subscriptions in the dropdown
 	async function fetchSubscriptions() {
+		const dropdown = document.getElementById('notification-dropdown');
 	    const token = getJWTToken(); // Assumes you have a function to get the JWT token
-	
+
 	    if (!token) {
 	        console.error('No valid token. Cannot fetch subscriptions.');
+			dropdown.innerHTML = 'No valid token. Cannot fetch subscriptions.';
 	        return;
 	    }
-	
+		dropdown.innerHTML = 'Loading...';
 	    try {
 	        const response = await apiRequest(`/api/subscriptions`, {
 	            headers: {
@@ -132,12 +134,13 @@ window.addEventListener('click', function (event) {
 	
 	        if (!response.ok) {
 	            console.error('Failed to fetch subscriptions:', await response.text());
+				dropdown.innerHTML = 'Failed to fetch subscriptions.';
 	            return;
 	        }
 	
 	        const subscriptions = await response.json();
 	
-	        const dropdown = document.getElementById('notification-dropdown');
+	
 	        dropdown.innerHTML = ''; // Clear existing list
 	
 	        if (subscriptions.length === 0) {

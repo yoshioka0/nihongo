@@ -107,7 +107,7 @@ async function ensureCorrectSubscription(registration, userId) {
     
     
 		document.getElementById('enable-notifications')?.addEventListener('click', async () => {
-		    if ('serviceWorker' in navigator && 'PushManager' in window) {
+		    if ('serviceWorker' in navigator && 'PushManager' in window) {			
 		        try {
 		            const registration = await navigator.serviceWorker.getRegistration();
 		            if (!registration) {
@@ -115,6 +115,10 @@ async function ensureCorrectSubscription(registration, userId) {
 		                return;
 		            }
 		            const token = getJWTToken();
+					if (!token || isTokenExpired(token)) {
+				        showPopupMessage2('No valid token found. Subscription cannot be made.',2000);
+				        return;
+				    }
 		            const userId = decodeJWT(token).userId;
 		
 		            const isSubscriptionValid = await ensureCorrectSubscription(registration, userId);
@@ -131,7 +135,7 @@ async function ensureCorrectSubscription(registration, userId) {
 async function subscribeUserToPush(registration, userId) {
     const token = getJWTToken();
     if (!token || isTokenExpired(token)) {
-        showPopupMessage2 ('No valid JWT token found. Subscription cannot be made.',1000);
+        showPopupMessage2('No valid JWT token found. Subscription cannot be made.',2000);
         return;
     }
 

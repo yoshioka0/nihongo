@@ -1,6 +1,6 @@
 // Constants
-//service-worker-cache v4.6.6
-const lastUpdated = "February 18, 2025 11:30 IST"; // Update dynamically in footer
+//service-worker-cache v4.6.7
+const lastUpdated = "February 18, 2025 13:10 IST"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
@@ -75,6 +75,34 @@ async function apiRequest(endpoint, options) {
     showPopupMessage("🔴 All backends failed. Please try again later.");
     throw new Error("🔴 All backends failed.");
 }
+
+// Offline Indicator
+function showOfflineBanner() {
+    let banner = document.createElement('div');
+    banner.id = 'offline-banner'; // Add an ID to prevent duplicates
+    banner.innerText = 'You are offline. Some features may not be available.';
+    banner.style.position = 'fixed';
+    banner.style.top = '0';
+    banner.style.width = '100%';
+    banner.style.background = 'rgba(255,0,0,0.7)';
+    banner.style.color = 'white';
+    banner.style.textAlign = 'center';
+    banner.style.padding = '5px';
+    banner.style.zIndex = '9999';
+    banner.style.pointerEvents = 'none';
+    document.body.prepend(banner);
+}
+
+function removeOfflineBanner() {
+    let banner = document.getElementById('offline-banner');
+    if (banner) { banner.remove(); } }
+// Check offline status on page load
+window.addEventListener('load', () => {
+    if (!navigator.onLine) { showOfflineBanner();    } });
+// Handle going offline
+window.addEventListener('offline', showOfflineBanner);
+// Handle coming back online
+window.addEventListener('online', removeOfflineBanner);
 
 
 // Helper Function 
