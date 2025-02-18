@@ -6,54 +6,70 @@
     <title>Offline</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f4f4f4;
+            background-color: #f0f4f8;
             color: #333;
             text-align: center;
         }
 
         .container {
             background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid #e1e1e1;
         }
 
         h1 {
+            font-size: 2.5rem;
             color: #e74c3c;
+            margin-bottom: 20px;
         }
 
         p {
-            font-size: 16px;
+            font-size: 1.2rem;
             color: #555;
+            margin-bottom: 30px;
         }
 
         a {
             display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
+            padding: 12px 30px;
             background-color: #3498db;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
 
         a:hover {
             background-color: #2980b9;
+            transform: translateY(-2px);
         }
+
+        .offline-icon {
+            font-size: 50px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="offline-icon">💟</div>
         <h1>You're Offline</h1>
         <p>It seems you are not connected to the internet. Please check your connection and try again.</p>
-        <a href="/">Go to Home</a>
+        <a href="/nihongo/">Go to Home</a>
     </div>
 </body>
 </html>
