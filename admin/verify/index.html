@@ -84,10 +84,13 @@
         async function refreshToken() {
             try {
                 logToConsole("🔄 Refreshing token...");
-                const response = await apiRequest('/refresh-token', {
-                    method: 'POST',
-                    credentials: 'include'
-                });
+                let token = localStorage.getItem('accessToken'); if (!token) {showPopupMessage2('Token not found!');}
+		        const response = await apiRequest(`/validate-token`, {
+		            method: 'GET',
+		            headers: {
+		                'Authorization': `Bearer ${token}`,
+		            },
+		        });
 
                 const data = await parseResponse(response);
 
