@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="/nihongo/config.js"></script>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+
+    <h2>Verify</h2>
+    <button class="btn" onclick="verifyToken()">Verify Token</button>
+    <button class="btn" onclick="refreshToken()">Refresh Token</button>
+
+    <div id="console"></div>
+    <div id="preview"></div>
+
+    <script>
+        function logToConsole(message) {
+            const consoleDiv = document.getElementById('console');
+            const logEntry = document.createElement("p");
+            logEntry.classList.add("log-entry");
+            logEntry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            consoleDiv.appendChild(logEntry);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        function previewHTML(content) {
+            let previewFrame = document.getElementById('html-preview');
+            
+            if (!previewFrame) {
+                previewFrame = document.createElement("iframe");
+                previewFrame.id = "html-preview";
+                previewFrame.style.transform = "scale(0.8)";
+				previewFrame.style.transformOrigin = "top left";
+				previewFrame.style.width = "calc(100% / 0.8)"; // Expand width to compensate for scaling
+				previewFrame.style.height = "calc(100% / 0.8)";
+                
+                previewFrame.style.border = "1px solid #ccc";
+                document.getElementById('preview').appendChild(previewFrame);
+            }
+            
+            const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+            doc.open();
+            doc.write(content);
+            doc.close();
+        }
+
+        async function parseResponse(response) {
+            const contentType = response.headers.get("content-type");
+
+            if (contentType && contentType.includes("application/json")) {
+                return await response.json();
+            } else if (contentType && contentType.includes("text/html")) {
+                return await response.text();
+            } else {
+                return await response.text();
+            }
+        }
+
+        async function verifyToken() {
+            try {
+                logToConsole("🔄 Validating token...");
+                const response = await apiRequest('/validate-token', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const data = await parseResponse(response);
+
+                if (typeof data === "string" && response.headers.get("content-type").includes("text/html")) {
+                    previewHTML(data);
+                    logToConsole("📄 HTML response displayed in preview.");
+                } else {
+                    logToConsole(`✅ Response: ${typeof data === "object" ? JSON.stringify(data) : data}`);
+                }
+            } catch (error) {
+                logToConsole(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function refreshToken() {
+            try {
+                logToConsole("🔄 Refreshing token...");
+                const response = await apiRequest('/refresh-token', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await parseResponse(response);
+
+                if (typeof data === "string" && response.headers.get("content-type").includes("text/html")) {
+                    previewHTML(data);
+                    logToConsole("📄 HTML response displayed in preview.");
+                } else {
+                    if (typeof data === "object" && data.token) {
+                        logToConsole("✅ New access token received and stored.");
+                        localStorage.setItem('accessToken', data.token);
+                    } else {
+                        logToConsole("⚠️ Failed to refresh token.");
+                    }
+                    logToConsole(`🔍 Response: ${typeof data === "object" ? JSON.stringify(data) : data}`);
+                }
+            } catch (error) {
+                logToConsole(`❌ Error: ${error.message}`);
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+            const button = document.querySelector(".theme-toggle");
+            button.innerHTML = document.body.classList.contains("dark-mode") ? "☀️ Light" : "🌙 Dark";
+        }
+    </script>
+</body>
+</html>
