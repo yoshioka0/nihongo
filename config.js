@@ -1,6 +1,6 @@
 // Constants
-//service-worker-cache v4.6.2
-const lastUpdated = "February 18, 2025 10:45 IST"; // Update dynamically in footer
+//service-worker-cache v4.6.3
+const lastUpdated = "February 18, 2025 10:55 IST"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
@@ -75,3 +75,46 @@ async function apiRequest(endpoint, options) {
     showPopupMessage("🔴 All backends failed. Please try again later.");
     throw new Error("🔴 All backends failed.");
 }
+
+
+// Helper Function 
+function showPopupMessage2(message, duration = 3000, background = '#ff4b5c') {
+    let alertBox = document.getElementById('custom-alert');
+    
+    if (!alertBox) {
+        alertBox = document.createElement('div');
+        alertBox.id = 'custom-alert';
+        document.body.appendChild(alertBox);
+        
+        document.head.insertAdjacentHTML('beforeend', `<style>
+            #custom-alert {
+                position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
+                background: ${background}; color: white; padding: 15px 20px;
+                border-radius: 5px; font-size: 16px; font-weight: bold;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+                transition: top 0.5s ease-in-out;
+                z-index: 9999; min-width: 250px; text-align: center;
+            }
+        </style>`);
+    }
+
+    // Reset transition before changing styles to restart animation
+    alertBox.style.transition = 'none';
+    alertBox.style.top = "-200px";
+    alertBox.offsetHeight; // Force a reflow to apply the reset
+    
+    // Now apply new styles
+    alertBox.innerText = message;
+    alertBox.style.background = background; // Update background if needed
+    alertBox.style.transition = 'top 0.5s ease-in-out'; // Restore transition
+    setTimeout(() => { alertBox.style.top = "10px"; }, 10); // Slide down
+
+    // Hide the alert after duration
+    clearTimeout(alertBox.dismissTimer);
+    alertBox.dismissTimer = setTimeout(() => {
+        alertBox.style.top = "-200px";
+    }, duration);
+}
+
+// Example usage (Default: 3sec)
+//showPopupMessage2("This is a custom alert!", 4000, 'green');
