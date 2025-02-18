@@ -222,7 +222,7 @@ async function clearAllData() {
 
     // Clear IndexedDB (browser-specific, could leave data in some browsers)
     if (window.indexedDB) {
-        const request = indexedDB.deleteDatabase('your-database-name');
+        const request = indexedDB.deleteDatabase('ChatKeysDB');
         await new Promise((resolve, reject) => {
             request.onsuccess = resolve;
             request.onerror = reject;
