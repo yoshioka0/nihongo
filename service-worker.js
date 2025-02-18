@@ -1,10 +1,9 @@
-const CACHE_NAME = 'pwa-cache-v4.6.4';
+const CACHE_NAME = 'pwa-cache-v4.6.5';
 const OFFLINE_URL = '/nihongo/offline.html';
 
 const urlsToCache = [
     '/',
     '/nihongo/',
-    '/nihongo/config.js', 
     '/nihongo/auth-v2.js',
     '/nihongo/404.html',
     '/nihongo/blocked.html',
@@ -27,7 +26,6 @@ self.addEventListener('install', (event) => {
             return cache.addAll(urlsToCache);
         })
     );
-    self.skipWaiting(); // Ensures immediate activation of the new service worker
 });
 
 // Serve files from cache & fallback to offline page
@@ -43,12 +41,10 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
-                cacheNames.filter(cacheName => cacheName !== CACHE_NAME)
-                          .map(cacheName => caches.delete(cacheName))
+                cacheNames.filter(cacheName => cacheName !== CACHE_NAME).map(cacheName => caches.delete(cacheName))
             );
         })
     );
-    self.clients.claim(); // Ensures the new service worker controls all open clients immediately
 });
 
 // Listen for push events
