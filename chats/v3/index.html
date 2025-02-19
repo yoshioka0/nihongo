@@ -75,14 +75,9 @@
 							    </button>
 							
 							    <!-- Delete Chat History -->
-							    <button id="clearChatCache-btn" class="dropdown-item" onclick="clearChatCache(currentChatUserId)">
+							    <button id="clearChatCache-btn" class="dropdown-item" onclick="clearChatCacheCnf(currentChatUserId)">
 							        <i class="fa-solid fa-trash"></i> Clear Chat Cache
 							    </button>					   
-
-							 <!-- Delete Chat History -->
-							    <button id="deleteChat-btn" class="dropdown-item" onclick="showPopupMessage2('Deleting chat history will be introduced in a future update.',5000,'red')">
-							        <i class="fa-solid fa-trash"></i> Delete History
-							    </button>               
 							
 							    <!-- Mute/Unmute Chat -->
 							    <button id="mute-btn" class="dropdown-item" onclick="showPopupMessage2('Not a fan of their messages? Block them for now and stay tuned while we work on a proper mute feature!', 5000, 'rgba(34, 153, 195, 0.9)')"> 
@@ -116,8 +111,13 @@
 							        <i class="fa-solid fa-flag"></i> Report User
 							    </button>
 							
+							<!-- Delete Chat History -->
+							    <button id="deleteChat-btn" class="dropdown-item" style="background: #dc3545; color:white;" onclick="deleteChatHistory(currentChatUserId)">
+							        <i class="fa-solid fa-trash"></i> Delete Chat History
+							    </button>               
+							
 							    <!-- Block/Unblock User -->
-							    <button onclick="toggleBlockUser()" class="dropdown-item" style="background: red; color:white;">
+							    <button onclick="toggleBlockUser()" class="dropdown-item" style="background: #ff6600; color:white;">
 							        <i class="fa-solid fa-ban"></i> <span id="block-button">Block</span>
 							    </button>
 						</div>

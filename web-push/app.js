@@ -146,7 +146,7 @@ async function subscribeUserToPush(registration, userId) {
             applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
         });
         newSubscription.userId = userId;
-        await apiRequest(`/api/subscribe`, {
+        const response = await apiRequest(`/api/subscribe`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -154,11 +154,29 @@ async function subscribeUserToPush(registration, userId) {
             },
             body: JSON.stringify(newSubscription),
         });
+        
+        // Check if response is HTML instead of JSON
+        const contentType = response.headers.get('Content-Type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const htmlText = await response.text(); // Read HTML response
+            console.error('❌ Unexpected HTML response:', htmlText);
+            showPopupMessage2('Subscription failed: Server returned an unexpected response.',100, 'red');
+            return;
+        }
+        
+        const result = await response.json();
+        if (!response.ok) {
+            showPopupMessage2(`Subscription failed: ${result.message || 'Unknown error'}`, 3000, 'red');
+            console.error('❌ Failed to send subscription:', result);
+            return;
+        }
+        
         const notifBtn = document.getElementById('enable-notifications');
 		if (!notifBtn) { alert('notif btn unavl'); }
 		showPopupMessage2('Subscribed successfully!', 2000, 'green');
         console.log('New subscription sent to the server:', newSubscription);
         document.getElementById('enable-notifications').style.display = 'none';
+        
     } catch (error) {
     	showPopupMessage2(`${error}`);
         console.log('🔴 Failed to subscribe user to push:', error);
