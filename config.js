@@ -1,6 +1,7 @@
 // Constants
-//service-worker-cache v4.8
-const lastUpdated = "February 22, 2025 10:55 IST (EoL)"; // Update dynamically in footer
+
+//service-worker-cache v5.1
+const lastUpdated = "February 23, 2025 02:25 IST (EoL)"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
@@ -8,6 +9,8 @@ const SOCKET_URL = 'https://nihongo-backend.onrender.com';
 const GOOGLE_CLIENT_ID='1015740375628-hig26ebdp3bbt4ma13pfr0ogs687838o.apps.googleusercontent.com';
 const PUBLIC_VAPID_KEY = 'BDdr26kHzz40SAgoMRYN6rVLogOqv1p8OoPw-NqX2cCTRrmK_j4YHwHVRvM8xrjw0kAx36ZuHN976uWRB0qGIjI';
 let BASE_URL
+
+let alertCooldown = false;  // Global flag for cooldown
 
 // Dynamically Choose the Fastest Server
 const backends = [
@@ -61,7 +64,14 @@ async function apiRequest(endpoint, options) {
             // Show the popup message if the status code is 403
             if (response.status === 403) {
                 const data = await response.json();
-                showPopupMessage2(data.message || "Access denied.", 5000, '#ff4b5c');
+
+				if (!alertCooldown) {
+				    showAlert(data.message || "Access denied.");
+				    alertCooldown = true;  // Set cooldown active
+				    setTimeout(() => {
+				        alertCooldown = false;  // Reset cooldown after 3 seconds (or your preferred time)
+				    }, 5000);  // Cooldown period (3000 ms = 3 seconds)
+				}
             }
             
             if (response) {
@@ -146,3 +156,39 @@ function showPopupMessage2(message, duration = 3000, background = '#ff4b5c') {
 
 // Example usage (Default: 3sec)
 //showPopupMessage2("This is a custom alert!", 4000, 'green');
+
+const notificationSound = new Audio(); // Create without a source initially
+
+function playAudio(path) {
+    notificationSound.src = path; // Set source dynamically
+    notificationSound.currentTime = 0; // Restart from beginning
+    notificationSound.play().catch(error => console.error('Error playing sound:', error));
+}
+
+function showAlert(title, message) {
+	if (message === undefined) { message = title; title = "Alert!"; }
+    const overlay = Object.assign(document.body.appendChild(document.createElement("div")), { 
+        style: `position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;`
+    });
+
+    const alertBox = Object.assign(document.body.appendChild(document.createElement("div")), { 
+        style: `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+        background: #f5f5f5; color: #000;padding:0;border-radius:12px;
+        text-align:center;font-size:18px;box-shadow:0 12px 25px rgba(0,0,0,0.4);
+        z-index:1000;width:min(90%,400px);`
+    });
+
+    alertBox.innerHTML = `<div style="background:#007BFF;color:#fff;padding:10px;
+        font-weight:bold;border-radius:12px 12px 0 0;">${title}</div>
+        <p style="margin:20px;">${message}</p>
+        <button style="margin: 20px 0;padding:10px 30px;border:none;border-radius:5px;
+        background:linear-gradient(135deg,#007BFF,#0056b3);color:white;
+        font-weight:bold;font-size:16px;cursor:pointer;">OK</button>`;
+
+    return new Promise(resolve => alertBox.querySelector("button").onclick = () => {
+		resolve(); //Proceed immediately 
+		alertCooldown = false;
+        alertBox.style.opacity = overlay.style.opacity = "0";        
+        setTimeout(() => (overlay.remove(), alertBox.remove()), 300);
+    });
+}

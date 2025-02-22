@@ -75,7 +75,7 @@
 							    </button>
 							
 							    <!-- Delete Chat History -->
-							    <button id="clearChatCache-btn" class="dropdown-item" onclick="clearChatCacheCnf(currentChatUserId)">
+							    <button id="clearChatCache-btn" class="dropdown-item" onclick="clearChatCacheCnf(currentChatUserId,currentChatUsername)">
 							        <i class="fa-solid fa-trash"></i> Clear Chat Cache
 							    </button>					   
 							
@@ -203,11 +203,103 @@
     <button id="close-blur-slider">✖</button>
 </div>
 
+<div id="custom-alert" class="alert-box hidden">
+    <p id="alert-message"></p>
+    <button onclick="closeAlert()">OK</button>
+</div>
+
     <!-- Floating Notification Button -->
 <button id="enable-notifications" class="floating-button" style="display: none; onclick="subscribeUserToPush()">
     📢
 </button>
 
+
+<!-- Notification Container -->
+<div id="notification-container"></div>
+
+<style>
+    /* Notification Styling */
+    #notification-container {
+        position: fixed;
+        top: 50px;
+        right: 10px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .notification {
+        background: linear-gradient(135deg, #4a90e2, #005bea);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 250px;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+    }
+
+    .notification.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .notification .close-btn {
+        margin-left: auto;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        opacity: 0.7;
+    }
+
+    .notification .close-btn:hover {
+        opacity: 1;
+    }
+</style>
+
+<script>
+    function showNotification2(message, duration=3000) {
+        const container = document.getElementById("notification-container");
+
+        // Create notification element
+        const notification = document.createElement("div");
+        notification.className = "notification";
+        notification.innerHTML = `
+            <span>${message}</span>
+            <span class="close-btn">&times;</span>
+        `;
+
+        // Append to container
+        container.appendChild(notification);
+
+        // Show animation
+        setTimeout(() => notification.classList.add("show"), 50);
+
+        // Auto-dismiss after 4 seconds
+        const autoDismiss = setTimeout(() => removeNotification(notification), duration);
+
+        // Remove on close button click
+        notification.querySelector(".close-btn").addEventListener("click", () => {
+            clearTimeout(autoDismiss);
+            removeNotification(notification);
+        });
+    }
+
+    function removeNotification(notification) {
+        notification.classList.remove("show");
+        setTimeout(() => notification.remove(), 400);
+    }
+
+    // Example usage:
+    //showNotification2("You have a new message!",3000);
+</script>
 
 
 
@@ -298,12 +390,10 @@ function updateMessages() {
 initI18n();
 </script>
   
-  <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
-
- 
-    
+  <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script> 
     <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
     <script src="chat-of.js"></script>
+    <script src="animation.js"></script>
     <script src="/nihongo/web-push/app.js"></script>
 </body>
 </html>

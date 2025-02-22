@@ -184,6 +184,7 @@ async function logout() {
 
         const data = await response.json();
         showPopupMessage2?.(data.message || "Logged out successfully"); // Use optional chaining
+        playAudio('/nihongo/media/winxpshutdown.mp3');
 
         // Clear tokens, session data, cookies, IndexedDB 
         await clearAllData();

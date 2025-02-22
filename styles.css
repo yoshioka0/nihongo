@@ -231,6 +231,67 @@ table {
   overflow-x: auto; /* Allows scrolling on smaller screens */
 }
 
+/* Custom Alert Box Styles */
+.alert-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.2); /* Glass effect */
+    backdrop-filter: blur(10px); /* Blur background */
+    -webkit-backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 1000;
+    width: 320px;
+    font-size: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    opacity: 0;
+    transform: translate(-50%, -55%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Show animation */
+.alert-box.show {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+}
+
+/* Alert message */
+.alert-box p {
+    margin: 10px 0;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+/* OK Button */
+.alert-box button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: none;
+    background: linear-gradient(135deg, #007BFF, #0056b3);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.alert-box button:hover {
+    background: linear-gradient(135deg, #0056b3, #004299);
+    transform: scale(1.05);
+}
+
+/* Hidden state */
+.hidden {
+    display: none;
+}
+
 @media screen and (max-width: 768px) {
   table th,
   table td {

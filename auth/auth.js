@@ -55,7 +55,8 @@ async function handleCredentialResponse(response) {
             localStorage.setItem("username", data.user.username);
 
             // Show success feedback
-            alert('Login successful! Welcome, ' + data.user.username);
+            playAudio('/nihongo/media/winxp.mp3');
+            await showAlert('Login successful! 🎉', `Welcome ${data.user.username}!`);
 
             // Optionally, redirect to the dashboard or another page
             window.location.href = "/nihongo/";  // or any other page
@@ -194,8 +195,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
 			}
 
         	showPopupMessage2(`User created successfully! (${username})`,3000,'green');
-            await delay(500);
-            alert(`User created successfully! (${username})`);
+            await showAlert('Success! 🎉', `User created successfully! (${username})`);
             window.location.href = '/nihongo/';
         } else {
             showPopupMessage(data.error || 'Something went wrong!');
@@ -249,9 +249,9 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 				// Store refresh token in a cookie (HttpOnly and Secure flags(in https environment) for better security)
 				//document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800;`;	// 7 days
 			}
-			showPopupMessage2(`Welcome back, ${username}!`,3000,'green');            
-			await delay(500);
-            alert(`Welcome back, ${username}!`);
+			showPopupMessage2(`Welcome back, ${username}!`,3000,'green');     
+			playAudio('/nihongo/media/winxp.mp3');       
+            await showAlert('Success! 🎉', `Welcome back, ${username}!`);
             window.location.href = '/nihongo/';         
         } else {
             showPopupMessage(data.error || 'Invalid username or password.');
@@ -263,8 +263,6 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
         showPopupMessage('Error connecting to the server. Please try again.');
     }
 });
-
-
 
 // Function to show a loading spinner during async actions
 function showLoadingSpinner(element, message) {

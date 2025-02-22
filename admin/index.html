@@ -25,7 +25,7 @@
             <button class="tab-button" data-tab="view-logs" onclick=" fetchLogs()">View Logs</button>
         </section>
         
-      <!-- Global Settings Tab -->
+<!-- Global Settings Tab -->
 <section id="global-settings" class="tab-content active">
     <h2>Global Site Settings</h2>
 
@@ -33,8 +33,8 @@
         <input type="checkbox" id="toggle-site"> Enable Site
     </label>
     <br>
-    	
-        <label>
+
+    <label>
         <input type="checkbox" id="toggle-googleAuth"> Enable Google Auth
     </label>
     <br>
@@ -53,9 +53,21 @@
         <input type="checkbox" id="toggle-chat"> Enable Chat
     </label>
     <br>
-    	
-        <label>
+
+    <label>
         <input type="checkbox" id="toggle-upload"> Enable Upload
+    </label>
+    <br>
+
+    <!-- New Fields for Watermark Control -->
+    <label>
+        <input type="checkbox" id="toggle-watermark"> Enable Watermark
+    </label>
+    <br>
+
+    <label>
+        Watermark Public ID:
+        <input type="text" id="watermark-public-id" placeholder="Enter Cloudinary Public ID (default: 1000042931_pb7zbk_uj1r6r)">
     </label>
     <br>
 

@@ -267,7 +267,57 @@ a {
 text-decoration: none;
 }
 
+/* General Input Styling */
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border 0.3s ease;
+}
 
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    background: #f0f0f0;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+
+
+/* Button Styling */
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
