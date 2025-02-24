@@ -139,8 +139,7 @@ async function subscribeUserToPush(registration, userId) {
         return;
     }
 
-    try {    	  
-		showPopupMessage2('Subscribing for Webpush...', 10000, '#E5914D');			
+    try {    	  	
         const newSubscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
@@ -159,8 +158,7 @@ async function subscribeUserToPush(registration, userId) {
         const contentType = response.headers.get('Content-Type');
         if (!contentType || !contentType.includes('application/json')) {
             const htmlText = await response.text(); // Read HTML response
-            console.error('❌ Unexpected HTML response:', htmlText);
-            showPopupMessage2('Subscription failed: Server returned an unexpected response.',100, 'red');
+            console.error('❌ Unexpected HTML response:', htmlText);           
             return;
         }
         

@@ -1,22 +1,22 @@
 // Constants
 
-//service-worker-cache v5.1
-const lastUpdated = "February 23, 2025 02:25 IST (EoL)"; // Update dynamically in footer
+//service-worker-cache v6.1
+const lastUpdated = "February 25, 2025 20:30 IST (EoL)"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
 
 const GOOGLE_CLIENT_ID='1015740375628-hig26ebdp3bbt4ma13pfr0ogs687838o.apps.googleusercontent.com';
 const PUBLIC_VAPID_KEY = 'BDdr26kHzz40SAgoMRYN6rVLogOqv1p8OoPw-NqX2cCTRrmK_j4YHwHVRvM8xrjw0kAx36ZuHN976uWRB0qGIjI';
-let BASE_URL
+let BASE_URL = 'https://nihongo-backend.onrender.com'; 
 
 let alertCooldown = false;  // Global flag for cooldown
 
 // Dynamically Choose the Fastest Server
 const backends = [
-//   { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost 
+//	   { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost 
       { url: "https://nihongo-backend.onrender.com", latency: Infinity },	// ✅ Use this fully functional 
-//    { url: "https://nihongo-backend-env.up.railway.app", latency: Infinity }	// ❌Don't Use if you want secure cookie to work
+//      { url: "https://nihongo-backend-env.up.railway.app", latency: Infinity }	// ❌Don't Use if you want secure cookie to work
 ];
 
 async function getFastestBackend() {
@@ -62,18 +62,46 @@ async function apiRequest(endpoint, options) {
         try {
             response = await fetch(backend.url + endpoint, options);
             // Show the popup message if the status code is 403
-            if (response.status === 403) {
-                const data = await response.json();
-
-				if (!alertCooldown) {
-				    showAlert(data.message || "Access denied.");
-				    alertCooldown = true;  // Set cooldown active
-				    setTimeout(() => {
-				        alertCooldown = false;  // Reset cooldown after 3 seconds (or your preferred time)
-				    }, 5000);  // Cooldown period (3000 ms = 3 seconds)
-				}
-            }
-            
+          if (!["/refresh-token", "/api/subscribe", "/api/subscription-user", "/api/chats/chatted-users"].includes(endpoint)) {
+			if (response.status === 403 || response.status === 404) {
+		        const contentType = response.headers.get("content-type");
+		        if (contentType && contentType.includes("text/html")) {
+		            // If the response is HTML, open it in a new tab
+		            const errorMessages = {
+					    403: "You don’t have permission to access this page.",
+					    404: "The requested resource was not found.",
+					    500: "An internal server error occurred. Please try again later."
+					};					
+					const message = errorMessages[response.status] || "An error occurred.";
+					await showAlert(`Error: ${response.status}`, message);
+		            const htmlContent = await response.text();
+		            const newTab = window.open();
+		            newTab.document.write(htmlContent);
+		            newTab.document.close();
+		        } else {
+		            // Otherwise, handle it as JSON
+		            const data = await response.json();
+		            if (!alertCooldown) {
+		                showAlert(data.message || "Access denied.");
+		                alertCooldown = true;
+		                setTimeout(() => {
+		                    alertCooldown = false;
+		                }, 5000);
+		            }
+		        }
+			return;
+		    }
+            if (response.status === 503) {
+		        const contentType = response.headers.get("content-type");
+		        if (contentType && contentType.includes("text/html")) {
+		            // If the response is HTML, open it in a new tab
+		            const htmlContent = await response.text();
+		            const newTab = window.open();
+		            newTab.document.write(htmlContent);
+		            newTab.document.close();
+		        } 
+		    }
+      }  
             if (response) {
                 BASE_URL = backend.url; // Update BASE_URL dynamically   
                 return response; // Return response from working backend
@@ -116,6 +144,10 @@ window.addEventListener('online', removeOfflineBanner);
 
 
 // Helper Function 
+function removePopupMessage2() {
+    const alertBox = document.getElementById('custom-alert');
+    if (alertBox) { alertBox.remove(); } }
+    
 function showPopupMessage2(message, duration = 3000, background = '#ff4b5c') {
     let alertBox = document.getElementById('custom-alert');
     

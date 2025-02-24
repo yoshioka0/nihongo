@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pwa-cache-v5.1';
+const CACHE_NAME = 'pwa-cache-v6.1';
 const OFFLINE_URL = '/nihongo/offline.html';
 
 const urlsToCache = [
