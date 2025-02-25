@@ -15,7 +15,6 @@ html, body {
 body {
   font-family: 'Arial', sans-serif;
   background: linear-gradient(135deg, #6a11cb, #2575fc);
-
   color: #333;
   line-height: 1.6;
 }
@@ -158,7 +157,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 10;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 30s ease-out;
 }
 
 /* Modal content box styling */
@@ -170,7 +169,7 @@ body {
   max-width: 500px; /* Limit the width for better responsiveness */
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Deeper shadow for a floating effect */
   text-align: center;
-  transition: all 0.3s ease-in-out;
+  transition: all 030s ease-in-out;
 }
 
 
@@ -295,121 +294,23 @@ input:focus {
 }
 
 
+@media (min-width: 768px) {
+    body::before, body::after {
+        content: ''; position: absolute; background: rgba(255, 255, 255, 0.1); z-index: -1;
+        animation: rotate 15s linear infinite, morph 8s ease-in-out infinite;
+    }
+    body::before { top: 10%; left: 10%; width: 200px; height: 200px; }
+    body::after { bottom: 10%; right: 10%; width: 300px; height: 300px; animation-direction: reverse; }
 
-@media (min-width: 768px) { 
+    @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-		/* Geometric Background Shapes */
-
-		body::before {
-
-		    content: '';
-
-		    position: absolute;
-
-		    top: 10%;
-
-		    left: 10%;
-
-		    width: 200px;
-
-		    height: 200px;
-
-		    background: rgba(255, 255, 255, 0.1);
-
-		    z-index: -1;
-
-		    animation: rotate 15s linear infinite, morph 8s ease-in-out infinite;
-
-		}
-
-		
-
-		body::after {
-
-		    content: '';
-
-		    position: absolute;
-
-		    bottom: 10%;
-
-		    right: 10%;
-
-		    width: 300px;
-
-		    height: 300px;
-
-		    background: rgba(255, 255, 255, 0.1);
-
-		    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-
-		    z-index: -1;
-
-		    animation: rotate 15s linear infinite reverse, morph 12s ease-in-out infinite;
-
-		}
-
-		
-
-		@keyframes rotate {
-
-		    0% { transform: rotate(0deg); }
-
-		    100% { transform: rotate(360deg); }
-
-		}
-
-		
-
-		
-
-		/* Keyframes for Shape Transformation */
-
-		@keyframes morph {
-
-		    0% {
-
-		        clip-path: circle(0% at 50% 50%); /* Circle */
-
-		    }
-
-		     10% {
-
-		        clip-path: circle(50% at 50% 50%); /* Circle */
-
-		    }
-
-		    20% {
-
-		        clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle */
-
-		    }
-
-		    35% {
-
-		        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); /* Square */
-
-		    }
-
-		    70% {
-
-		        clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); /* Pentagon */
-
-		    }
-
-			85% {
-
-		        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-
-		    }
-
-		    100% {
-
-		        clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%);
-
-		    }	
-
-		}
-
-		
-
+    @keyframes morph {
+        0% { clip-path: circle(0% at 50% 50%); }  
+        10% { clip-path: circle(50% at 50% 50%); }  
+        20% { clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }  
+        35% { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); }  
+        70% { clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }  
+        85% { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }  
+        100% { clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%); }  
+    }
 }

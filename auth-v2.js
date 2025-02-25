@@ -70,7 +70,7 @@ async function refreshAccessToken() {
 	}
 	
     try {
-        const response = await apiRequest('/refresh-token', {
+        const response = await apiRequest('/auth/refresh-token', {
             method: 'POST',
             credentials: 'include', //Allows sending HttpOnly cookies
         });
@@ -135,8 +135,7 @@ async function checkAuthentication() {
         console.log('User is authenticated', result.userId);
         
         if (window.location.pathname === '/nihongo/auth/') {
-       	showPopupMessage('Already logged in!');
-       	 alert(`Already logged in!`);
+       	await showAlert('Already logged in!');
             window.location.href = '/nihongo/';         
     } 
 
@@ -169,7 +168,7 @@ async function logout() {
 
     try {
     	
-        const response = await apiRequest('/api/logout', {
+        const response = await apiRequest('/auth/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

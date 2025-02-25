@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pwa-cache-v6.1';
+const CACHE_NAME = 'pwa-cache-v6.5';
 const OFFLINE_URL = '/nihongo/offline.html';
 
 const urlsToCache = [
@@ -16,6 +16,7 @@ const urlsToCache = [
     '/nihongo/script.js',
     '/nihongo/header-footer/header.js',
     '/nihongo/favicon/android-chrome-192x192.png',
+    '/nihongo/img/icon.png',
     OFFLINE_URL
 ];
 

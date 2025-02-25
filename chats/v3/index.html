@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Nihongo Chats</title>
+   <link rel="stylesheet" href="preloader.css">
     <link rel="stylesheet" href="chat.css">
     <script src="/nihongo/config.js"></script> 
     <script src="/nihongo/auth-v2.js"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500&display=swap" rel="stylesheet">
 <!-- Add Font Awesome in <head> -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <!-- Include i18next Library -->
@@ -18,7 +19,12 @@
   <noscript>
     <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
   </noscript>
-	
+  
+  <!-- preloader Element -->
+<div id="preloader"> <div class="shape"></div> <div id="chat-caption"></div>
+
+  </div>
+<script src="preloader.js"></script> 
 	
     <div class="chat-container">
         <!-- Left Panel: User List -->

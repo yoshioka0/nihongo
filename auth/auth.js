@@ -62,14 +62,13 @@ async function handleCredentialResponse(response) {
             window.location.href = "/nihongo/";  // or any other page
         } else {
             // Show error feedback if something went wrong
-            alert('Login failed: ' + data.error);
+            await showAlert('Login failed: ' , data.error);
             location.reload();           
         }
     } catch (err) {
         console.error("Error:", err);
-        loginWindow.innerHTML = `<div class="loader-container"> <div class="loader"></div> <span>🔴 An error has occurred. Please try again. The page will refresh in 5 seconds. </span> </div>`;
-      //  showPopupMessage(`${err || "Error: An error occurred. Please try again."}`);
-        await delay(5000);
+        loginWindow.innerHTML = `<div class="loader-container"> <div class="loader"></div> <span>🔴 An error has occurred. Please try again. The page will refresh in 10 seconds. </span> </div>`;
+        await delay(10000);
         location.reload();
     }
 }
@@ -176,7 +175,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
             return;
         }
     	
-        const response = await apiRequest(`/create-user`, {
+        const response = await apiRequest(`/auth/create-user`, {
             method: 'POST',
             credentials: "include",  // Ensures cookies are sent
             headers: { 'Content-Type': 'application/json' },
@@ -204,7 +203,6 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
     } catch (error) {
         console.error('Error:', error);
         hideLoadingSpinner(signupForm);
-        showPopupMessage('Error connecting to the server. Please try again.');
     }
 });
 
@@ -232,7 +230,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
             return;
         }
 
-        const response = await apiRequest(`/login`, {
+        const response = await apiRequest(`/auth/login`, {
             method: 'POST',
             credentials: "include",  // Ensures cookies are sent
             headers: { 'Content-Type': 'application/json' },
@@ -260,7 +258,6 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
     } catch (error) {
         console.error('Error:', error);
         hideLoadingSpinner(loginForm);
-        showPopupMessage('Error connecting to the server. Please try again.');
     }
 });
 

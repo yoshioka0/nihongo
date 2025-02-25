@@ -112,7 +112,7 @@
         async function refreshToken() {
             try {
                 logToConsole("🔄 Refreshing token...");
-                const response = await apiRequest('/refresh-token', {
+                const response = await apiRequest('/auth/refresh-token', {
                     method: 'POST',
                     credentials: 'include'
                 });

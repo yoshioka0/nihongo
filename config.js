@@ -1,7 +1,7 @@
 // Constants
 
-//service-worker-cache v6.1
-const lastUpdated = "February 24, 2025 21:20 IST (EoL)"; // Update dynamically in footer
+//service-worker-cache v6.5
+const lastUpdated = "February 25, 2025 20:00 IST (EoL)"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
@@ -62,22 +62,24 @@ async function apiRequest(endpoint, options) {
         try {
             response = await fetch(backend.url + endpoint, options);
             // Show the popup message if the status code is 403
-          if (!["/refresh-token", "/api/subscribe", "/api/subscription-user", "/api/chats/chatted-users"].includes(endpoint)) {
-			if (response.status === 403 || response.status === 404) {
+          if (!["/auth/refresh-token", "/api/subscribe", "/api/subscription-user"].includes(endpoint)) {
+			if (response.status === 403 || response.status === 404 || response.status === 429) {
 		        const contentType = response.headers.get("content-type");
 		        if (contentType && contentType.includes("text/html")) {
 		            // If the response is HTML, open it in a new tab
 		            const errorMessages = {
 					    403: "You don’t have permission to access this page.",
 					    404: "The requested resource was not found.",
-					    500: "An internal server error occurred. Please try again later."
+					    500: "An internal server error occurred. Please try again later.",
+						429: "Too many requests. Please try again later"
 					};					
 					const message = errorMessages[response.status] || "An error occurred.";
 					await showAlert(`Error: ${response.status}`, message);
 		            const htmlContent = await response.text();
-		            const newTab = window.open();
-		            newTab.document.write(htmlContent);
-		            newTab.document.close();
+					const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
+					doc.querySelectorAll('a.logo').forEach(a => (a.href = "/nihongo"));
+					document.open(), document.write(doc.documentElement.outerHTML), document.close();	//Use same tab (don't use it's frustrating)
+		            //const newTab = window.open(); newTab.document.write(doc.documentElement.outerHTML); newTab.document.close();
 		        } else {
 		            // Otherwise, handle it as JSON
 		            const data = await response.json();
