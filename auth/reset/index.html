@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Password Reset</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="/nihongo/config.js"></script>
 </head>
 <body>
     <div class="container">
@@ -40,7 +41,7 @@
             messageBox.style.opacity = "1";
 
             try {
-                const response = await fetch('http://localhost:3000/auth/request-reset', {
+                const response = await apiRequest('/auth/request-reset', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
