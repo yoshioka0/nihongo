@@ -1,5 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/nihongo/:path*", "destination": "https://nihongohub.vercel.app/:path*" }
-  ]
-}

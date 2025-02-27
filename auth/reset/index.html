@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Forgot Your Password?</h2>
+        <p>Enter your email, and we'll send you a reset link.</p>
+
+        <form id="request-reset-form">
+            <input type="email" id="email" placeholder="Enter your email" required>
+            <button type="submit">
+                <span class="btn-text">Send Reset Link</span>
+                <span class="loader"></span>
+            </button>
+            <p id="message"></p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('request-reset-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const messageBox = document.getElementById('message');
+            const button = document.querySelector("button");
+            const btnText = document.querySelector(".btn-text");
+            const loader = document.querySelector(".loader");
+
+            // Disable button & show loading
+            button.disabled = true;
+            btnText.style.display = "none";
+            loader.style.display = "inline-block";
+
+            messageBox.innerText = "Processing...";
+            messageBox.className = "loading";
+            messageBox.style.opacity = "1";
+
+            try {
+                const response = await fetch('http://localhost:3000/auth/request-reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageBox.innerText = data.message;
+                    messageBox.className = "success";
+                } else {
+                    messageBox.innerText = data.error || "Something went wrong";
+                    messageBox.className = "error";
+                }
+            } catch (error) {
+                messageBox.innerText = "Failed to connect to server.";
+                messageBox.className = "error";
+            }
+
+            // Re-enable button after response
+            button.disabled = false;
+            btnText.style.display = "inline";
+            loader.style.display = "none";
+        });
+    </script>
+</body>
+</html>

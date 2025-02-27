@@ -1,7 +1,7 @@
 // Constants
 
-//service-worker-cache v6.5
-const lastUpdated = "February 25, 2025 20:00 IST (EoL)"; // Update dynamically in footer
+//service-worker-cache v7.1
+const lastUpdated = "February 27, 2025 07:10 IST (EoL)"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
@@ -15,6 +15,7 @@ let alertCooldown = false;  // Global flag for cooldown
 // Dynamically Choose the Fastest Server
 const backends = [
 //	   { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost 
+//		
       { url: "https://nihongo-backend.onrender.com", latency: Infinity },	// ✅ Use this fully functional 
 //      { url: "https://nihongo-backend-env.up.railway.app", latency: Infinity }	// ❌Don't Use if you want secure cookie to work
 ];
@@ -84,7 +85,7 @@ async function apiRequest(endpoint, options) {
 		            // Otherwise, handle it as JSON
 		            const data = await response.json();
 		            if (!alertCooldown) {
-		                showAlert(data.message || "Access denied.");
+		                showAlert(data.message || data.error || "Access denied.");
 		                alertCooldown = true;
 		                setTimeout(() => {
 		                    alertCooldown = false;

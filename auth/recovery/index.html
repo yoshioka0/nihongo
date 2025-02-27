@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Email</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="/nihongo/config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Add Your Email</h2>
+        <p>Enter your email below to receive a verification link.</p>
+		<form id="email-form">
+		    <input type="email" id="email" placeholder="Enter your email" required>
+		    	<button type="submit" id="sendEmailButton">Send Verification</button>
+		</form>
+        <div class="loader"></div>
+        <p class="status" id="status"></p>
+    </div>
+
+    <script>
+       showAlert("Attention!","Please ensure you enter the correct email address, as you may not be allowed to change it later.");
+        document.getElementById('email-form').addEventListener('submit', async (e) => {
+			e.preventDefault();
+            const email = document.getElementById("email").value;
+            const status = document.getElementById("status");
+            const loader = document.querySelector(".loader");
+            const sendEmailButton = document.getElementById("sendEmailButton");
+
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!emailRegex.test(email)) return showAlert('Invalid email format! Try again.');
+            // Reset status
+            status.innerHTML = "";
+            loader.style.display = "block";
+            sendEmailButton.disabled = true;
+
+            if (!email) {
+                loader.style.display = "none";
+                status.innerHTML = "<span class='error'>Email cannot be empty</span>";
+                sendEmailButton.disabled = false;
+                return;
+            }
+            
+           const token=localStorage.getItem('accessToken');
+           if (!token) {
+                loader.style.display = "none";
+                status.innerHTML = "<span class='error'>Authorization required.</span>";
+                sendEmailButton.disabled = false;
+                return;
+            }
+			
+            try {
+                const response = await apiRequest("/auth/request-add-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ email})
+                });
+
+                const data = await response.json();
+                loader.style.display = "none";
+
+                if (response.ok) {
+                    status.innerHTML = "<span class='success'>Verification email sent. Check your inbox!</span>";
+                } else {
+                    status.innerHTML = "<span class='error'>" + data.error + "</span>";
+                    sendEmailButton.disabled = false;
+                }
+            } catch (error) {
+                loader.style.display = "none";
+                sendEmailButton.disabled = false;
+                status.innerHTML = "<span class='error'>Something went wrong!</span>";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -247,6 +247,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 				// Store refresh token in a cookie (HttpOnly and Secure flags(in https environment) for better security)
 				//document.cookie = `refreshToken=${refreshToken}; Path=/; Max-Age=604800;`;	// 7 days
 			}
+			localStorage.setItem("userEmail", data.email);
 			showPopupMessage2(`Welcome back, ${username}!`,3000,'green');     
 			playAudio('/nihongo/media/winxp.mp3');       
             await showAlert('Success! 🎉', `Welcome back, ${username}!`);
