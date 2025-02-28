@@ -1,7 +1,7 @@
 // Constants
 
-//service-worker-cache v7.1
-const lastUpdated = "February 28, 2025 17:00 IST (EoL)"; // Update dynamically in footer
+//service-worker-cache v7.2
+const lastUpdated = "February 28, 2025 21:00 IST (EoL)"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
@@ -153,7 +153,7 @@ function removePopupMessage2() {
     
 function showPopupMessage2(message, arg1 = 3000, arg2 = '#ff4b5c') {
 	let duration = typeof arg1 === "number" ? arg1 : 3000, background = typeof arg1 === "string" ? arg1 : arg2;
-    let alertBox = document.getElementById('custom-alert');
+    let alertBox = document.getElementById('custom-popup-message2');
     
     if (!alertBox) {
         alertBox = document.createElement('div');

@@ -152,9 +152,11 @@
   					  <div id="image-button" class="image-picker-btn"><i class="fa-solid fa-image"></i> </div>
   					
   					<div id="file-button" class="file-picker-btn" onclick="showPopupMessage2('File Upload feature coming soon.',5000,'#FF8A00')"><i class="fa-solid fa-file"></i> </div>
+                
                 <input id="message-input" type="text" placeholder="Type a message..." />
                 <div id="send-button" class="send-btn">  <i class="fa-solid fa-paper-plane"></i> </div>
             </div>
+            
         </div>
     </div>
     
@@ -270,27 +272,6 @@
     }
 </style>
 
-<script>
-function showNotification2(message, duration = 3000) {
-    const container = document.getElementById("notification-container"),
-          notification = document.createElement("div");
-    
-    notification.className = "notification";
-    notification.innerHTML = `<span>${message}</span><span class="close-btn">&times;</span>`;
-    
-    container.appendChild(notification);
-    setTimeout(() => notification.classList.add("show"), 50);
-
-    const autoDismiss = setTimeout(() => removeNotification(notification), duration);
-    notification.querySelector(".close-btn").onclick = () => (clearTimeout(autoDismiss), removeNotification(notification));
-}
-
-const removeNotification = (n) => (n.classList.remove("show"), setTimeout(() => n.remove(), 400));
-    // Example usage:
-    //showNotification2("You have a new message!",3000);
-</script>
-
-
 
     <script>
     // Dynamically set the viewport height for better compatibility
@@ -381,7 +362,7 @@ initI18n();
   
   <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script> 
     <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
-    <script src="chat-of.js"></script>
+    <script src="chat.js"></script>
     <script src="animation.js"></script>
     <script src="/nihongo/web-push/app.js"></script>
 </body>
