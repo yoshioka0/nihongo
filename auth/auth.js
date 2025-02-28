@@ -123,12 +123,12 @@ document.querySelectorAll('.password-wrapper i').forEach(icon => {
 loginHere.addEventListener("click", () => {
     document.getElementById("login-modal").style.display = "flex";
     document.getElementById("signup-modal").style.display = "none";
-    document.getElementById('login-username').focus(); // Focus on the first input field
+  
 });
 signupHere.addEventListener("click", () => {
     document.getElementById("signup-modal").style.display = "flex";
     document.getElementById("login-modal").style.display = "none";
-    document.getElementById('signup-username').focus();
+   
 });
 
 // Helper functions
@@ -165,13 +165,13 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
     return;
       }
 
-    showLoadingSpinner(signupForm, 'Creating Account...');
+    showLoadingSpinner("signup-button", 'Creating Account...');
     renderTurnstile("turnstile1") ;
     try {
         const turnstileResponse = turnstile.getResponse(turnstile1);
         if (!turnstileResponse) {
             showPopupMessage('Please complete the captcha.');
-            hideLoadingSpinner(signupForm);
+            hideLoadingSpinner("signup-button");
             return;
         }
     	
@@ -183,7 +183,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
         });
 
         const data = await response.json();
-        hideLoadingSpinner(signupForm);
+        hideLoadingSpinner("signup-button");
 
         if (response.ok) {
         	const { accessToken, refreshToken } = data;
@@ -202,7 +202,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
         }
     } catch (error) {
         console.error('Error:', error);
-        hideLoadingSpinner(signupForm);
+        hideLoadingSpinner("signup-button");
     }
 });
 
@@ -220,13 +220,13 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
         return;
     }
 
-    showLoadingSpinner(loginForm, 'Logging In...');
+    showLoadingSpinner("login-button", 'Logging In...');
 	renderTurnstile("turnstile2") ;
     try {
         const turnstileResponse = turnstile.getResponse(turnstile2);
         if (!turnstileResponse) {
             showPopupMessage('Please complete the captcha.');
-            hideLoadingSpinner(loginForm);
+            hideLoadingSpinner("login-button");
             return;
         }
 
@@ -238,7 +238,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
         });
 
         const data = await response.json();
-        hideLoadingSpinner(loginForm);
+        hideLoadingSpinner("login-button");
 
         if (response.ok) {
 			const { accessToken, refreshToken } = data;
@@ -258,22 +258,27 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
         }
     } catch (error) {
         console.error('Error:', error);
-        hideLoadingSpinner(loginForm);
+        showPopupMessage('Error logging in!',1000);
+        hideLoadingSpinner("login-button");
     }
 });
 
-// Function to show a loading spinner during async actions
-function showLoadingSpinner(element, message) {
-    const loadingMessage = document.createElement('div');
-    loadingMessage.classList.add('loading-message');
-    loadingMessage.innerHTML = `${message} <div class="spinner"></div>`;
-    element.appendChild(loadingMessage);
+let tempHTML = {}; // object to store multiple elements' contents
+
+function showLoadingSpinner(id, message = "Processing...") {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.disabled = true;
+    tempHTML[id] = element.innerHTML;
+    element.innerHTML = `<div class="spinner-container"><div class="spinner"></div><span class="loading-text">${message}</span></div>`;
 }
 
-// Function to hide the loading spinner
-function hideLoadingSpinner(element) {
-    const loadingMessage = element.querySelector('.loading-message');
-    if (loadingMessage) {
-        element.removeChild(loadingMessage);
-    }
+function hideLoadingSpinner(id) {
+    const element = document.getElementById(id);
+    if (!element || !tempHTML[id]) return;
+    element.innerHTML = tempHTML[id]; // Restore original content
+    element.disabled = false;
+    delete tempHTML[id]; // Remove stored content
 }
+// Usage
+//showLoadingSpinner("signup-button");	//setTimeout(() => hideLoadingSpinner("signup-button"), 3000);

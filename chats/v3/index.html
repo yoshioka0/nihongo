@@ -271,38 +271,21 @@
 </style>
 
 <script>
-    function showNotification2(message, duration=3000) {
-        const container = document.getElementById("notification-container");
+function showNotification2(message, duration = 3000) {
+    const container = document.getElementById("notification-container"),
+          notification = document.createElement("div");
+    
+    notification.className = "notification";
+    notification.innerHTML = `<span>${message}</span><span class="close-btn">&times;</span>`;
+    
+    container.appendChild(notification);
+    setTimeout(() => notification.classList.add("show"), 50);
 
-        // Create notification element
-        const notification = document.createElement("div");
-        notification.className = "notification";
-        notification.innerHTML = `
-            <span>${message}</span>
-            <span class="close-btn">&times;</span>
-        `;
+    const autoDismiss = setTimeout(() => removeNotification(notification), duration);
+    notification.querySelector(".close-btn").onclick = () => (clearTimeout(autoDismiss), removeNotification(notification));
+}
 
-        // Append to container
-        container.appendChild(notification);
-
-        // Show animation
-        setTimeout(() => notification.classList.add("show"), 50);
-
-        // Auto-dismiss after 4 seconds
-        const autoDismiss = setTimeout(() => removeNotification(notification), duration);
-
-        // Remove on close button click
-        notification.querySelector(".close-btn").addEventListener("click", () => {
-            clearTimeout(autoDismiss);
-            removeNotification(notification);
-        });
-    }
-
-    function removeNotification(notification) {
-        notification.classList.remove("show");
-        setTimeout(() => notification.remove(), 400);
-    }
-
+const removeNotification = (n) => (n.classList.remove("show"), setTimeout(() => n.remove(), 400));
     // Example usage:
     //showNotification2("You have a new message!",3000);
 </script>

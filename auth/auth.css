@@ -74,14 +74,25 @@ body {
   transition: width 0.3s ease;
 }
 /* Spinner Style */
+.spinner-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Space between spinner and text */
+}
 .spinner {
-  border: 4px solid rgba(0,0,0,0.7);
-  border-top: 4px solid white;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
-  margin-left: 10px;
+	border: 3px solid #f3f3f3;
+	border-top: 3px solid blue;
+	border-radius: 50%;
+	width: 20px;
+	height: 20px;
+	animation: spin 1s linear infinite;
+            
+}
+.loading-text {
+  font-size: 14px;
+  color: #fff;
+  font-weight:700;
 }
 
 .loader-container {
@@ -115,17 +126,6 @@ body {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-
-/* Loading Message Style */
-.loading-message {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: green;
-  font-weight:700;
 }
 
 /* Hyperlink for Sign Up / Login */
@@ -169,7 +169,7 @@ body {
   max-width: 500px; /* Limit the width for better responsiveness */
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Deeper shadow for a floating effect */
   text-align: center;
-  transition: all 030s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 
@@ -181,29 +181,42 @@ body {
   font-weight: 600; /* Bold heading */
 }
 
-.modal button {
-    padding: 10px 20px;
+button, .auth-btn {
+    width: 100%;
+    padding: 12px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
     cursor: pointer;
-	color: #0078D7;
-	font-weight: bold;
-	font-size: 1.2em;
-	display: inline-block;
-	padding: 10px 20px;
-	border: 2px solid #0078D7;
-	border-radius: 5px;
-	transition: all 0.3s;  
-}
-
-.modal button:hover {
-  background-color: #0078D7;
-   color: #fff;
+    transition: background 0.3s, transform 0.2s;
 }
 
 button:disabled {
-    background-color: #ccc; /* Greyed-out for disabled state */
-    cursor: not-allowed;
+    background: #ccc; /* Gray background */
+    cursor: not-allowed; /* Show 'not-allowed' cursor */
+    opacity: 0.6; /* Reduce opacity */
+    transition: background 0.3s, opacity 0.3s;
 }
 
+button:hover {
+    background: #5a67d8;
+    animation: pulse 0.3s;
+}
+
+.auth-btn {
+      margin: 0 auto;
+      padding: 10px;
+      margin-top: 5px;
+	 background-color: #555; color: #fff;
+    }
+.auth-btn:hover {
+background-color: #000;
+}
+    .auth-btn i {
+      font-size: 18px;
+    }
 
 /* Input field styles */
 /* Apply styles only to text inputs, not checkboxes */

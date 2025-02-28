@@ -1,7 +1,7 @@
 // Constants
 
 //service-worker-cache v7.1
-const lastUpdated = "February 27, 2025 07:10 IST (EoL)"; // Update dynamically in footer
+const lastUpdated = "February 28, 2025 17:00 IST (EoL)"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 
@@ -15,7 +15,6 @@ let alertCooldown = false;  // Global flag for cooldown
 // Dynamically Choose the Fastest Server
 const backends = [
 //	   { url: "http://localhost:3000", latency: Infinity }, // prioritize localhost 
-//		
       { url: "https://nihongo-backend.onrender.com", latency: Infinity },	// ✅ Use this fully functional 
 //      { url: "https://nihongo-backend-env.up.railway.app", latency: Infinity }	// ❌Don't Use if you want secure cookie to work
 ];
@@ -152,7 +151,8 @@ function removePopupMessage2() {
     const alertBox = document.getElementById('custom-alert');
     if (alertBox) { alertBox.remove(); } }
     
-function showPopupMessage2(message, duration = 3000, background = '#ff4b5c') {
+function showPopupMessage2(message, arg1 = 3000, arg2 = '#ff4b5c') {
+	let duration = typeof arg1 === "number" ? arg1 : 3000, background = typeof arg1 === "string" ? arg1 : arg2;
     let alertBox = document.getElementById('custom-alert');
     
     if (!alertBox) {
@@ -202,29 +202,154 @@ function playAudio(path) {
 }
 
 function showAlert(title, message) {
-	if (message === undefined) { message = title; title = "Alert!"; }
-    const overlay = Object.assign(document.body.appendChild(document.createElement("div")), { 
-        style: `position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;`
+    if (message === undefined) { message = title; title = "Alert!"; }
+
+    const overlay = document.createElement("div");
+    Object.assign(overlay.style, {
+        position: "fixed", inset: "0", background: "rgba(0,0,0,0.6)", zIndex: "999"
     });
 
-    const alertBox = Object.assign(document.body.appendChild(document.createElement("div")), { 
-        style: `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-        background: #f5f5f5; color: #000;padding:0;border-radius:12px;
-        text-align:center;font-size:18px;box-shadow:0 12px 25px rgba(0,0,0,0.4);
-        z-index:1000;width:min(90%,400px);`
+    const alertBox = document.createElement("div");
+    Object.assign(alertBox.style, {
+        position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+        background: "#f5f5f5", color: "#000", padding: "0", borderRadius: "12px",
+        textAlign: "center", fontSize: "18px", boxShadow: "0 12px 25px rgba(0,0,0,0.4)",
+        zIndex: "1000", width: "min(90%,400px)"
     });
 
-    alertBox.innerHTML = `<div style="background:#007BFF;color:#fff;padding:10px;
-        font-weight:bold;border-radius:12px 12px 0 0;">${title}</div>
-        <p style="margin:20px;">${message}</p>
-        <button style="margin: 20px 0;padding:10px 30px;border:none;border-radius:5px;
-        background:linear-gradient(135deg,#007BFF,#0056b3);color:white;
-        font-weight:bold;font-size:16px;cursor:pointer;">OK</button>`;
+    // Create a shadow root inside alertBox  // shadow DOM is not affected by external css
+    const shadow = alertBox.attachShadow({ mode: "closed" });
+    shadow.innerHTML = `
+        <style>
+            * { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+            .header { background:#007BFF; color:#fff; padding:10px; font-weight:bold; border-radius:12px 12px 0 0; }
+            .content { margin: 20px; }
+            .btn { margin: 20px 0; padding: 10px 30px; border: none; border-radius: 5px;
+                   background: linear-gradient(135deg,#007BFF,#0056b3); color: white;
+                   font-weight: bold; font-size: 16px; cursor: pointer; }
+        </style>
+        <div class="header">${title}</div>
+        <p class="content">${message}</p>
+        <button class="btn">OK</button>
+    `;
 
-    return new Promise(resolve => alertBox.querySelector("button").onclick = () => {
-		resolve(); //Proceed immediately 
-		alertCooldown = false;
-        alertBox.style.opacity = overlay.style.opacity = "0";        
-        setTimeout(() => (overlay.remove(), alertBox.remove()), 300);
+    document.body.appendChild(overlay);
+    document.body.appendChild(alertBox);
+
+    return new Promise(resolve => {
+        shadow.querySelector("button").onclick = () => {
+            resolve();
+            alertBox.style.opacity = overlay.style.opacity = "0";
+            setTimeout(() => { overlay.remove(); alertBox.remove(); }, 300);
+        };
     });
 }
+
+// Custom Confirmation Box 
+function showConfirmBox(message) {
+    return new Promise((resolve) => {
+        if (!document.getElementById("confirm-style")) {
+            const style = document.createElement("style");
+            style.id = "confirm-style";
+            style.innerHTML = `
+                .confirm-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex;
+                    align-items: center; justify-content: center; z-index: 1000; }
+                .confirm-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center;
+                    min-width: 280px; font-size: 16px; font-weight: 500; }
+                .confirm-buttons { margin-top: 15px; display: flex; justify-content: center; gap: 15px; }
+                .confirm-btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; }
+                .confirm-yes { background: #4CAF50; color: white; }
+                .confirm-no { background: #f44336; color: white; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Create confirmation box
+        const overlay = document.createElement("div"),
+              box = document.createElement("div"),
+              buttons = document.createElement("div"),
+              btnYes = document.createElement("button"),
+              btnNo = document.createElement("button");
+
+        overlay.className = "confirm-overlay";
+        box.className = "confirm-box";
+        buttons.className = "confirm-buttons";
+        btnYes.className = "confirm-btn confirm-yes";
+        btnNo.className = "confirm-btn confirm-no";
+
+        box.innerHTML = `<p>${message}</p>`;
+        btnYes.innerText = "Yes";
+        btnNo.innerText = "No";
+
+        buttons.append(btnYes, btnNo);
+        box.appendChild(buttons);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        // Handle clicks
+        btnYes.onclick = () => { resolve(true); closeConfirmBox(); };
+        btnNo.onclick = () => { resolve(false); closeConfirmBox(); };
+
+        function closeConfirmBox() { document.body.removeChild(overlay); }
+    });
+}
+
+/* Example usage inside an async function
+async function deleteItem() {
+    const confirmed = await showConfirmBox("Are you sure you want to delete?");
+    if (!confirmed) return showPopupMessage2("Cancelled!");
+	showPopupMessage2("Item deleted!", 3000, 'green');
+}	*/
+
+function showNotification2(message, arg1 = 3000, arg2 = "#4a90e2") {
+	let duration = typeof arg1 === "number" ? arg1 : 3000,	bgColor = typeof arg1 === "string" ? arg1 : arg2;
+    if (!document.getElementById("notif-style")) {
+        const style = document.createElement("style");
+        style.id = "notif-style";
+        style.innerHTML = `
+            #notification-container { position: fixed; bottom: 20px; right: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+            .notification { color: white; padding: 12px 18px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+                font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; min-width: 250px; 
+                transform: translateX(100%); opacity: 0; transition: transform 0.4s, opacity 0.4s; position: relative; overflow: hidden; }
+            .notification.show { transform: translateX(0); opacity: 1; }
+            .close-btn { margin-left: auto; cursor: pointer; font-size: 16px; font-weight: bold; opacity: 0.7; }
+            .close-btn:hover { opacity: 1; }
+            .progress-bar { position: absolute; top: 0; left: 0; height: 3px; background: white; width: 0%; transition: width linear; }
+        `;
+        document.head.appendChild(style);
+    }
+
+    let container = document.getElementById("notification-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "notification-container";
+        document.body.appendChild(container);
+    }
+
+    const notification = document.createElement("div"),
+          progress = document.createElement("div");
+
+    notification.className = "notification";
+    notification.style.background = bgColor; // Set background color dynamically
+    progress.className = "progress-bar";
+    
+    notification.innerHTML = `<span>${message}</span><span class="close-btn">&times;</span>`;
+    notification.appendChild(progress);
+    container.appendChild(notification);
+
+    setTimeout(() => {
+        notification.classList.add("show");
+        progress.style.width = "100%"; // Progress bar moves from left to right
+        progress.style.transition = `width ${duration}ms linear`;
+    }, 50);
+
+    const autoDismiss = setTimeout(() => removeNotification(notification), duration);
+    notification.querySelector(".close-btn").onclick = () => (clearTimeout(autoDismiss), removeNotification(notification));
+}
+
+const removeNotification = (n) => (n.classList.remove("show"), setTimeout(() => n.remove(), 400));
+// Example usage:	showNotification2("Default Blue Notification", 3000);
+
+// Wrapper function to replace showPopupMessage() with showNotification2()
+function showPopupMessage(message, duration = 3000) { showNotification2(message, duration, "#ff726f"); }
+// Example usage (wherever showPopupMessage was used before): showPopupMessage("This is a soft red notification!");

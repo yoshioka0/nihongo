@@ -65,7 +65,7 @@ function isTokenExpired(token) {
 
 // Function to refresh the access token using the refresh token
 async function refreshAccessToken() {
-	if (window.location.pathname !== '/nihongo/auth/'  && window.location.pathname !== '/nihongo/') {
+	if (window.location.pathname !== '/nihongo/auth/'  && window.location.pathname !== '/nihongo/' && window.location.pathname !== '/nihongo/auth/v2/') {
 		document.body.innerHTML = ` <div class="loader-container"> <div class="loader"></div> <span>Verifying...</span> </div>	`;
 	}
 	
@@ -146,7 +146,7 @@ async function checkAuthentication() {
 }
 
 function redirect() {
-    if (window.location.pathname !== '/nihongo/auth/'  && window.location.pathname !== '/nihongo/') {
+    if (window.location.pathname !== '/nihongo/auth/'  && window.location.pathname !== '/nihongo/' && window.location.pathname !== '/nihongo/auth/v2/') {
 			window.location.href = '/nihongo/unauthorized.html';
     }
 }
@@ -247,7 +247,7 @@ async function clearAllData() {
 // Maximum number of pop-ups allowed at once
 const MAX_POPUPS = 4;
 
-function showPopupMessage(message, duration = 3000) {
+function showPopupMessageOG(message, duration = 3000) {
     const popup = document.createElement('div');
     popup.classList.add('popup-notification');
 
@@ -306,46 +306,3 @@ function showPopupMessage(message, duration = 3000) {
     }, duration);
    
 }
-
-
-
-function showPopupMessage2(message, duration = 3000, background = '#ff4b5c') {
-    let alertBox = document.getElementById('custom-alert');
-    
-    if (!alertBox) {
-        alertBox = document.createElement('div');
-        alertBox.id = 'custom-alert';
-        document.body.appendChild(alertBox);
-        
-        document.head.insertAdjacentHTML('beforeend', `<style>
-            #custom-alert {
-                position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
-                background: ${background}; color: white; padding: 15px 20px;
-                border-radius: 5px; font-size: 16px; font-weight: bold;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
-                transition: top 0.5s ease-in-out;
-                z-index: 9999; min-width: 250px; text-align: center;
-            }
-        </style>`);
-    }
-
-    // Reset transition before changing styles to restart animation
-    alertBox.style.transition = 'none';
-    alertBox.style.top = "-200px";
-    alertBox.offsetHeight; // Force a reflow to apply the reset
-    
-    // Now apply new styles
-    alertBox.innerText = message;
-    alertBox.style.background = background; // Update background if needed
-    alertBox.style.transition = 'top 0.5s ease-in-out'; // Restore transition
-    setTimeout(() => { alertBox.style.top = "10px"; }, 10); // Slide down
-
-    // Hide the alert after duration
-    clearTimeout(alertBox.dismissTimer);
-    alertBox.dismissTimer = setTimeout(() => {
-        alertBox.style.top = "-200px";
-    }, duration);
-}
-
-// Example usage (Default: 3sec)
-//showPopupMessage2("This is a custom alert!", 4000, 'green');

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Nihongo 日本語</title>
+  <link rel="stylesheet" href="auth.css">
+  <script src="https://accounts.google.com/gsi/client" async></script>
+  <script src="/nihongo/config.js"></script>
+  <script src="/nihongo/auth-v22.js" defer></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+  <noscript>
+    <meta http-equiv="refresh" content="0;url=/nihongo/js-disabled.html" />
+  </noscript>
+
+  <!-- Signup Modal -->
+  <div id="signup-modal" class="modal" style="display:flex">
+    <div class="modal-content">
+      <h1>Authenticate</h1>
+
+      <!-- Selection Screen -->
+      <div id="signup-selection">
+        <button id="google-login" class="auth-btn">
+          <i class="fab fa-google"></i> Continue with Google
+        </button>
+        <button id="email-login" class="auth-btn">
+          <i class="fas fa-envelope"></i> Continue with Email
+        </button>
+        <button id="phone-login" class="auth-btn">
+          <i class="fas fa-mobile-alt"></i> Continue with Phone
+        </button>
+
+      </div>
+
+      <div id="buttonDiv"></div> <!-- Google Sign-In Button -->
+    </div>
+  </div>
+
+  <script src="auth.js" async></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // Login
+      document.getElementById("email-login").addEventListener("click", () => {
+			window.location.href = "./login";
+      });
+
+      // Google & Phone buttons (optional: add handlers)
+      document.getElementById("google-login").addEventListener("click", () => {
+        document.getElementById("buttonDiv").click(); // Trigger Google Sign-In
+      });
+
+      document.getElementById("phone-login").addEventListener("click", () => {
+        window.location.href = "./phone";
+      });
+    });
+  </script>
+
+  <style>
+    .auth-btn {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .auth-btn i {
+      font-size: 18px;
+    }
+
+    #google-signup, #google-login {
+      background-color: #db4437;
+      color: white;
+    }
+
+    #email-signup, #email-login {
+      background-color: #4285f4;
+      color: white;
+    }
+
+    #phone-signup, #phone-login {
+      background-color: #34a853;
+      color: white;
+    }
+  </style>
+
+</body>
+</html>
