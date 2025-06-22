@@ -712,7 +712,7 @@ async function displayMessage(_0x94398e, _0x5da90e) {
 } catch {
     showNotification2(_0x401dda(0xe4));
         }
-            , _0x440a15[_0x401dda(0xd9)](_0x34c6bc), _0x440a15[_0x401dda(0xd9)](_0x12c46f), _0x3e0d15['appendChild'](_0x440a15);
+             _0x440a15[_0x401dda(0xd9)](_0x34c6bc), _0x440a15[_0x401dda(0xd9)](_0x12c46f), _0x3e0d15['appendChild'](_0x440a15);
     } else {
         const _0xa40bdb = /^(https?:\/\/(media\.tenor\.com|i\.giphy\.com|media\d+\.giphy\.com)\/.*\.(webp))$/i;
         if (_0xa40bdb['test'](_0x94398e['message'])) {
