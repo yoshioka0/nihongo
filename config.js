@@ -1,7 +1,7 @@
 // Constants
 
-//service-worker-cache v7.2
-const lastUpdated = "February 28, 2025 21:00 IST (EoL)"; // Update dynamically in footer
+//service-worker-cache v8.1
+const lastUpdated = "Aug 5, 2025 11:00 IST (EoL)"; // Update dynamically in footer
 
 //const SOCKET_URL = 'http://localhost:3000'; 
 const SOCKET_URL = 'https://nihongo-backend.onrender.com'; 

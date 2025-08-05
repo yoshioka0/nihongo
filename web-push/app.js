@@ -14,12 +14,10 @@ async function clearSubscriptions() {
     }
 }
 
-
-async function ensureCorrectSubscription(registration, userId) {
+async function ensureCorrectSubscription(registration) {
     try {
         const subscription = await registration.pushManager.getSubscription();
         if (subscription) {
-            // Fetch user ID tied to the subscription from the server
             const response = await apiRequest(`/api/subscription-user`, {
                 method: 'POST',
                 headers: {
@@ -30,26 +28,27 @@ async function ensureCorrectSubscription(registration, userId) {
             });
 
             if (response.ok) {
-                const { serverUserId } = await response.json();
-
-                // Check if the subscription belongs to the logged-in user
-                if (serverUserId === userId) {
-                    console.log('Subscription matches the logged-in user.');
-                    return true; // Subscription is valid
+                const { isValid } = await response.json();
+                if (isValid) {
+                    console.log('✅ Subscription is valid.');
+                    return true;
                 }
 
-                console.log('Subscription does not match the logged-in user. Clearing it.');
+                console.log('🟡 Subscription mismatch. Unsubscribing...');
                 await subscription.unsubscribe();
             } else {
-                console.error('Failed to verify subscription on the server:', response.statusText);
+                console.error('❌ Failed to validate subscription:', response.statusText);
             }
         }
     } catch (error) {
-        console.error('Error while ensuring correct subscription:', error);
+        console.error('🔴 Subscription check error:', error);
     }
 
-    return false; // Subscription needs to be recreated
+    return false;
 }
+
+
+
 
 
 //📢📢 Notification related function scrapped from /nihongo/script.js
